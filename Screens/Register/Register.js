@@ -2,7 +2,6 @@ import React from "react";
 import { Button, Image, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 const Register=()=>{
     return (
-    <>
     <ScrollView>
         <View style={styles.container}>
     <View style={styles.c1}>
@@ -46,7 +45,6 @@ const Register=()=>{
     </View>
     </View>
     </ScrollView>
-    </>
     )
 };
 const styles= StyleSheet.create({

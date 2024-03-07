@@ -2,7 +2,6 @@ import React from "react";
 import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 const Start = () => {
     return (
-        <>
             <View style={styles.container}>
                 <View style={styles.container1}>
                 <View><Image source={require('../../Assets/testImage.jpg')} style={[styles.logo]} /></View>
@@ -23,7 +22,6 @@ const Start = () => {
                     <View style={styles.button}><Text style={{marginTop:10, color:"black"}}>Tiếp tục</Text></View>
                 </View>
             </View>
-        </>
     )
 };
 const styles = StyleSheet.create({
