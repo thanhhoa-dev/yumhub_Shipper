@@ -62,7 +62,7 @@ const styles= StyleSheet.create({
         backgroundColor:"#66CCFF",
         borderWidth:1,
         borderColor:"gray",
-        borderRadius:2
+        borderRadius:2,
     },
     c3:{
         marginTop:20,
