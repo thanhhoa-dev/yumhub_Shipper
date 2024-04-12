@@ -21,7 +21,7 @@ class MapScreen extends Component {
         });
       },
       error => alert(error.message),
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+      { enableHighAccuracy: true, timeout: 200000, maximumAge: 1000 }
     );
   }
 
@@ -33,12 +33,6 @@ class MapScreen extends Component {
             style={styles.map}
             region={this.state.region}
             showsUserLocation={true}
-            // initialRegion={{
-            //     latitude: 37.78825,
-            //     longitude: -122.4324,
-            //     latitudeDelta: 0.0922,
-            //     longitudeDelta: 0.0421,
-            //   }}
           >
             <Marker
               coordinate={{

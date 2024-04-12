@@ -12,7 +12,7 @@ import Mapne from '../shipper/screen/Mapne';
 
 const UserNavigation = () => {
   return (
-    <Stack.Navigator initialRouteName="UserInformation">
+    <Stack.Navigator initialRouteName="MapScreen">
       <Stack.Screen
         options={{headerShown: false}}
         name="Login"
@@ -27,6 +27,11 @@ const UserNavigation = () => {
         options={{headerShown: false}}
         name="UserInformation"
         component={UserInformation}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="Mapne"
+        component={Mapne}
       />
       <Stack.Screen
         options={{headerShown: false}}

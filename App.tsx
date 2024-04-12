@@ -1,16 +1,15 @@
 import React from "react";
-import ShipperStackNavigation from "./src/components/shipper/ShipperNavigation";
-import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaView } from "react-native";
-import AppNavigation from "./src/components/navigations/AppNavigation";
-import { UserProvider } from "./src/components/user/UserContext";
+import Feedback from "./src/components/shipper/screen/Feedback";
 
 const App =() => {
   return (
     <SafeAreaView style={{flex:1}}>
-      <UserProvider>
+      {/* <UserProvider>
         <AppNavigation/>
-      </UserProvider>
+      </UserProvider> */}
+      {/* <DirectionsComponent/> */}
+      <Feedback/>
     </SafeAreaView>
   )
 }
