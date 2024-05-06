@@ -1,9 +1,8 @@
-import { View, Text } from 'react-native'
 import React, { useContext } from 'react'
 
 import UserNavigation from '../user/UserNavigation'
 import ShipperStackNavigation from '../shipper/ShipperNavigation'
-import UserContext from '../user/UserContext'
+import {UserContext} from '../user/UserContext'
 import {NavigationContainer} from '@react-navigation/native';
 
 const AppNavigation = (props) => {

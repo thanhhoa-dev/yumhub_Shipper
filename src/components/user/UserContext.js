@@ -1,7 +1,6 @@
-import { View, Text } from 'react-native'
 import React, { createContext, useState } from 'react'
 
-const UserContext = createContext();
+export const UserContext = createContext();
 
 export const UserProvider = (props) =>{
     const {children} = props;
@@ -12,6 +11,3 @@ export const UserProvider = (props) =>{
         </UserContext.Provider>
     )
 }
-
-
-export default UserContext;
