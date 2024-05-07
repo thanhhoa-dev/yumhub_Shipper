@@ -1,17 +1,17 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { login } from '../UserHTTP';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {UserContext} from '../UserContext';
+import { UserContext } from '../UserContext';
 
 const Login = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
-  const {setUser} = useContext(UserContext);
-  
+  const { setUser } = useContext(UserContext);
 
-  const handleLogin = async () =>{
+
+  const handleLogin = async () => {
     try {
       const result = await login(phoneNumber, password);
       await AsyncStorage.setItem('token', result.data.token);
@@ -23,21 +23,21 @@ const Login = () => {
 
   // useEffect(()=>{
   //   const fetchData = async () =>{
-      
+
   //   }
   // })
   return (
     <View>
       <TouchableOpacity>
-      <Text>Login</Text>
+        <Text>Login</Text>
       </TouchableOpacity>
       <TextInput placeholder='Nhap so dien thoại'
-      value={phoneNumber}
-      onChangeText={(text) => setPhoneNumber(text)}
+        value={phoneNumber}
+        onChangeText={(text) => setPhoneNumber(text)}
       />
       <TextInput placeholder='Nhập mật khẩu'
-      value={password}
-      onChangeText={(text) => setPassword(text)}/>
+        value={password}
+        onChangeText={(text) => setPassword(text)} />
       <TouchableOpacity onPress={handleLogin}>
         <Text>Login</Text>
       </TouchableOpacity>
