@@ -4,14 +4,15 @@ import { UserProvider } from "./src/components/user/UserContext";
 import AppNavigation from "./src/components/navigations/AppNavigation";
 import Login from "./src/components/user/screens/Login";
 import DirectionsComponent from "./src/components/shipper/screen/DirectionsComponent";
-import Feedbackne from "./src/components/shipper/screen/Feedbackne";
+import Feedback from "./src/components/shipper/screen/Feedback";
+import HistoryFeedback from "./src/components/shipper/screen/HistoryFeedback";
 const App =() => {
   return (
     <SafeAreaView style={{flex:1}}>
       {/* <UserProvider>
         <AppNavigation/>
       </UserProvider> */}
-      <Feedbackne/>
+      <DirectionsComponent/>
     </SafeAreaView>
   )
 }

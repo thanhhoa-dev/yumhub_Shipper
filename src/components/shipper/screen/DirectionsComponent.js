@@ -1,20 +1,34 @@
-import React, {useEffect, useState} from 'react';
-import {View, Button, Text, Image, Modal, StyleSheet} from 'react-native';
-import MapView, {Marker, Polyline} from 'react-native-maps';
+import React, {useContext, useEffect, useState} from 'react';
+import {
+  View,
+  Button,
+  Text,
+  Image,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import MapView, {Marker, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {GetOrderByID, SetStatus} from '../ShipperHTTP';
+import MapViewDirections from 'react-native-maps-directions';
+import {UpdateShipperInformation} from '../ShipperHTTP';
+import { UserContext } from '../../user/UserContext';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 const DirectionsComponent = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
-  const [route, setRoute] = useState(null);
-  const [error, setError] = useState(null);
   const [directions, setDirections] = useState(null);
   const [locateCurrent, setLocateCurrent] = useState(null);
+  const [distance, setDistance] = useState(null);
+  const [duration, setDuration] = useState(null);
 
   const [order, setOrder] = useState(null);
+  // const {user} = useContext(UserContext);
   const id = '660c9dc319f26b917ea15837';
+  const idUser = '6604e1ec5a6c5ad8711aebfa'
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -22,13 +36,28 @@ const DirectionsComponent = () => {
         const result = await GetOrderByID(id);
         setOrder(result.order);
         if (result.order) {
-          setModalVisible(true)
+          const updateStatusShipper = await UpdateShipperInformation(idUser, 8);
+          setModalVisible(true);
         }
       } catch (error) {
         console.error('Error fetching order:', error);
       }
     };
     fetchOrder();
+  }, []);
+
+  useEffect(() => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setLocateCurrent({
+          latitude,
+          longitude,
+        });
+      },
+      error => console.log(error.message),
+      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+    );
   }, []);
 
   const updateOrderStatus = async (id, status) => {
@@ -47,9 +76,12 @@ const DirectionsComponent = () => {
       setModalVisible(false);
       if (status === 3) {
         await updateOrderStatus(id, 3);
+        await UpdateShipperInformation(idUser, 6);
+
         // fetchOrder(id); // Cập nhật lại đơn hàng sau khi thay đổi trạng thái
       } else if (status === 5) {
         await updateOrderStatus(status, 5);
+        await UpdateShipperInformation(idUser, 7);
       } else {
         console.warn('Lựa chọn không hợp lệ');
       }
@@ -70,105 +102,92 @@ const DirectionsComponent = () => {
     );
   };
 
-  const handleShortestRoute = async () => {
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}&key=AIzaSyCRAJhXjISdn1nLa1TwTTFEPjBqKLVXxaw`,
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch directions');
-      }
-      const data = await response.json();
-      if (data.status !== 'OK') {
-        throw new Error(`Google Maps API error: ${data.status}`);
-      }
-      if (
-        !data.routes ||
-        !data.routes.length ||
-        !data.routes[0].legs ||
-        !data.routes[0].legs.length
-      ) {
-        throw new Error('Directions data is incomplete');
-      }
-      setDirections(data.routes[0].legs[0]);
-      setRoute(data.routes[0].overview_polyline.points);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching directions:', error);
-      setError(error.message || 'An unknown error occurred');
-      setDirections(null);
-      setRoute(null);
-    }
-  };
-  useEffect(() => {
-    Geolocation.getCurrentPosition(position => {
-      setLocateCurrent({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
+  const handleSelectPlace = (place) => {
+    setDestination({
+      latitude: place.geometry.location.lat,
+      longitude: place.geometry.location.lng,
     });
-  }, []);
+  };
 
   return (
     <View style={{flex: 1}}>
+      <View style={{zIndex:1, flex:0.5}}>
+      <GooglePlacesAutocomplete
+        placeholder="Nhập địa chỉ giao hàng"
+        fetchDetails={true}
+        onPress={(data, details = null) => {
+          handleSelectPlace(details);
+        }}
+        query={{
+          key: 'AIzaSyCRAJhXjISdn1nLa1TwTTFEPjBqKLVXxaw',
+          language: 'vi', // language of the results
+        }}
+        onFail={error => console.log(error)}
+      />
+      </View>
+
       <MapView
         style={{flex: 1}}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}>
-        {origin && (
+        provider={PROVIDER_GOOGLE}
+        initialRegion={
+          locateCurrent
+            ? {
+                latitude: locateCurrent.latitude,
+                longitude: locateCurrent.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }
+            : null
+        }>
+        {locateCurrent && (
           <Marker
-            coordinate={{latitude: origin.lat, longitude: origin.lng}}
+            coordinate={{
+              latitude: locateCurrent.latitude,
+              longitude: locateCurrent.longitude,
+            }}
             anchor={{x: 0.5, y: 1}}>
             <CustomMarker />
           </Marker>
         )}
         {destination && (
           <Marker
-            coordinate={{latitude: destination.lat, longitude: destination.lng}}
+            draggable
+            coordinate={destination}
+            onDragEnd={directions => {
+              setDestination(directions.nativeEvent.coordinate),
+                console.log(destination);
+            }}
           />
         )}
-        {route && (
-          <Polyline
-            coordinates={decodePolyline(route)}
-            strokeWidth={4}
-            strokeColor="blue"
-          />
-        )}
+        <MapViewDirections
+          origin={locateCurrent}
+          destination={destination}
+          apikey={'AIzaSyCRAJhXjISdn1nLa1TwTTFEPjBqKLVXxaw'}
+          strokeWidth={4}
+          strokeColor="blue"
+          onReady={result => {
+            setDistance(result.distance);
+            setDuration(result.duration);
+          }}
+        />
       </MapView>
       <View style={{padding: 10}}>
         <Text>
-          Origin: {origin ? `${origin.lat}, ${origin.lng}` : 'Not set'}
-        </Text>
-        <Text>
           Destination:{' '}
-          {destination ? `${destination.lat}, ${destination.lng}` : 'Not set'}
+          {destination
+            ? `${destination.latitude}, ${destination.longitude}`
+            : 'Not set'}
         </Text>
-        <Button
-          title="Set Origin"
-          onPress={() => [
-            setModalVisible(true),
-            setOrigin({
-              lat: locateCurrent.latitude,
-              lng: locateCurrent.longitude,
-            }),
-          ]}
-        />
+
         <Button
           title="Set Destination"
-          onPress={() => setDestination({lat: 37.7749, lng: -122.4194})}
+          //37.4270, -122.1329 ; 10.813112, 106.668242; latitude: 37.4606, longitude: -122.1410
+          onPress={() =>
+            setDestination({latitude: 10.813112, longitude: 106.668242})
+          }
         />
-        <Button title="Find Shortest Route" onPress={handleShortestRoute} />
-        {error && <Text style={{color: 'red'}}>Error: {error}</Text>}
-        {directions && (
-          <View>
-            <Text>Distance: {directions.distance.text}</Text>
-            <Text>Duration: {directions.duration.text}</Text>
-          </View>
-        )}
+        {distance && <Text>Distance: {distance}</Text>}
+        {duration && <Text>Duration: {duration}</Text>}
       </View>
       {order && (
         <Modal
@@ -183,14 +202,14 @@ const DirectionsComponent = () => {
             <View style={styles.centeredView}>
               <Text>{`ID Đơn hàng: ${order._id}`}</Text>
               <View style={styles.viewButtonOrder}>
-                <Button
-                  title="Nhận đơn"
-                  onPress={() => handleShipperDecision(order._id, 3)}
-                />
-                <Button
-                  title="Không nhận đơn"
-                  onPress={() => handleShipperDecision(order._id, 5)}
-                />
+                <TouchableOpacity
+                  onPress={() => handleShipperDecision(order._id, 3)}>
+                  <Text>Nhận đơn</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleShipperDecision(order._id, 5)}>
+                  <Text>Không nhập đơn</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -217,41 +236,3 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
 });
-
-function decodePolyline(encoded) {
-  const poly = [];
-  let index = 0,
-    len = encoded.length;
-  let lat = 0,
-    lng = 0;
-
-  while (index < len) {
-    let b,
-      shift = 0,
-      result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    const dlat = (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-    lat += dlat;
-
-    shift = 0;
-    result = 0;
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    const dlng = (result & 1) !== 0 ? ~(result >> 1) : result >> 1;
-    lng += dlng;
-
-    const p = {
-      latitude: lat / 1e5,
-      longitude: lng / 1e5,
-    };
-    poly.push(p);
-  }
-  return poly;
-}

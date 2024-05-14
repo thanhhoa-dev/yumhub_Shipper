@@ -1,21 +1,23 @@
 import AxiosInstance from "../../http/AxiosInstance";
 
-export const getReviews = async () =>{
+export const getShipperBeReview = async () =>{
     try {
         const axiosInstance = AxiosInstance();
-        const url = `orders/historyReviewShipper/6604e1ec5a6c5ad8711aebf9`;
-        return await axiosInstance.get(url);
+        const url = 'orders/historyShipperIsReview';
+        const params = {id: "6604e1ec5a6c5ad8711aebf9"}
+        return await axiosInstance.get(url, {params});
     } catch (error) {
         console.log(error);
         throw error;
     }
 }
 
-export const getHistoryReviews = async (id) =>{
+export const getShipperReview = async () =>{
     try {
         const axiosInstance = AxiosInstance();
-        const url = `reviews/gethistoryreview/6604e1ec5a6c5ad8711aebf9`;
-        return await axiosInstance.get(url);
+        const url = 'orders/historyShipperReview';
+        const params = {id: "6604e1ec5a6c5ad8711aebf9"}
+        return await axiosInstance.get(url, {params});
     } catch (error) {
         console.log(error);
         throw error;
@@ -59,6 +61,34 @@ export const SetStatus = async (id, status) =>{
             status: status
         }
         return await axiosInstance.post(url, {params});
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const SetDeleteReview = async (id) =>{
+    try {
+        const axiosInstance = AxiosInstance();
+        const url = 'reviews/delete';
+        const params = {
+            id: id,
+        }
+        return await axiosInstance.delete(url, {params});
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const UpdateShipperInformation = async (id, status) =>{
+    try {
+        const axiosInstance = AxiosInstance();
+        const url = `shippers/updateShipper/${id}`;
+        const body = {
+            status: status
+        }
+        return await axiosInstance.patch(url, body) 
     } catch (error) {
         console.log(error);
         throw error;

@@ -13,7 +13,7 @@ import Account from './screen/Account';
 import AccessLocation from './screen/AccessLocation';
 import SixDaysAgo from './screen/SixDaysAgo';
 import GetOrder from './screen/GetOrder';
-import Feedbackne from './screen/Feedbackne';
+import Feedbackne from './screen/Feedback';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();

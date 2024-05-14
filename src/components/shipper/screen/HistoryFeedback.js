@@ -1,5 +1,6 @@
 import {
   Dimensions,
+  FlatList,
   Image,
   Modal,
   Pressable,
@@ -12,28 +13,84 @@ import React, {useEffect, useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import StarRating from 'react-native-star-rating';
-import {getHistoryReviews} from '../ShipperHTTP';
+import {getShipperReview} from '../ShipperHTTP';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 const {height} = Dimensions.get('window');
+import { SetDeleteReview } from '../ShipperHTTP';
 
 const HistoryFeedback = () => {
   const [reviews, setReviews] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  
+  const fetchData = async () => {
+    try {
+      const response = await getShipperReview();
+      const sortedReviews = response.history.sort((a, b) => {
+        return new Date(b.review.createAt) + new Date(a.review.createAt);
+      });
+      setReviews(sortedReviews);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getHistoryReviews();
-        setReviews(response.reviews);
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    };
     fetchData();
   }, []);
+
+  const handlDeleteReview = async (id) =>{
+    
+    try {
+      const result = await SetDeleteReview(id);
+      if(result === "đã xoá thành công"){
+        setModalVisible(false);
+        fetchData();
+      }
+      return result;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const renderItemReview = ({item}) => {
+    const originalDateTime = item.review.createAt;
+    const date = new Date(originalDateTime);
+    const formattedDateTime = date.toISOString().split('T')[0];
+    return (
+      <View style={styles.viewContainerItemContent}>
+        <TouchableOpacity
+          onPress={() => {
+            setSelectedItem(item);
+            setModalVisible(true);
+          }}>
+          <View style={styles.viewItemHeader}>
+            <Text style={styles.textDate}>{formattedDateTime}</Text>
+            <TouchableOpacity>
+              <Entypo name={'dots-three-horizontal'} size={20} />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.textNameFeedback}>{item.user.fullName}</Text>
+          <View style={{width: 100, paddingVertical: 10}}>
+            <StarRating
+              starSize={15}
+              rating={item.review.rating}
+              disabled={false}
+              maxStars={5}
+              fullStarColor={'#FC6E2A'}
+            />
+          </View>
+          <Text numberOfLines={2} style={styles.textContentFeedback}>
+            {item.review.description}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.viewContainerBackgroundColor}>
@@ -44,32 +101,12 @@ const HistoryFeedback = () => {
           </TouchableOpacity>
           <Text style={styles.textHistoryFeedback}>Lịch sử đánh giá</Text>
         </View>
-        <View style={styles.viewContainerItemContent}>
-          <TouchableOpacity
-            onPress={() => {
-              setModalVisible(true);
-            }}>
-            <View style={styles.viewItemHeader}>
-              <Text style={styles.textDate}>20/15/16</Text>
-              <TouchableOpacity>
-                <Entypo name={'dots-three-horizontal'} size={20} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.textNameFeedback}>item.typeOfReview.name</Text>
-            <View style={{width: 100, paddingVertical: 10}}>
-              <StarRating
-                starSize={15}
-                rating={2}
-                disabled={false}
-                maxStars={5}
-                fullStarColor={'#FC6E2A'}
-              />
-            </View>
-            <Text numberOfLines={2} style={styles.textContentFeedback}>
-              item.description
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <FlatList
+          data={reviews}
+          renderItem={renderItemReview}
+          keyExtractor={(item, index) => index.toString()}
+          showsVerticalScrollIndicator={false}
+        />
       </View>
       <Modal
         animationType="slide"
@@ -92,16 +129,35 @@ const HistoryFeedback = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.modalViewInformation}>
-              <Text style={styles.textNameCustomer}>Tên khách hàng</Text>
-              <Text>20/10/20203</Text>
+              {selectedItem ? (
+                <Text style={styles.textNameCustomer}>
+                  {selectedItem.user.fullName}
+                </Text>
+              ) : (
+                <Text style={styles.textNameCustomer}>Tên khách hàng</Text>
+              )}
+              {selectedItem ? (
+                <Text>{(new Date(selectedItem.review.createAt)).toISOString().split('T')[0]}</Text>
+              ) : (
+                <Text>Thời gian</Text>
+              )}
             </View>
             <View>
-              <StarRating
-                rating={1}
-                disabled={false}
-                maxStars={5}
-                fullStarColor={'#FC6E2A'}
-              />
+              {selectedItem ? (
+                <StarRating
+                  rating={selectedItem.review.rating}
+                  disabled={false}
+                  maxStars={5}
+                  fullStarColor={'#FC6E2A'}
+                />
+              ) : (
+                <StarRating
+                  rating={1}
+                  disabled={false}
+                  maxStars={5}
+                  fullStarColor={'#FC6E2A'}
+                />
+              )}
             </View>
             <View style={styles.viewContainerImage}>
               <View style={styles.viewIcon}>
@@ -120,14 +176,20 @@ const HistoryFeedback = () => {
               </View>
             </View>
             <View style={styles.viewContenDetailHistory}>
-              <Text numberOfLines={5}>
-                This Food so tasty & delicious. Breakfast so fast Delivered in
-                my place. Chef is very friendly. I’m really like chef for Home
-                Food Order. Thanks.{' '}
-              </Text>
+              {selectedItem ? (
+                <Text numberOfLines={5}>
+                  {selectedItem.review.description}{' '}
+                </Text>
+              ) : (
+                <Text numberOfLines={5}>
+                  This Food so tasty & delicious. Breakfast so fast Delivered in
+                  my place. Chef is very friendly. I’m really like chef for Home
+                  Food Order. Thanks.{' '}
+                </Text>
+              )}
             </View>
             <View style={styles.viewContainerAction}>
-              <TouchableOpacity style={styles.buttonAction}>
+              <TouchableOpacity style={styles.buttonAction} onPress={() => handlDeleteReview(selectedItem.review._id)}>
                 <Text style={styles.textAction}>Xóa</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -182,7 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F5FA',
     borderRadius: 15,
     height: '15%',
-    padding:8
+    padding: 8,
   },
   buttonIcon: {
     width: 45,

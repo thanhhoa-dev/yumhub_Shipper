@@ -1,22 +1,31 @@
-import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import Foundation from 'react-native-vector-icons/Foundation';
-import {getReviews} from '../ShipperHTTP';
+import LinearGradient from 'react-native-linear-gradient';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import StarRating from 'react-native-star-rating';
+import Entypo from 'react-native-vector-icons/Entypo';
+import {getShipperBeReview} from '../ShipperHTTP';
 
 const Feedback = () => {
   const [reviews, setReviews] = useState([]);
-  const [ratingNe, setRatingNe] = useState();
-  const [reviewFilter, setReviewFilter] = useState([]);
-  const [rating, setRating] = useState(0);
+  const [ratingAverageTotal, setRatingAverageTotal] = useState(0);
 
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getReviews();
-        setReviews(response.reviews);
-        setReviewFilter(response.reviews);
+        const response = await getShipperBeReview();
+        const sortedReviews = response.history.sort((a, b) => {
+          return new Date(b.review.createAt) + new Date(a.review.createAt);
+        });
+        setReviews(sortedReviews);
       } catch (error) {
         console.log(error);
         throw error;
@@ -27,147 +36,147 @@ const Feedback = () => {
 
   useEffect(() => {
     let totalRating = 0;
-    for (let i = 0; i < reviews.length; i++) {
-      totalRating += reviews[i].rating;
-    }
-    if (reviews.length > 0) {
-      let total = totalRating / reviews.length;
-      setRatingNe(total);
-    } else {
-      setRatingNe(0);
+    if (reviews != null) {
+      for (let i = 0; i < reviews.length; i++) {
+        totalRating += reviews[i].review.rating;
+      }
+      if (reviews.length > 0) {
+        let total = totalRating / reviews.length;
+        setRatingAverageTotal(total);
+      } else {
+        setRatingAverageTotal(0);
+      }
     }
   }, [reviews]);
 
-  const renderItem = ({item}) => {
-    const size =
-      item.rating === 0
-        ? reviews.length
-        : reviews.filter(review => review.rating === item.rating).length;
-
-    return (
-      <View>
-        <TouchableOpacity
-          key={item.rating}
-          style={[
-            styles.viewItemFeedback,
-            rating === item.rating && {backgroundColor: '#286b35'},
-          ]}
-          onPress={() => setRatingFilter(item.rating)}>
-          <Text
-            style={[
-              styles.textItem,
-              rating === item.rating && {color: '#fff'},
-            ]}>
-            {item.rating === 0 ? 'Tất cả' : `${item.rating} sao`} | {size}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
-  };
-
-  const setRatingFilter = rating => {
-    if (rating !== 0) {
-      setReviewFilter(reviews.filter(e => e.rating === rating));
-    } else {
-      setReviewFilter(reviews);
-    }
-    setRating(rating);
-  };
-
-  const renderItemContent = ({item}) => {
-    return (
-      <View style={styles.viewItemContentFeedback}>
-        <View style={styles.viewStar}>
-          <StarRating fullStarColor={'yellow'} starSize={15} rating={item.rating} disabled={false} emptyStarColor={'yellow'} />
-          <Text style={styles.textDate}>21 04 2021</Text>
-        </View>
-        <Text numberOfLines={2} style={styles.textContenItem}>
-          {item.description}
-        </Text>
-      </View>
-    );
-  };
-
   const calculateWidth = rating => {
-    const totalReviews = reviews.length;
+    if (reviews != null) {
+      const totalReviews = reviews.length;
 
-    const ratingCount = reviews.filter(
-      review => review.rating === rating,
-    ).length;
+      const ratingCount = reviews.filter(
+        reviews => reviews.review.rating === rating,
+      ).length;
 
-    const percentage = (ratingCount / totalReviews) * 100;
-    return percentage + '%';
+      const percentage = (ratingCount / totalReviews) * 100;
+      return percentage + '%';
+    }
   };
 
   const renderNumberRating = ({item}) => {
     const width = calculateWidth(item.number);
     return (
-      <View style={styles.viewColumn}>
-        <Text>{item.number}</Text>
-        <View style={styles.viewPercent}>
-          <View
-            style={[styles.percent, {width: width}]}
-          />
+      <View style={styles.viewContainerChartStartRating}>
+        <Text style={styles.textNumberStartRating}>{item.number}</Text>
+        <StarRating
+          starSize={15}
+          rating={1}
+          disabled={false}
+          maxStars={1}
+          fullStarColor={'#FC6E2A'}
+        />
+        <View style={styles.viewTotalChart}>
+          <LinearGradient
+            colors={['#5D5DFF', '#6D21B1']}
+            style={[styles.viewChart, {width: width}]}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 0}}></LinearGradient>
         </View>
       </View>
     );
   };
-  return (
-    <View style={styles.container}>
-      <View style={styles.viewHeader}>
-        <FontAwesome6 name={'arrow-left'} size={25} />
-        <Text style={styles.textFeedback}>Phản hồi</Text>
-      </View>
-      <View style={styles.viewChartFeedback}>
-        <Text style={styles.textFeedbackCustomer}>Đánh giá khách hàng</Text>
-        <View style={styles.viewMainFeedback}>
-          <View style={styles.viewChartMainFeedback}>
-            <FlatList
-              data={numberRating}
-              renderItem={renderNumberRating}
-              keyExtractor={(item, index) => index.toString()}
-              showsHorizontalScrollIndicator={false}
-            />
+
+  const renderItem = ({item}) => {
+    const originalDateTime = item.review.createAt;
+    const date = new Date(originalDateTime);
+    const formattedDateTime = date.toISOString().split('T')[0];
+    return (
+      <View style={styles.viewContainerItemFeedback}>
+        {item.user.avatar ? 
+        <Image
+        source={{uri: `${item.user.avatar}`}}
+        style={{
+          width: 50,
+          height: 50,
+          backgroundColor: 'red',
+          borderRadius: 50,
+        }}
+      />: 
+      <Image
+          source={require('../../../assets/ZaloPlay.png')}
+          style={{
+            width: 50,
+            height: 50,
+            backgroundColor: 'black',
+            borderRadius: 50,
+          }}
+        />}
+        
+        <View style={styles.viewContainerItemContent}>
+          <View style={styles.viewItemHeader}>
+            <Text style={styles.textDate}>{formattedDateTime}</Text>
+            <TouchableOpacity>
+              <Entypo name={'dots-three-horizontal'} size={20} />
+            </TouchableOpacity>
           </View>
-          <View style={styles.viewMainRating}>
-            <Text style={styles.textMedium}>{ratingNe}</Text>
+          <Text style={styles.textNameFeedback}>{item.review.typeOfReview}</Text>
+          <View style={{width: 100, paddingVertical: 10}}>
             <StarRating
               starSize={15}
-              rating={ratingNe}
+              rating={item.review.rating}
               disabled={false}
               maxStars={5}
-              fullStarColor={'yellow'}
-              emptyStarColor={'yellow'}
-              // onChange={setRatingNe}
+              fullStarColor={'#FC6E2A'}
             />
-            <Text>({reviews.length})</Text>
           </View>
-        </View>
-        <View style={styles.viewService}>
-          <Foundation name={'clipboard-notes'} size={30} />
-          <Text style={styles.textService}>
-            Tìm hiểu cách cải thiện dịch vụ để làm hài lòng khách hàng hơn
+          <Text numberOfLines={2} style={styles.textContentFeedback}>
+            {item.review.description}
           </Text>
-          <FontAwesome6 name={'angle-right'} size={30} />
         </View>
       </View>
-      <View style={styles.viewContentFeedback}>
-        <Text style={styles.textContentFeedback}>Phản hồi từ khách</Text>
-        <FlatList
-          data={title}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => item.rating}
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-        />
-      </View>
-      <View style={styles.viewFlatListFeedback}>
-        <FlatList
-          data={reviewFilter}
-          renderItem={renderItemContent}
-          keyExtractor={(item, index) => index.toString()}
-          showsHorizontalScrollIndicator={false}
-        />
+    );
+  };
+
+  return (
+    <View style={styles.viewContainerBackgroundColor}>
+      <View style={styles.viewContainer}>
+        <View style={styles.viewHeader}>
+          <TouchableOpacity>
+            <AntDesign name={'left'} size={20} />
+          </TouchableOpacity>
+          <Text style={styles.titleHeader}>Phản hồi từ khách hàng</Text>
+        </View>
+        <View style={styles.viewTotalStartRating}>
+          <View style={styles.viewContainerAverageTotalStartRating}>
+            <View style={styles.viewAverageTotalStartRating}>
+              <Text style={styles.textAverageTotal}>{ratingAverageTotal}</Text>
+              <StarRating
+                rating={1}
+                disabled={false}
+                maxStars={1}
+                fullStarColor={'#19D6E5'}
+              />
+            </View>
+            {reviews == null ? (
+              <Text>0 reviews</Text>
+            ) : (
+              <Text>{reviews.length} reviews</Text>
+            )}
+          </View>
+          <FlatList
+            data={numberRating}
+            renderItem={renderNumberRating}
+            keyExtractor={(item, index) => index.toString()}
+            showsHorizontalScrollIndicator={false}
+          />
+        </View>
+        <View style={styles.viewContainerItemContentFeedback}>
+          <FlatList
+            data={reviews}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
       </View>
     </View>
   );
@@ -176,132 +185,96 @@ const Feedback = () => {
 export default Feedback;
 
 const styles = StyleSheet.create({
-  textMedium: {
-    fontWeight: 'bold',
-    fontSize: 35,
+  textNameFeedback: {
+    fontWeight: '700',
     color: '#000',
   },
-  viewMainRating: {
+  viewItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 10,
+  },
+  viewContainerItemContent: {
+    marginStart: 10,
+    backgroundColor: '#F6F8FA',
+    padding: 10,
+    justifyContent: 'center',
+    flex: 1,
+    borderRadius: 20,
+  },
+  viewContainerItemContentFeedback: {
+    marginTop: 25,
+  },
+  viewContainerItemFeedback: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  viewChart: {
+    backgroundColor: 'red',
+    height: 8,
+    borderRadius: 20,
+  },
+  viewTotalChart: {
+    flex: 1,
+    backgroundColor: '#F5FEFF',
+    height: 10,
+    paddingHorizontal: 5,
+  },
+  textNumberStartRating: {
+    paddingEnd: 8,
+  },
+  viewContainerChartStartRating: {
+    paddingStart: 30,
+    flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  viewChartMainFeedback: {
-    width: '70%',
+  textAverageTotal: {
+    fontWeight: 'bold',
+    fontSize: 30,
+    color: '#000',
+    paddingEnd: 10,
+  },
+  viewContainerAverageTotalStartRating: {
     justifyContent: 'center',
+    width: '29%',
+    alignItems: 'center',
   },
-  viewMainFeedback: {
+  viewAverageTotalStartRating: {
     flexDirection: 'row',
-    paddingBottom: 20,
+    alignItems: 'center',
   },
-  textContenItem: {},
-  textDate: {
-    fontWeight: '600',
-    marginStart: 15,
-    color: '#000',
-  },
-  viewStar: {
+  viewTotalStartRating: {
     flexDirection: 'row',
-  },
-  viewItemContentFeedback: {
-    borderBottomWidth: 1,
-    paddingVertical: 10,
-  },
-  viewFlatListFeedback: {
-    marginHorizontal: 24,
-    marginTop: 25,
-  },
-  textItem: {
-    color: '#000',
-  },
-  viewItemFeedback: {
-    // backgroundColor: '#286b35',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-    marginEnd: 10,
-    borderWidth: 1,
-  },
-  textContentFeedback: {
-    fontWeight: '700',
-    fontSize: 18,
-    color: '#000',
-    marginBottom: 15,
-  },
-  viewContentFeedback: {
-    marginStart: 24,
     marginTop: 20,
+    backgroundColor: '#F5FEFF',
+    borderRadius: 20,
+    paddingStart: 20,
+    paddingEnd: 10,
+    borderWidth: 1,
+    elevation: 15,
   },
-  textService: {
-    width: 250,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  viewService: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    justifyContent: 'space-between',
-    paddingTop: 15,
-    alignItems: 'center',
-  },
-  textFeedbackCustomer: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  percent: {
-    backgroundColor: '#fcb103',
-    height: 6,
-    // width: '0%',
-    borderRadius: 10,
-  },
-  viewPercent: {
-    marginStart: 10,
-    backgroundColor: '#b7b9bd',
-    height: 6,
-    flex:1,
-    borderRadius: 10,
-  },
-  viewColumn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewChartFeedback: {
-    marginHorizontal: 24,
-    marginTop: 24,
-    backgroundColor: '#FFF',
-    padding: 20,
-    borderRadius: 10,
-  },
-  textFeedback: {
-    fontSize: 25,
-    fontWeight: '700',
+  titleHeader: {
     marginStart: 20,
   },
   viewHeader: {
     flexDirection: 'row',
-    paddingHorizontal: 24,
-    paddingVertical: 15,
     alignItems: 'center',
-    borderBottomWidth: 1,
+    marginTop: 10,
   },
-  container: {
+  viewContainer: {
+    flex: 1,
+    marginHorizontal: 24,
+  },
+  viewContainerBackgroundColor: {
+    backgroundColor: '#fff',
     flex: 1,
   },
 });
-
-var title = [
-  {rating: 0, number: 34},
-  {rating: 5, number: 21},
-  {rating: 4, number: 14},
-  {rating: 3, number: 12},
-  {rating: 2, number: 5},
-  {rating: 1, number: 1},
-];
-
 var numberRating = [
-  {number: 1},
-  {number: 2},
-  {number: 3},
-  {number: 4},
   {number: 5},
+  {number: 4},
+  {number: 3},
+  {number: 2},
+  {number: 1},
 ];
