@@ -4,8 +4,11 @@ import {
   Image,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
+  TextInputComponent,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,14 +21,16 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 const {height} = Dimensions.get('window');
-import { SetDeleteReview } from '../ShipperHTTP';
+import {SetDeleteReview, UpdateShipperReview} from '../ShipperHTTP';
 
 const HistoryFeedback = () => {
   const [reviews, setReviews] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [ratingModal, setRatingModal] = useState(null);
+  const [descriptionModal, setDescriptionModal] = useState(null);
+  const [idReviewModal, setIdReviewModal] = useState(null);
 
-  
   const fetchData = async () => {
     try {
       const response = await getShipperReview();
@@ -43,11 +48,10 @@ const HistoryFeedback = () => {
     fetchData();
   }, []);
 
-  const handlDeleteReview = async (id) =>{
-    
+  const handlDeleteReview = async id => {
     try {
       const result = await SetDeleteReview(id);
-      if(result === "đã xoá thành công"){
+      if (result === 'đã xoá thành công') {
         setModalVisible(false);
         fetchData();
       }
@@ -55,7 +59,7 @@ const HistoryFeedback = () => {
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const renderItemReview = ({item}) => {
     const originalDateTime = item.review.createAt;
@@ -66,6 +70,9 @@ const HistoryFeedback = () => {
         <TouchableOpacity
           onPress={() => {
             setSelectedItem(item);
+            setRatingModal(item.review.rating);
+            setIdReviewModal(item.review._id);
+            setDescriptionModal(item.review.description);
             setModalVisible(true);
           }}>
           <View style={styles.viewItemHeader}>
@@ -92,6 +99,29 @@ const HistoryFeedback = () => {
     );
   };
 
+  const onStarRatingPress = rating => {
+    setRatingModal(rating);
+  };
+
+  const handleUpdateReview = async () => {
+    const data = {
+      description: descriptionModal,
+      rating: ratingModal,
+    };
+
+    
+    try {
+      const updatedReview = await UpdateShipperReview(idReviewModal, data);
+      console.log(updatedReview);
+      if (updatedReview.result) {
+        setModalVisible(false);
+        fetchData();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <View style={styles.viewContainerBackgroundColor}>
       <View style={styles.viewContainer}>
@@ -108,6 +138,7 @@ const HistoryFeedback = () => {
           showsVerticalScrollIndicator={false}
         />
       </View>
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -121,83 +152,79 @@ const HistoryFeedback = () => {
             activeOpacity={1}
             onPress={() => setModalVisible(false)}
           />
-          <View style={styles.centeredView}>
-            <View style={styles.modalViewHeader}>
-              <EvilIcons name={'tag'} size={25} color={'#19D6E5'} />
-              <TouchableOpacity>
-                <Text>Chi tiết đơn hàng</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.modalViewInformation}>
-              {selectedItem ? (
-                <Text style={styles.textNameCustomer}>
-                  {selectedItem.user.fullName}
-                </Text>
-              ) : (
-                <Text style={styles.textNameCustomer}>Tên khách hàng</Text>
-              )}
-              {selectedItem ? (
-                <Text>{(new Date(selectedItem.review.createAt)).toISOString().split('T')[0]}</Text>
-              ) : (
-                <Text>Thời gian</Text>
-              )}
-            </View>
-            <View>
-              {selectedItem ? (
-                <StarRating
-                  rating={selectedItem.review.rating}
-                  disabled={false}
-                  maxStars={5}
-                  fullStarColor={'#FC6E2A'}
-                />
-              ) : (
-                <StarRating
-                  rating={1}
-                  disabled={false}
-                  maxStars={5}
-                  fullStarColor={'#FC6E2A'}
-                />
-              )}
-            </View>
-            <View style={styles.viewContainerImage}>
-              <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.buttonIcon}>
-                  <FontAwesome6 name={'images'} size={30} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonIcon}>
-                  <MaterialIcons name={'delete'} size={30} />
+            <View style={styles.centeredView}>
+              <View style={styles.modalViewHeader}>
+                <EvilIcons name={'tag'} size={25} color={'#19D6E5'} />
+                <TouchableOpacity>
+                  <Text>Chi tiết đơn hàng</Text>
                 </TouchableOpacity>
               </View>
-              <View style={styles.viewImage}>
-                <Image
-                  style={{width: '100%', height: '100%', resizeMode: 'cover'}}
-                  source={require('../../../assets/ZaloPlay.png')}
+              <View style={styles.modalViewInformation}>
+                {selectedItem ? (
+                  <Text style={styles.textNameCustomer}>
+                    {selectedItem.user.fullName}
+                  </Text>
+                ) : null}
+                {selectedItem ? (
+                  <Text>
+                    {
+                      new Date(selectedItem.review.createAt)
+                        .toISOString()
+                        .split('T')[0]
+                    }
+                  </Text>
+                ) : (
+                  <Text>Thời gian</Text>
+                )}
+              </View>
+              <View>
+                <StarRating
+                  rating={ratingModal}
+                  disabled={false}
+                  maxStars={5}
+                  selectedStar={rating => onStarRatingPress(rating)}
+                  fullStarColor={'#FC6E2A'}
                 />
               </View>
+              <View style={styles.viewContainerImage}>
+                <View style={styles.viewIcon}>
+                  <TouchableOpacity style={styles.buttonIcon}>
+                    <FontAwesome6 name={'images'} size={30} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.buttonIcon}>
+                    <MaterialIcons name={'delete'} size={30} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.viewImage}>
+                  <Image
+                    style={{width: '100%', height: '100%', resizeMode: 'cover'}}
+                    source={require('../../../assets/ZaloPlay.png')}
+                  />
+                </View>
+              </View>
+              <View style={styles.viewContenDetailHistory}>
+                <TextInput
+                  editable
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  onChangeText={text => setDescriptionModal(text)}
+                  value={descriptionModal}
+                />
+              </View>
+              <View style={styles.viewContainerAction}>
+                <TouchableOpacity
+                  style={styles.buttonAction}
+                  onPress={() => handlDeleteReview(selectedItem.review._id)}>
+                  <Text style={styles.textAction}>Xóa</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                onPress={handleUpdateReview}
+                  style={[styles.buttonAction, {backgroundColor: '#FC6E2A'}]}>
+                  <Text style={styles.textAction}>Sửa</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.viewContenDetailHistory}>
-              {selectedItem ? (
-                <Text numberOfLines={5}>
-                  {selectedItem.review.description}{' '}
-                </Text>
-              ) : (
-                <Text numberOfLines={5}>
-                  This Food so tasty & delicious. Breakfast so fast Delivered in
-                  my place. Chef is very friendly. I’m really like chef for Home
-                  Food Order. Thanks.{' '}
-                </Text>
-              )}
-            </View>
-            <View style={styles.viewContainerAction}>
-              <TouchableOpacity style={styles.buttonAction} onPress={() => handlDeleteReview(selectedItem.review._id)}>
-                <Text style={styles.textAction}>Xóa</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.buttonAction, {backgroundColor: '#FC6E2A'}]}>
-                <Text style={styles.textAction}>Sửa</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
       </Modal>
     </View>
@@ -244,7 +271,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F5FA',
     borderRadius: 15,
     height: '15%',
-    padding: 8,
+    paddingHorizontal: 8,
   },
   buttonIcon: {
     width: 45,

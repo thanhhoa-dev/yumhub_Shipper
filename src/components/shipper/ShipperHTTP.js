@@ -84,11 +84,28 @@ export const SetDeleteReview = async (id) =>{
 export const UpdateShipperInformation = async (id, status) =>{
     try {
         const axiosInstance = AxiosInstance();
-        const url = `shippers/updateShipper/${id}`;
+        const url = 'shippers/updateShipper';
+        const params = {id: id};
         const body = {
             status: status
         }
-        return await axiosInstance.patch(url, body) 
+        return await axiosInstance.patch(url, {params}, body) 
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const UpdateShipperReview = async (id, data) => {
+    try {
+        const axiosInstance = AxiosInstance();
+        const url = 'reviews/updateReview?id=663f0573a412374d78c3a40f';
+        const params = {id: id};
+        // const body = {
+        //     description: description,
+        //     rating: rating
+        // }
+        return await axiosInstance.patch(url, data)
     } catch (error) {
         console.log(error);
         throw error;

@@ -30,19 +30,21 @@ const DirectionsComponent = () => {
   const id = '660c9dc319f26b917ea15837';
   const idUser = '6604e1ec5a6c5ad8711aebfa'
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const result = await GetOrderByID(id);
-        setOrder(result.order);
-        if (result.order) {
-          const updateStatusShipper = await UpdateShipperInformation(idUser, 8);
-          setModalVisible(true);
-        }
-      } catch (error) {
-        console.error('Error fetching order:', error);
+  const fetchOrder = async () => {
+    try {
+      const result = await GetOrderByID(id);
+      setOrder(result.order);
+      console.log(result);
+      if (result.order) {
+        const updateStatusShipper = await UpdateShipperInformation(idUser, 8);
+        setModalVisible(true);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching order:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchOrder();
   }, []);
 
@@ -111,7 +113,7 @@ const DirectionsComponent = () => {
 
   return (
     <View style={{flex: 1}}>
-      <View style={{zIndex:1, flex:0.5}}>
+      {/* <View style={{zIndex:1, flex:0.5}}>
       <GooglePlacesAutocomplete
         placeholder="Nhập địa chỉ giao hàng"
         fetchDetails={true}
@@ -124,7 +126,7 @@ const DirectionsComponent = () => {
         }}
         onFail={error => console.log(error)}
       />
-      </View>
+      </View> */}
 
       <MapView
         style={{flex: 1}}
