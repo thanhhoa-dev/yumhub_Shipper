@@ -5,11 +5,13 @@ const Stack = createNativeStackNavigator();
 import Login from './screens/Login';
 import Signup from './screens/Signup';
 import UserInformation from '../shipper/screen/UserInformation';
+import SuccessOrder from '../shipper/screen/SuccessOrder';
+import Goong from '../shipper/screen/Goong';
 
 
 const UserNavigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Login">
+    <Stack.Navigator initialRouteName="Goong">
       <Stack.Screen
         options={{headerShown: false}}
         name="Login"
@@ -24,6 +26,16 @@ const UserNavigation = () => {
         options={{headerShown: false}}
         name="UserInformation"
         component={UserInformation}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="SuccessOrder"
+        component={SuccessOrder}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="Goong"
+        component={Goong}
       />
     </Stack.Navigator>
   );

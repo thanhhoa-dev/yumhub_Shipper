@@ -99,15 +99,45 @@ export const UpdateShipperInformation = async (id, status) =>{
 export const UpdateShipperReview = async (id, data) => {
     try {
         const axiosInstance = AxiosInstance();
-        const url = 'reviews/updateReview?id=663f0573a412374d78c3a40f';
+        const url = 'reviews/updateReview';
         const params = {id: id};
-        // const body = {
-        //     description: description,
-        //     rating: rating
-        // }
-        return await axiosInstance.patch(url, data)
+        return await axiosInstance.patch(url, data, {params});
     } catch (error) {
         console.log(error);
         throw error;
     }
 }
+
+export const ShowDetail = async (id) =>{
+    try {
+        const axiosInstance = AxiosInstance();
+        const url = 'detail/order';
+        const params = {id: id};
+        return await axiosInstance.get(url, {params});
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const uploadImage = async (form) =>{
+    try {
+        const axiosInstance = AxiosInstance('multipart/form-data');
+        const url ='files/upload';
+        return await axiosInstance.post(url,form)
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+// export const UpdateOrder = async (id) =>{
+//     try {
+//         const axiosInstance = AxiosInstance();
+//         const url ='files/upload';
+//         return await axiosInstance.post(url,form)
+//     } catch (error) {
+//         console.log(error);
+//         throw error;
+//     }
+// }

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.UpdateShipperReview = exports.UpdateShipperInformation = exports.SetDeleteReview = exports.SetStatus = exports.GetOrderByID = exports.revenueShipperTimeTwoTime = exports.getShipperReview = exports.getShipperBeReview = void 0;
+exports.uploadImage = exports.ShowDetail = exports.UpdateShipperReview = exports.UpdateShipperInformation = exports.SetDeleteReview = exports.SetStatus = exports.GetOrderByID = exports.revenueShipperTimeTwoTime = exports.getShipperReview = exports.getShipperBeReview = void 0;
 
 var _AxiosInstance = _interopRequireDefault(require("../../http/AxiosInstance"));
 
@@ -274,16 +274,14 @@ var UpdateShipperReview = function UpdateShipperReview(id, data) {
         case 0:
           _context8.prev = 0;
           axiosInstance = (0, _AxiosInstance["default"])();
-          url = 'reviews/updateReview?id=663f0573a412374d78c3a40f';
+          url = 'reviews/updateReview';
           params = {
             id: id
-          }; // const body = {
-          //     description: description,
-          //     rating: rating
-          // }
-
+          };
           _context8.next = 6;
-          return regeneratorRuntime.awrap(axiosInstance.patch(url, data));
+          return regeneratorRuntime.awrap(axiosInstance.patch(url, data, {
+            params: params
+          }));
 
         case 6:
           return _context8.abrupt("return", _context8.sent);
@@ -303,3 +301,80 @@ var UpdateShipperReview = function UpdateShipperReview(id, data) {
 };
 
 exports.UpdateShipperReview = UpdateShipperReview;
+
+var ShowDetail = function ShowDetail(id) {
+  var axiosInstance, url, params;
+  return regeneratorRuntime.async(function ShowDetail$(_context9) {
+    while (1) {
+      switch (_context9.prev = _context9.next) {
+        case 0:
+          _context9.prev = 0;
+          axiosInstance = (0, _AxiosInstance["default"])();
+          url = 'detail/order';
+          params = {
+            id: id
+          };
+          _context9.next = 6;
+          return regeneratorRuntime.awrap(axiosInstance.get(url, {
+            params: params
+          }));
+
+        case 6:
+          return _context9.abrupt("return", _context9.sent);
+
+        case 9:
+          _context9.prev = 9;
+          _context9.t0 = _context9["catch"](0);
+          console.log(_context9.t0);
+          throw _context9.t0;
+
+        case 13:
+        case "end":
+          return _context9.stop();
+      }
+    }
+  }, null, null, [[0, 9]]);
+};
+
+exports.ShowDetail = ShowDetail;
+
+var uploadImage = function uploadImage(form) {
+  var axiosInstance, url;
+  return regeneratorRuntime.async(function uploadImage$(_context10) {
+    while (1) {
+      switch (_context10.prev = _context10.next) {
+        case 0:
+          _context10.prev = 0;
+          axiosInstance = (0, _AxiosInstance["default"])('multipart/form-data');
+          url = 'files/upload';
+          _context10.next = 5;
+          return regeneratorRuntime.awrap(axiosInstance.post(url, form));
+
+        case 5:
+          return _context10.abrupt("return", _context10.sent);
+
+        case 8:
+          _context10.prev = 8;
+          _context10.t0 = _context10["catch"](0);
+          console.log(_context10.t0);
+          throw _context10.t0;
+
+        case 12:
+        case "end":
+          return _context10.stop();
+      }
+    }
+  }, null, null, [[0, 8]]);
+}; // export const UpdateOrder = async (id) =>{
+//     try {
+//         const axiosInstance = AxiosInstance();
+//         const url ='files/upload';
+//         return await axiosInstance.post(url,form)
+//     } catch (error) {
+//         console.log(error);
+//         throw error;
+//     }
+// }
+
+
+exports.uploadImage = uploadImage;
