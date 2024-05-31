@@ -1,51 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Button,
-} from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 import Feather from 'react-native-vector-icons/Feather';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-const SixDaysAgo = () => {
+const SixDaysAgo = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [startDate, setStartDate] = useState('');
-const [endDate, setEndDate] = useState('');
-
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const getOneRevenue = await revenueShipperTimeTwoTime(ID, startDate);
-        setRevenur(getOneRevenue);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, []);
+  const [endDate, setEndDate] = useState('');
+  const [markedDates, setMarkedDates] = useState({
+    [new Date().toISOString().split('T')[0]]: { disabled: true, startingDay: true, color: 'green', endingDay: true }
+  });
+  const [rangeSelected, setRangeSelected] = useState(false);
 
   useEffect(() => {
-    const weekDays = getWeekDays(currentDate);
+    const today = new Date();
+    const weekDays = getWeekDays(today);
     const startOfWeek = weekDays[0];
     const endOfWeek = weekDays[6];
-  
+
     setStartDate(startOfWeek);
     setEndDate(endOfWeek);
   }, []);
-
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || new Date();
-    setShowDatePicker(false);
-    setSelectedDate(currentDate);
-    setCurrentDate(currentDate);
-  };
 
   const getWeekDays = (date) => {
     const startOfWeek = new Date(date);
@@ -62,10 +40,45 @@ const [endDate, setEndDate] = useState('');
     return weekDays;
   };
 
+  const onDayPress = (day) => {
+    if (!rangeSelected) {
+      setStartDate(day.dateString);
+      setMarkedDates({
+        [day.dateString]: { startingDay: true, color: 'lightblue', textColor: 'white' },
+      });
+      setRangeSelected(true);
+    } else {
+      const start = new Date(startDate);
+      const end = new Date(day.dateString);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 30) {
+        Alert.alert('Error', 'Date range should not exceed 30 days');
+        return;
+      }
+
+      const range = {};
+      let current = new Date(startDate);
+      while (current <= end) {
+        const dateString = current.toISOString().split('T')[0];
+        range[dateString] = {
+          color: 'lightblue',
+          textColor: 'white',
+        };
+        current.setDate(current.getDate() + 1);
+      }
+      range[startDate] = { startingDay: true, color: 'lightblue', textColor: 'white' };
+      range[day.dateString] = { endingDay: true, color: 'lightblue', textColor: 'white' };
+      setMarkedDates(range);
+      setEndDate(day.dateString);
+      setRangeSelected(false);
+    }
+  };
+
   const renderDay = (date) => {
     const isToday = isSameDay(date, new Date());
     const dayStyle = isToday ? [styles.dayText, styles.today] : styles.dayText;
-    console.log(startDate, endDate);
 
     return (
       <TouchableOpacity>
@@ -85,20 +98,6 @@ const [endDate, setEndDate] = useState('');
     );
   };
 
-  const handlePreviousWeek = () => {
-    const previousWeek = new Date(currentDate);
-    previousWeek.setDate(currentDate.getDate() - 7);
-    setCurrentDate(previousWeek);
-  };
-
-  const handleNextWeek = () => {
-    const nextWeek = new Date(currentDate);
-    nextWeek.setDate(currentDate.getDate() + 7);
-    setCurrentDate(nextWeek);
-  };
-
-  const weekDays = getWeekDays(currentDate);
-
   return (
     <View style={styles.backgroundContainer}>
       <View style={styles.viewHeaderToday}>
@@ -109,33 +108,23 @@ const [endDate, setEndDate] = useState('');
       </View>
       <View style={styles.viewFlatlistDate}>
         <View style={styles.container}>
-          {showDatePicker && (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display="calendar"
-              onChange={handleDateChange}
-            />
-          )}
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+          <TouchableOpacity onPress={() => setShowCalendar(!showCalendar)}>
             <Text style={styles.monthText}>
               {selectedDate.toLocaleString('vi-VN', { month: 'long', year: 'numeric' })}
             </Text>
           </TouchableOpacity>
-          <View style={styles.navigation}>
-            <Button title="Previous" onPress={handlePreviousWeek} />
-            <Text style={styles.weekText}>
-              {currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
+          <TouchableOpacity onPress={() => setShowCalendar(true)}>
+            <Text style={styles.monthText}>
+              àdasdflasdflasdf
             </Text>
-            <Button title="Next" onPress={handleNextWeek} />
-          </View>
-          <FlatList
-            data={weekDays}
-            renderItem={({ item }) => renderDay(item)}
-            keyExtractor={(item) => item.toISOString()}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          />
+          </TouchableOpacity>
+          {showCalendar && (
+            <Calendar
+              markingType={'period'}
+              markedDates={markedDates}
+              onDayPress={onDayPress}
+            />
+          )}
         </View>
       </View>
     </View>

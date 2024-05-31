@@ -15,7 +15,7 @@ var AxiosInstance = function AxiosInstance() {
   var contentType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'application/json';
 
   var axiosInstance = _axios["default"].create({
-    baseURL: 'http://192.168.89.148:3000/' // timeout: 10000,
+    baseURL: 'http://192.168.2.25:3001/' // timeout: 10000,
 
   });
 

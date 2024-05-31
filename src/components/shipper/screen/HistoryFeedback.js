@@ -15,13 +15,14 @@ import {
 import React, {useEffect, useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
-import StarRating from 'react-native-star-rating';
+import StarRating from 'react-native-star-rating-widget';
 import {getShipperReview} from '../ShipperHTTP';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-const {height} = Dimensions.get('window');
 import {SetDeleteReview, UpdateShipperReview} from '../ShipperHTTP';
+import Loading from './Loading';
+import { styles } from '../styles/HistoryFeedbackStyle';
 
 const HistoryFeedback = () => {
   const [reviews, setReviews] = useState([]);
@@ -29,6 +30,7 @@ const HistoryFeedback = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [ratingModal, setRatingModal] = useState(null);
   const [descriptionModal, setDescriptionModal] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
@@ -37,6 +39,7 @@ const HistoryFeedback = () => {
         return new Date(b.review.createAt) + new Date(a.review.createAt);
       });
       setReviews(sortedReviews);
+      setLoading(false);
     } catch (error) {
       console.log(error);
       throw error;
@@ -46,6 +49,10 @@ const HistoryFeedback = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   const handlDeleteReview = async id => {
     try {
@@ -82,11 +89,14 @@ const HistoryFeedback = () => {
           <Text style={styles.textNameFeedback}>{item.user.fullName}</Text>
           <View style={{width: 100, paddingVertical: 10}}>
             <StarRating
-              starSize={15}
+              style={{marginLeft: -5}}
+              starSize={20}
               rating={item.review.rating}
-              disabled={false}
+              disabled={true}
               maxStars={5}
-              fullStarColor={'#FC6E2A'}
+              color={'#FC6E2A'}
+              onChange={() => {}}
+              starStyle={{marginRight: -1}}
             />
           </View>
           <Text numberOfLines={2} style={styles.textContentFeedback}>
@@ -102,7 +112,6 @@ const HistoryFeedback = () => {
   };
 
   const handleUpdateReview = async id => {
-   
     const data = {
       description: descriptionModal,
       rating: ratingModal,
@@ -173,13 +182,16 @@ const HistoryFeedback = () => {
                 <Text>Thời gian</Text>
               )}
             </View>
-            <View>
+            <View
+              style={{justifyContent: 'space-between', alignItems: 'center'}}>
               <StarRating
                 rating={ratingModal}
                 disabled={false}
                 maxStars={5}
-                selectedStar={rating => onStarRatingPress(rating)}
-                fullStarColor={'#FC6E2A'}
+                onChange={rating => onStarRatingPress(rating)}
+                color={'#FC6E2A'}
+                starSize={50}
+                starStyle={{marginHorizontal: 15}}
               />
             </View>
             <View style={styles.viewContainerImage}>
@@ -232,126 +244,3 @@ const HistoryFeedback = () => {
 };
 
 export default HistoryFeedback;
-
-const styles = StyleSheet.create({
-  centeredViewModal: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  textAction: {
-    fontWeight: '700',
-    fontSize: 16,
-    color: '#fff',
-  },
-  buttonAction: {
-    backgroundColor: '#E04444',
-    width: '40%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 15,
-    borderRadius: 10,
-  },
-  viewContainerAction: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-    marginHorizontal: 10,
-  },
-  viewContenDetailHistory: {
-    marginTop: 20,
-    backgroundColor: '#F0F5FA',
-    borderRadius: 15,
-    height: '15%',
-    paddingHorizontal: 8,
-  },
-  buttonIcon: {
-    width: 45,
-    height: 45,
-    backgroundColor: '#F6F8FA',
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  viewImage: {},
-  textNameCustomer: {
-    fontWeight: '700',
-    color: '#000',
-    fontSize: 14,
-  },
-  viewIcon: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    position: 'absolute',
-    zIndex: 5,
-    width: '100%',
-    padding: 15,
-  },
-  viewContainerImage: {
-    borderWidth: 1,
-    borderRadius: 15,
-    borderColor: '#005987',
-    overflow: 'hidden',
-    height: '50%',
-    backgroundColor: '#fff',
-    marginTop: 30,
-  },
-  modalViewInformation: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-  },
-  modalViewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  centeredView: {
-    backgroundColor: '#F5FEFF',
-    width: '100%',
-    height: height * 0.95,
-    position: 'absolute',
-    bottom: 0,
-    borderTopEndRadius: 24,
-    borderTopStartRadius: 24,
-    padding: 10,
-  },
-  textNameFeedback: {
-    fontWeight: '700',
-    color: '#000',
-  },
-  viewItemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 10,
-  },
-  viewContainerItemContent: {
-    marginStart: 10,
-    backgroundColor: '#F6F8FA',
-    padding: 10,
-    borderRadius: 20,
-    marginTop: 30,
-  },
-  textHistoryFeedback: {
-    marginStart: 10,
-  },
-  viewHeader: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  viewContainer: {
-    flex: 1,
-    marginHorizontal: 24,
-  },
-  viewContainerBackgroundColor: {
-    backgroundColor: '#fff',
-    flex: 1,
-  },
-});

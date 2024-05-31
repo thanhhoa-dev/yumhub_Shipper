@@ -15,7 +15,7 @@ const Login = () => {
     try {
       const result = await login(phoneNumber, password);
       await AsyncStorage.setItem('token', result.data.token);
-      setUser(result);
+      setUser(result.data);
     } catch (error) {
       console.log(error);
     }

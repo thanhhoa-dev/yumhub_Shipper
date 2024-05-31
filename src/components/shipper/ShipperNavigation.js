@@ -6,14 +6,13 @@ import Feather from 'react-native-vector-icons/Feather'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import DetailHome from './screen/DetailHome';
-import DirectionsComponent from './screen/DirectionsComponent';
 import Revenue from './screen/Revenue';
-import Notification from './screen/Notification';
 import Account from './screen/Account';
 import AccessLocation from './screen/AccessLocation';
 import SixDaysAgo from './screen/SixDaysAgo';
 import GetOrder from './screen/GetOrder';
 import Feedbackne from './screen/Feedback';
+import Goong from './screen/Goong';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -61,7 +60,7 @@ const ShipperTabNavigation = () => {
         <Tab.Screen 
         options={{headerShown:false}}
         name='Trang chủ'
-        component={DirectionsComponent}/>
+        component={Goong}/>
         <Tab.Screen 
         options={{headerShown:false}}
         name='Doanh thu'

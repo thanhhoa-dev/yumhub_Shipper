@@ -24,19 +24,27 @@ import {
 } from 'react-native';
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
-import {GetOrderByID, SetStatus, ShowDetail, uploadImage} from '../ShipperHTTP';
+import {
+  GetOrderByID,
+  ShowDetail,
+  uploadImage,
+  UpdateOrder,
+} from '../ShipperHTTP';
 import axios from 'axios';
 import {UpdateShipperInformation} from '../ShipperHTTP';
 import {UserContext} from '../../user/UserContext';
 import BottomSheet from '@gorhom/bottom-sheet';
 import {GestureHandlerRootView, ScrollView} from 'react-native-gesture-handler';
-import StarRating from 'react-native-star-rating';
+import StarRating from 'react-native-star-rating-widget';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {launchCamera} from 'react-native-image-picker';
 import {useNavigation} from '@react-navigation/native';
+import Loading from './Loading';
+import {styles} from '../styles/GoogStyle';
+import {GOONG_API_KEY} from '@env';
 
 const Goong = () => {
   const navigation = useNavigation();
@@ -56,33 +64,56 @@ const Goong = () => {
   const [places, setPlaces] = useState([]);
   const [destinationCustomer, setDestinationCustomer] = useState(null);
   const [detailFoodOrder, setDetailFoodOrder] = useState(null);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState('');
   const [index, setIndex] = useState(0);
   const [showNumberPhone, setShowNumberPhone] = useState(false);
+  const translateX = useRef(new Animated.Value(0)).current;
+  const {width} = Dimensions.get('window');
+  const bottomSheetRef = useRef(null);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+  const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
+  const [statusShipper, setStatusShipper] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const {user} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
   const id = '660c9dc319f26b917ea15837';
-  const idUser = '6604e1ec5a6c5ad8711aebfa';
-  const GOONG_API_KEY = 'wfCk7bvFrsdfFOxyWEG4KuHEhZNHyuD47VXOzLQm'; // Thay bằng API Key của bạn
+  const idUser = user.checkAccount._id;
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         const result = await GetOrderByID(id);
-        setOrder(result.order);
-        if (result.order) {
+        setOrder(result);
+        if (result.result) {
           await UpdateShipperInformation(idUser, 8);
           setModalVisible(true);
+          setIsTimerRunning(true);
         }
       } catch (error) {
         console.log('Error fetching order:', error);
         throw error;
       }
     };
-    if (!order) {
+    if (!order && statusShipper && index ===4) {
       fetchOrder();
     }
-  }, [id, idUser, order]);
+  }, [countdown, id, idUser, order, statusShipper]);
+
+  useEffect(() => {
+    const timeReceiveApplication = async () => {
+      if (countdown === 0 && isTimerRunning) {
+        setOrder(null);
+        setModalVisible(false);
+        setCountdown(60);
+        setIsTimerRunning(false);
+        await updateOrderStatus(id, 5);
+        await UpdateShipperInformation(idUser, 7);
+      }
+    };
+    timeReceiveApplication();
+  }, [countdown]);
 
   useEffect(() => {
     Geolocation.getCurrentPosition(
@@ -129,7 +160,6 @@ const Goong = () => {
 
       const {routes} = response.data;
 
-      // console.log(response.data);
       if (routes && routes.length > 0) {
         const points = routes[0].overview_polyline.points;
         const coordinates = decodePolyline(points);
@@ -155,7 +185,6 @@ const Goong = () => {
 
       const {routes} = response.data;
 
-      // console.log(response.data);
       if (routes && routes.length > 0) {
         const points = routes[0].overview_polyline.points;
         const coordinates = decodePolyline(points);
@@ -207,16 +236,16 @@ const Goong = () => {
   };
 
   const updateOrderStatus = async (id, status) => {
+    const data = {
+      status: status
+    }
     try {
-      await SetStatus(id, status);
+      await UpdateOrder(id, data);
       console.log('Cập nhập trạng thái thành công');
     } catch (error) {
       console.error('Error updating order status:', error);
     }
   };
-
-  const bottomSheetRef = useRef(null);
-  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
 
   // Show Bottom Sheet
   const handlePresentPress = useCallback(() => {
@@ -234,12 +263,14 @@ const Goong = () => {
     try {
       if (status === 3) {
         setDestination({
-          latitude: order.merchantID.latitude,
-          longitude: order.merchantID.longitude,
+          latitude: order.order.merchantID.latitude,
+          longitude: order.order.merchantID.longitude,
         });
-        setQuery(`${order.deliveryAddress}`);
+        setQuery(`${order.order.deliveryAddress}`);
         setModalVisible(false);
         setModalVisibleConfirm(false);
+        setIsTimerRunning(false);
+        setCountdown(60);
         handlePresentPress();
 
         await updateOrderStatus(id, 3);
@@ -248,7 +279,9 @@ const Goong = () => {
         setModalVisible(false);
         setModalVisibleConfirm(false);
         setOrder(null);
-        await updateOrderStatus(id, 5);
+        setIsTimerRunning(false);
+        setCountdown(60);
+        await updateOrderStatus(id, 6);
         await UpdateShipperInformation(idUser, 7);
       } else {
         console.warn('Lựa chọn không hợp lệ');
@@ -308,8 +341,6 @@ const Goong = () => {
     }
   };
 
-  const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
-
   const handleShowDetail = async () => {
     try {
       const result = await ShowDetail(id);
@@ -352,26 +383,6 @@ const Goong = () => {
     'Giao hoàn tất',
   ];
 
-  const translateX = useRef(new Animated.Value(0)).current;
-  const {width} = Dimensions.get('window');
-
-  const handleConfirmCancel = async () => {
-    try {
-      handleClosePress();
-      setIndex(0);
-      await updateOrderStatus(id, 5);
-      setOrder(null);
-      navigation.navigate('SuccessOrder');
-      translateX.setValue(0);
-      setTimeout(() => {
-        navigation.navigate('Goong');
-      }, 3000);
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
-
   const handleConfirmCancelOrder = async () => {
     try {
       setModalVisibleCancelOrder(false);
@@ -379,11 +390,15 @@ const Goong = () => {
       setIndex(0);
       await updateOrderStatus(id, 6);
       setOrder(null);
-      navigation.navigate('SuccessOrder');
       translateX.setValue(0);
+       navigation.navigate('CancelSuccessOrder');
       setTimeout(() => {
         navigation.navigate('Goong');
-      }, 3000);
+      }, 5000);
+      // navigation.navigate('SuccessOrder');
+      // setTimeout(() => {
+      //   navigation.navigate('SubmitReview', {id: id});
+      // }, 5000);
     } catch (error) {
       console.log(error);
       throw error;
@@ -393,7 +408,6 @@ const Goong = () => {
   const handleUpdateIndex = () => {
     setIndex(prevIndex => {
       const newIndex = (prevIndex + 1) % (items.length + 1);
-
       switch (newIndex) {
         case 1:
           handleShowDetail();
@@ -403,7 +417,8 @@ const Goong = () => {
         case 3:
           break;
         case 4:
-          handleConfirmCancel();
+          setIndex(3);
+          openCamera();
           break;
         default:
           break;
@@ -455,7 +470,9 @@ const Goong = () => {
       });
       try {
         const result = await uploadImage(formData);
-        setImage(result.url);
+        const imageGiveFood = result.url;
+        console.log(result.url);
+        handleConfirmCancel(imageGiveFood);
       } catch (error) {
         console.error('Error uploading image:', error);
       }
@@ -468,6 +485,7 @@ const Goong = () => {
       quality: 1,
       saveToPhotos: true,
     };
+    setIndex(3);
     launchCamera(options, takePhoto);
   }, [takePhoto]);
 
@@ -476,11 +494,83 @@ const Goong = () => {
     Linking.openURL(`tel:${phoneNumber}`);
   };
 
+  const handleSetStatusShipper = () => {
+    if (statusShipper) {
+      setStatusShipper(false);
+    } else {
+      setStatusShipper(true);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (countdown > 0 && isTimerRunning) {
+        setCountdown(prevCountdown => prevCountdown - 1);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdown, isTimerRunning]);
+
+  const formatTime = seconds => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+    return `${formattedMinutes}:${formattedSeconds}`;
+  };
+
+  const handleConfirmCancel = async imageGiveFood => {
+    const data = {
+      imageGiveFood: imageGiveFood,
+    };
+    try {
+      if (imageGiveFood && imageGiveFood.trim() !== '') {
+        handleClosePress();
+        setIndex(0);
+        await updateOrderStatus(id, 5);
+        await UpdateOrder(id, data);
+        setOrder(null);
+        translateX.setValue(0);
+        navigation.navigate('SuccessOrder');
+        setTimeout(() => {
+          navigation.navigate('SubmitReview', {id: id});
+        }, 5000);
+      } else {
+        setIndex(3);
+        Alert.alert('Phải chụp hình ảnh');
+      }
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  if (!locateCurrent) {
+    return <Loading />;
+  }
+
   return (
-    <View style={{flex: 1}}>
-      <GestureHandlerRootView style={{flex: 1}}>
+    <View style={styles.viewContainerGoong}>
+      <GestureHandlerRootView style={{flex: 1, position: 'relative'}}>
+        <View style={styles.viewStatusShipper}>
+          {statusShipper ? (
+            <Text style={[styles.textStatusShipper, {color: '#005987'}]}>
+              Đang hoạt động
+            </Text>
+          ) : (
+            <Text style={styles.textStatusShipper}>Không hoạt động</Text>
+          )}
+          <TouchableOpacity
+            onPress={() => {
+              handleSetStatusShipper();
+            }}
+            style={styles.buttonPowerOffStatusShipper}>
+            <FontAwesome6 name={'power-off'} size={25} color={'#19D6E5'} />
+          </TouchableOpacity>
+        </View>
         <MapView
-          style={{flex: 1}}
+          style={{flex: 1, zIndex:-1}}
           provider={PROVIDER_GOOGLE}
           initialRegion={
             locateCurrent
@@ -502,20 +592,20 @@ const Goong = () => {
               <CustomMarker />
             </Marker>
           )}
-          {destination && order && (
+          {destination && order && order.result && (
             <Marker
               draggable
-              title={`${order.merchantID.name}`}
+              title={`${order.order.merchantID.name}`}
               coordinate={destination}
               onDragEnd={directions => {
                 setDestination(directions.nativeEvent.coordinate);
               }}
             />
           )}
-          {destinationCustomer && order && (
+          {destinationCustomer && order && order.result && (
             <Marker
               draggable
-              title={`${order.customerID.fullName}`}
+              title={`${order.order.customerID.fullName}`}
               coordinate={{
                 latitude: destinationCustomer.lat,
                 longitude: destinationCustomer.lng,
@@ -538,7 +628,7 @@ const Goong = () => {
             />
           )}
         </MapView>
-        {order && destination && isBottomSheetVisible && (
+        {order && order.result && destination && isBottomSheetVisible && (
           <BottomSheet
             index={0}
             snapPoints={snapPoints}
@@ -559,23 +649,25 @@ const Goong = () => {
                         <Text
                           style={styles.textNameMerchantBottomSheet}
                           numberOfLines={1}>
-                          {order.merchantID.name}
+                          {order.order.merchantID.name}
                         </Text>
                         <Text
                           style={styles.textAddressMerchantBottomSheet}
                           numberOfLines={1}>
-                          {order.merchantID.address}
+                          {order.order.merchantID.address}
                         </Text>
                         <View style={styles.viewContainerRating}>
                           <StarRating
-                            disabled={false}
+                            disabled={true}
                             maxStars={1}
                             rating={1}
-                            fullStarColor={'orange'}
-                            starSize={20}
+                            color={'#FC6E2A'}
+                            starSize={22}
+                            starStyle={{marginHorizontal: 0}}
+                            onChange={() => {}}
                           />
                           <Text style={styles.textRatingBottomSheet}>
-                            {order.merchantID.rating}
+                            {order.order.merchantID.rating}
                           </Text>
                         </View>
                       </View>
@@ -584,7 +676,7 @@ const Goong = () => {
                     <View style={styles.viewInformationMerchantBottomSheet}>
                       <Image
                         style={styles.imageMerchantBottomSheet}
-                        source={{uri: `${order.customerID.avatar}`}}
+                        source={{uri: `${order.order.customerID.avatar}`}}
                       />
                       <View
                         style={
@@ -593,23 +685,25 @@ const Goong = () => {
                         <Text
                           style={styles.textNameMerchantBottomSheet}
                           numberOfLines={1}>
-                          {order.customerID.fullName}
+                          {order.order.customerID.fullName}
                         </Text>
                         <Text
                           style={styles.textAddressMerchantBottomSheet}
                           numberOfLines={1}>
-                          {order.deliveryAddress}
+                          {order.order.deliveryAddress}
                         </Text>
                         <View style={styles.viewContainerRating}>
                           <StarRating
-                            disabled={false}
+                            disabled={true}
                             maxStars={1}
                             rating={1}
-                            fullStarColor={'orange'}
-                            starSize={20}
+                            color={'#FC6E2A'}
+                            starSize={22}
+                            starStyle={{marginHorizontal: 0}}
+                            onChange={() => {}}
                           />
                           <Text style={styles.textRatingBottomSheet}>
-                            {order.merchantID.rating}
+                            {order.order.merchantID.rating}
                           </Text>
                         </View>
                       </View>
@@ -637,6 +731,7 @@ const Goong = () => {
                   )}
                   {detailFoodOrder && index == 1 && (
                     <View style={styles.viewListItemInformationFoodBottomSheet}>
+                      <Text style={styles.textCodeOrdersBottomSheet}>#{order.order._id}</Text>
                       <Text style={styles.textListFoodBottomSheet}>
                         Danh Sách Món
                       </Text>
@@ -804,6 +899,20 @@ const Goong = () => {
                           Đơn hàng hoàn tất
                         </Text>
                       </View>
+                    ) : index >= 4 ? (
+                      <View style={styles.viewStepsDeliveryBottomSheet}>
+                        <MaterialIcons
+                          style={[
+                            styles.IconStepsLoadDeliveryBottomSheet,
+                            {backgroundColor: '#005987'},
+                          ]}
+                          color={'white'}
+                          name={'done'}
+                        />
+                        <Text style={styles.textStepsDelivery}>
+                          Shipper đã đến nơi giao
+                        </Text>
+                      </View>
                     ) : (
                       <View style={styles.viewStepsDeliveryBottomSheet}>
                         <MaterialIcons
@@ -824,7 +933,7 @@ const Goong = () => {
                         Giá tiền
                       </Text>
                       <Text style={styles.textItemSummaryBottmSheet}>
-                        {order.totalPaid
+                        {order.order.totalPaid
                           .toString()
                           .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
                       </Text>
@@ -834,7 +943,7 @@ const Goong = () => {
                         Phí giao hàng
                       </Text>
                       <Text style={styles.textItemSummaryBottmSheet}>
-                        {order.deliveryCost
+                        {order.order.deliveryCost
                           .toString()
                           .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
                       </Text>
@@ -862,30 +971,6 @@ const Goong = () => {
                       </Text>
                     </View>
                   </View>
-
-                  {image && (
-                    <View
-                      style={{
-                        marginHorizontal: 20,
-                        height: 190,
-                        marginTop: 10,
-                      }}>
-                      <Image
-                        style={{width: '100%', height: '100%'}}
-                        source={{uri: image}}
-                      />
-                    </View>
-                  )}
-
-                  {index >= 3 && (
-                    <TouchableOpacity
-                      onPress={openCamera}
-                      style={styles.buttonTakePhotoBottomSheet}>
-                      <Text style={styles.textTakePhotoBottomSheet}>
-                        Chụp ảnh
-                      </Text>
-                    </TouchableOpacity>
-                  )}
                   <View style={styles.viewArriveRestaurantBottomSheet}>
                     <View style={styles.buttonArriveRestaurantBottomSheet}>
                       <Animated.View
@@ -919,14 +1004,28 @@ const Goong = () => {
                       </Text>
                     </TouchableOpacity>
                   )}
+                  {index == 1 && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setModalVisibleCancelOrder(true);
+                      }}
+                      style={[
+                        styles.buttonTakePhotoBottomSheet,
+                        {backgroundColor: '#E04444'},
+                      ]}>
+                      <Text style={styles.textTakePhotoBottomSheet}>
+                        Nhà hàng đóng cửa/hết món
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
                 <View style={styles.viewContainerCallUserBottomSheet}>
                   {!showNumberPhone && (
                     <View style={styles.viewInformationUserBottomSheet}>
-                      {order.customerID.avatar ? (
+                      {order.order.customerID.avatar ? (
                         <Image
                           style={{height: 70, width: 70, borderRadius: 50}}
-                          source={{uri: `${order.customerID.avatar}`}}
+                          source={{uri: `${order.order.customerID.avatar}`}}
                         />
                       ) : (
                         <Image
@@ -936,15 +1035,17 @@ const Goong = () => {
                       )}
                       <View style={styles.viewContainerInformationCustomer}>
                         <Text style={styles.textUserBottomSheet}>
-                          {order.customerID.fullName}
+                          {order.order.customerID.fullName}
                         </Text>
                         <View style={styles.viewContainerRating}>
                           <StarRating
-                            disabled={false}
+                            disabled={true}
                             maxStars={1}
                             rating={1}
-                            fullStarColor={'orange'}
-                            starSize={20}
+                            color={'#FC6E2A'}
+                            starSize={22}
+                            starStyle={{marginHorizontal: 0}}
+                            onChange={() => {}}
                           />
                           <Text style={styles.textRatingBottomSheet}>4.7</Text>
                         </View>
@@ -979,11 +1080,11 @@ const Goong = () => {
                         {justifyContent: 'space-between', flex: 1},
                       ]}>
                       <Text style={styles.textCustomerPhoneNumber}>
-                        {order.customerID.phoneNumber}
+                        {order.order.customerID.phoneNumber}
                       </Text>
                       <TouchableOpacity
                         onPress={() => {
-                          handleCall(order.customerID.phoneNumber);
+                          handleCall(order.order.customerID.phoneNumber);
                         }}>
                         <Ionicons
                           style={styles.iconCallBottomSheet}
@@ -1000,7 +1101,7 @@ const Goong = () => {
           </BottomSheet>
         )}
       </GestureHandlerRootView>
-      {order && (
+      {order && order.result && (
         <Modal
           animationType="slide"
           transparent={true}
@@ -1023,22 +1124,22 @@ const Goong = () => {
                 <View style={styles.viewContainerNameUser}>
                   <Text style={styles.textInformation}>Đặt bởi: </Text>
                   <Text style={styles.textInformation}>
-                    {order.customerID.fullName}
+                    {order.order.customerID.fullName}
                   </Text>
                 </View>
                 <Text style={styles.textInformation} numberOfLines={1}>
-                  {order.deliveryAddress}
+                  {order.order.deliveryAddress}
                 </Text>
               </View>
               <View style={styles.viewContainerInformation}>
                 <View style={styles.viewContainerNameUser}>
                   <Text style={styles.textInformation}>Nhà hàng: </Text>
                   <Text style={styles.textInformation}>
-                    {order.merchantID.name}
+                    {order.order.merchantID.name}
                   </Text>
                 </View>
                 <Text style={styles.textInformation} numberOfLines={1}>
-                  {order.merchantID.address}
+                  {order.order.merchantID.address}
                 </Text>
               </View>
               <View style={styles.viewContainerInformationIncom}>
@@ -1051,7 +1152,7 @@ const Goong = () => {
                 <View style={styles.viewItemIncom}>
                   <Text style={styles.textItemIncom}>Tổng hóa đơn:</Text>
                   <Text style={styles.textItemIncom}>
-                    {order.totalPaid
+                    {order.order.totalPaid
                       .toString()
                       .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
                     đ
@@ -1060,7 +1161,7 @@ const Goong = () => {
                 <View style={styles.viewItemIncom}>
                   <Text style={styles.textItemIncom}>Thu nhập:</Text>
                   <Text style={styles.textItemIncom}>
-                    {order.deliveryCost
+                    {order.order.deliveryCost
                       .toString()
                       .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
                     đ
@@ -1068,9 +1169,12 @@ const Goong = () => {
                 </View>
               </View>
               <TouchableOpacity
-                onPress={() => handleShipperDecision(order._id, 3)}
+                onPress={() => handleShipperDecision(order.order._id, 3)}
                 style={styles.buttonReceiveOrder}>
                 <Text style={styles.textReceiveOrder}>NHẬN ĐƠN</Text>
+                <Text style={[styles.textReceiveOrder, {marginStart: 10}]}>
+                  {formatTime(countdown)}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1098,7 +1202,7 @@ const Goong = () => {
                 <Text style={styles.textConfirmYes}>Hủy</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => handleShipperDecision(order._id, 5)}
+                onPress={() => handleShipperDecision(order.order._id, 5)}
                 style={[styles.buttonConfirm, styles.buttonConfirmNo]}>
                 <Text style={styles.textConfirmNo}>Từ Chối</Text>
               </TouchableOpacity>
@@ -1145,403 +1249,3 @@ const Goong = () => {
 };
 
 export default Goong;
-
-const styles = StyleSheet.create({
-  viewContainerBottomSheet: {
-    flex: 1,
-  },
-  textCustomerPhoneNumber: {
-    color: '#005987',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  viewContainerInformationCustomer: {
-    marginStart: 10,
-  },
-  textReceiveCancelOrder: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: '700',
-    paddingVertical: 10,
-    textAlign: 'center',
-  },
-  buttonReceiveCancelOrder: {
-    borderRadius: 20,
-    backgroundColor: '#19D6E5',
-    marginHorizontal: 40,
-    marginVertical: 35,
-  },
-  textInputCancelOrder: {
-    color: '#32343E',
-    fontSize: 14,
-    fontWeight: '400',
-  },
-  viewContainerTextInputCancelOrder: {
-    backgroundColor: '#F0F5FA',
-    borderRadius: 15,
-    marginHorizontal: 20,
-    marginTop: 15,
-    paddingHorizontal: 10,
-    height: 190,
-  },
-  textReasonForCancellation: {
-    color: '#32343E',
-    fontSize: 20,
-    fontWeight: '700',
-    marginStart: 20,
-  },
-  textTakePhotoBottomSheet: {
-    color: '#FFF',
-    fontSize: 20,
-    fontWeight: '700',
-    paddingVertical: 10,
-  },
-  buttonTakePhotoBottomSheet: {
-    backgroundColor: '#19D6E5',
-    borderRadius: 15,
-    marginHorizontal: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  textListFoodBottomSheet: {
-    color: '#32343E',
-    fontSize: 20,
-    fontWeight: '400',
-    marginStart: 15,
-  },
-  textInformationFoodBottomSheet: {
-    color: '#32343E',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  viewItemImageFoodBottomSheet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewContainerItemInformationFoodBottomSheet: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#F6F8FA',
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    marginTop: 10,
-  },
-  viewListItemInformationFoodBottomSheet: {
-    marginTop: 30,
-  },
-  textUserBottomSheet: {
-    color: '#005987',
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  iconMessageBottomSheet: {
-    padding: 15,
-    backgroundColor: '#FFF',
-    borderRadius: 50,
-    marginEnd: 15,
-    borderColor: '#005987',
-    borderWidth: 1,
-  },
-  iconCallBottomSheet: {
-    padding: 15,
-    backgroundColor: '#005987',
-    borderRadius: 50,
-    elevation: 15,
-    shadowColor: '#19D6E5',
-    marginEnd: 15,
-  },
-  viewContainerIconBottomSheet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewInformationUserBottomSheet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewContainerCallUserBottomSheet: {
-    marginTop: 27,
-    flexDirection: 'row',
-    paddingVertical: 20,
-    paddingHorizontal: 25,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderWidth: 1,
-    marginHorizontal: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: 116,
-  },
-  textArriveRestaurantBottomSheet: {
-    color: '#FFF',
-    fontSize: 23,
-    fontWeight: '500',
-    textAlign: 'center',
-    flex: 1,
-    zIndex: 1,
-  },
-  iconRightBottomSheet: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    zIndex: 2,
-  },
-  iconContainer: {zIndex: 2},
-  buttonArriveRestaurantBottomSheet: {
-    backgroundColor: '#005987',
-    borderRadius: 40,
-    alignItems: 'center',
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    height: 60,
-  },
-  viewArriveRestaurantBottomSheet: {
-    marginTop: 20,
-    marginHorizontal: 15,
-  },
-  textIncomeBottomSheet: {
-    fontWeight: '600',
-    fontSize: 20,
-  },
-  textItemSummaryBottmSheet: {
-    color: '#005987',
-    fontSize: 16,
-    fontWeight: '400',
-  },
-  viewContainerSummaryBottomSheet: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  textSummaryBottomSheet: {
-    color: '#005987',
-    fontSize: 20,
-    fontWeight: '600',
-    paddingBottom: 20,
-  },
-  viewSummaryBottomSheet: {
-    paddingHorizontal: 10,
-    marginTop: 20,
-  },
-  viewConnectingWireBottomSheet: {
-    height: 25,
-    borderStartWidth: 1.5,
-    width: 0,
-    marginStart: 10,
-    borderStartColor: '#646982',
-  },
-  IconStepsLoadDeliveryBottomSheet: {
-    backgroundColor: '#BFBCBA',
-    borderRadius: 15,
-    padding: 4,
-  },
-  textStepsDelivery: {
-    paddingStart: 15,
-    color: '#646982',
-    fontSize: 13,
-    fontWeight: '400',
-  },
-  viewStepsDeliveryBottomSheet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // paddingBottom: 25,
-  },
-  viewContainerStepsDeliveryBottomSheet: {
-    paddingHorizontal: 30,
-    marginTop: 30,
-  },
-  textWishBottomSheet: {
-    color: '#646982',
-    fontSize: 14,
-    fontWeight: '400',
-    lineHeight: 24,
-  },
-  textNumberDistanceBottomSheet: {
-    color: '#005987',
-    fontSize: 30,
-    fontWeight: '800',
-  },
-  viewTotalDistance: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  imageMerchantBottomSheet: {
-    height: 90,
-    width: 90,
-    borderRadius: 10,
-  },
-  textRatingBottomSheet: {
-    color: '#005987',
-    fontSize: 16,
-    fontWeight: '700',
-    paddingStart: 10,
-  },
-  viewContainerRating: {
-    flexDirection: 'row',
-    marginTop: 15,
-  },
-  textAddressMerchantBottomSheet: {
-    color: '#646982',
-    fontSize: 14,
-    fontWeight: '400',
-  },
-  textNameMerchantBottomSheet: {
-    color: '#005987',
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  viewContainerInformationMerchatBottomSheet: {
-    marginStart: 15,
-    flex: 1,
-  },
-  viewInformationMerchantBottomSheet: {
-    marginHorizontal: 30,
-    paddingTop: 20,
-    flexDirection: 'row',
-  },
-  contentContainerBottmSheet: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  contentTitleBottmSheet: {
-    fontSize: 24,
-  },
-  ViewContainerBottmSheet: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  textConfirmNo: {
-    color: '#32343E',
-    fontSize: 20,
-    fontWeight: '700',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    textAlign: 'center',
-  },
-  textConfirmYes: {
-    color: '#646982',
-    fontSize: 20,
-    fontWeight: '700',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    textAlign: 'center',
-  },
-  buttonConfirmNo: {
-    backgroundColor: '#19D6E5',
-  },
-  buttonConfirmYes: {
-    backgroundColor: '#F5FEFF',
-  },
-  buttonConfirm: {
-    borderRadius: 15,
-    width: '40%',
-  },
-  viewButtonConfirm: {
-    marginTop: 40,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-  TextConfirmOrder: {
-    color: '#646982',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '700',
-    lineHeight: 24 /* 150% */,
-  },
-  viewContainerConfirm: {
-    width: '80%',
-    backgroundColor: '#F0F5FA',
-    borderRadius: 10,
-    padding: 15,
-  },
-  textXClose: {
-    fontSize: 16,
-    color: '#000',
-  },
-  buttonCloseOrder: {
-    position: 'absolute',
-    right: -10,
-    top: -10,
-    width: 40,
-    height: 40,
-    backgroundColor: '#FC6E2A',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-  },
-  textReceiveOrder: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
-    paddingVertical: 20,
-  },
-  buttonReceiveOrder: {
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#005987',
-    backgroundColor: '#19D6E5',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    marginTop: 30,
-  },
-  textItemIncom: {
-    color: '#32343E',
-    fontSize: 13,
-    fontWeight: '400',
-  },
-  viewItemIncom: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 6,
-  },
-  viewContainerInformationIncom: {
-    marginTop: 13,
-  },
-  textInformation: {
-    color: '#32343E',
-    fontSize: 16,
-    fontStyle: 'normal',
-    fontWeight: '400',
-  },
-  viewContainerNameUser: {
-    flexDirection: 'row',
-  },
-  viewContainerInformation: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#F5FEFF',
-    paddingVertical: 14,
-  },
-  textOrderNew: {
-    color: '#005987',
-    textAlign: 'center',
-    fontSize: 25,
-    fontWeight: '800',
-    paddingBottom: 25,
-  },
-  viewContainerModalOrder: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  viewButtonOrder: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  centeredView: {
-    width: '85%',
-    backgroundColor: '#F6F8FA',
-    borderRadius: 35,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-  },
-});

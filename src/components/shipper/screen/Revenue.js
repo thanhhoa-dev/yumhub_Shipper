@@ -1,148 +1,334 @@
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
-import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import {Calendar} from 'react-native-calendars';
 import {revenueShipperTimeTwoTime} from '../ShipperHTTP';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {UserContext} from '../../user/UserContext';
-import {useNavigation} from '@react-navigation/native';
-
-const FirstRoute = () => {
-  const navigation = useNavigation();
-  const [revenue, setRevenur] = useState([]);
-  const [startDate, setStartDate] = useState(new Date());
-  const {user} = useContext(UserContext);
-  const [ID, setID] = useState(user.data.checkAccount._id);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const getOneRevenue = await revenueShipperTimeTwoTime(ID, startDate);
-        setRevenur(getOneRevenue);
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    };
-    fetchData();
-  }, []);
-  return (
-    <View style={{flex: 1, padding: 10}}>
-      <Text style={styles.textToday}>Hôm nay</Text>
-      <Text style={styles.textMoneyToday}>
-        {revenue.revenue ? revenue.revenue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."): '0'}{' '}đ
-      </Text>
-      <View style={styles.viewDetaiOrder}>
-        <Text>{revenue.success} đơn hàng hoàn tất</Text>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('SixDaysAgo');
-          }}
-          style={styles.buttonDetailOrder}>
-          <Text style={styles.textSeeDetail}>Xem chi tiết</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
-const SecondRoute = () => (
-  <View style={{flex: 1, backgroundColor: '#673ab7'}} />
-);
-
-const renderScene = SceneMap({
-  first: FirstRoute,
-  second: SecondRoute,
-});
+import Loading from './Loading';
+import { UserContext } from '../../user/UserContext';
 
 const Revenue = () => {
-  const layout = useWindowDimensions();
+  const [date, setDate] = useState(new Date());
+  const [startDateWeek, setStartDateWeek] = useState(null);
+  const [endDateWeek, setEndDateWeek] = useState(null);
+  const [startOfMonth, setStartOfMonth] = useState(null);
+  const [endOfMonth, setEndOfMonth] = useState(null);
+  const [index, setIndex] = useState(1);
+  const [markedDates, setMarkedDates] = useState({
+    [new Date().toISOString().split('T')[0]]: {
+      disabled: true,
+      startingDay: true,
+      color: 'orange',
+      endingDay: true,
+      textColor: 'white',
+    },
+  });
+  const [rangeSelected, setRangeSelected] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [revenue, setRevenue] = useState(null);
+  const {user} = useContext(UserContext)
+  const formattedDate = date.toLocaleDateString();
+  var formattedStartWeek,
+    formattedEndWeek,
+    formattedStartMonth,
+    formattedEndMonth;
+  const ID = user.checkAccount._id;
 
-  const [index, setIndex] = React.useState(0);
-  const [routes] = React.useState([
-    {key: 'first', title: 'Hàng ngày'},
-    {key: 'second', title: 'Hàng tuần'},
-  ]);
+  formattedStartWeek = new Date(startDateWeek).toLocaleDateString();
+  formattedEndWeek = new Date(endDateWeek).toLocaleDateString();
+  formattedStartMonth = new Date(startOfMonth).toLocaleDateString();
+  formattedEndMonth = new Date(endOfMonth).toLocaleDateString();
 
-  const renderTabBar = props => (
-    <TabBar
-      {...props}
-      indicatorStyle={{backgroundColor: '#2ca11d'}}
-      pressColor="pink"
-      labelStyle={{color: '#9fa6a1', fontWeight: '700'}}
-      style={{backgroundColor: 'white'}}
-      activeColor="#000"
-    />
-  );
+  const fechDataRevenueDate = async (IDUser, start, end) => {
+    try {
+      const result = await revenueShipperTimeTwoTime(IDUser, start, end);
+      console.log(result);
+      setRevenue(result);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    if (index === 1) {
+      fechDataRevenueDate(ID, date, date);
+    } else if (index === 2) {
+      if (startDateWeek && endDateWeek) {
+        fechDataRevenueDate(ID, startDateWeek, endDateWeek);
+      }
+    } else if (index === 3) {
+      fechDataRevenueDate(ID, startOfMonth, endOfMonth);
+    } else if (index === 4) {
+      if (startDate && endDate) {
+        console.log(startDate + endDate);
+        fechDataRevenueDate(ID, startDate, endDate);
+      }
+    }
+  }, [index, date, startDate, endDate]);
+
+  const handlePreviousDay = () => {
+    setIndex(1);
+    setDate(prevDate => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(newDate.getDate() - 1);
+      return newDate;
+    });
+  };
+
+  const handleNextDay = () => {
+    setIndex(1);
+    setDate(prevDate => {
+      const newDate = new Date(prevDate);
+      const today = new Date();
+      newDate.setDate(newDate.getDate() + 1);
+      return newDate > today ? today : newDate;
+    });
+  };
+
+  useEffect(() => {
+    const weekDays = getWeekDays(date);
+    const startOfWeek = weekDays[0];
+    const endOfWeek = weekDays[6];
+
+    setStartDateWeek(startOfWeek);
+    setEndDateWeek(endOfWeek);
+    setStartOfMonth(getStartOfMonth(date));
+    setEndOfMonth(getEndOfMonth(date));
+  }, [date]);
+
+  const getWeekDays = date => {
+    const startOfWeek = new Date(date);
+    const dayOfWeek = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startOfWeek);
+      day.setDate(startOfWeek.getDate() + i);
+      weekDays.push(day);
+    }
+    return weekDays;
+  };
+
+  const handlePreviousWeek = () => {
+    setIndex(2);
+    setDate(prevDate => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(newDate.getDate() - 7);
+      return newDate;
+    });
+  };
+
+  const handleNextWeek = () => {
+    setIndex(2);
+    setDate(prevDate => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(newDate.getDate() + 7);
+      const today = new Date();
+      return newDate > today ? today : newDate;
+    });
+  };
+
+  const handlePreviousMonth = () => {
+    setIndex(3);
+    setDate(prevDate => {
+      const newDate = new Date(prevDate);
+      newDate.setMonth(newDate.getMonth() - 1);
+      return newDate;
+    });
+  };
+
+  const handleNextMonth = () => {
+    setIndex(3);
+    setDate(prevDate => {
+      const newDate = new Date(prevDate);
+      const today = new Date();
+      newDate.setMonth(newDate.getMonth() + 1);
+      return newDate > today ? today : newDate;
+    });
+  };
+
+  const getStartOfMonth = date => {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  };
+
+  const getEndOfMonth = date => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  };
+
+  const onDayPress = day => {
+    setIndex(4);
+    if (!rangeSelected) {
+      setStartDate(day.dateString);
+      setMarkedDates({
+        [day.dateString]: {
+          startingDay: true,
+          color: 'orange',
+          textColor: 'white',
+        },
+      });
+      setRangeSelected(true);
+    } else {
+      const start = new Date(startDate);
+      const end = new Date(day.dateString);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 30) {
+        Alert.alert('Error', 'Date range should not exceed 30 days');
+        return;
+      }
+
+      const range = {};
+      let current = new Date(startDate);
+      while (current <= end) {
+        const dateString = current.toISOString().split('T')[0];
+        range[dateString] = {
+          color: 'orange',
+          textColor: 'white',
+        };
+        current.setDate(current.getDate() + 1);
+      }
+      range[startDate] = {
+        startingDay: true,
+        color: 'orange',
+        textColor: 'white',
+      };
+      range[day.dateString] = {
+        endingDay: true,
+        color: 'orange',
+        textColor: 'white',
+      };
+
+      setMarkedDates(range);
+      setEndDate(day.dateString);
+      setRangeSelected(false);
+    }
+  };
+
+  if (revenue === null) {
+    return <Loading />;
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.backgroundContainer}>
-        <View style={styles.viewContainerTitle}>
-          <Text style={styles.textRevenue}>Doanh thu</Text>
-          <Text style={styles.textTotalRevenue}>Tổng kết doanh thu</Text>
+    <View style={styles.viewContainer}>
+      <View style={styles.viewContainerHeader}>
+        <View style={styles.viewContainerIconLeft}>
+          <TouchableOpacity onPress={handlePreviousMonth}>
+            <FontAwesome6 name={'caret-left'} size={30} color={'#000'} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{marginHorizontal: 10}}
+            onPress={handlePreviousWeek}>
+            <FontAwesome6 name={'angles-left'} size={30} color={'#000'} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handlePreviousDay}>
+            <FontAwesome6 name={'chevron-left'} size={23} />
+          </TouchableOpacity>
         </View>
-        <View style={styles.viewContainerTabView}>
-          <TabView
-            navigationState={{index, routes}}
-            renderScene={renderScene}
-            onIndexChange={setIndex}
-            initialLayout={{width: layout.width}}
-            renderTabBar={renderTabBar}
-          />
+        <View style={styles.viewHeaderDate}>
+          {index === 1 ? (
+            <Text style={styles.textShowDate}>
+              {formattedDate} -- {formattedDate}
+            </Text>
+          ) : index === 2 ? (
+            <Text style={styles.textShowDate}>{`${
+              formattedStartWeek ? formattedStartWeek : ''
+            } -- ${formattedEndWeek ? formattedEndWeek : ''}`}</Text>
+          ) : index === 3 ? (
+            <Text style={styles.textShowDate}>{`${
+              formattedStartMonth ? formattedStartMonth : ''
+            } -- ${formattedEndMonth ? formattedEndMonth : ''}`}</Text>
+          ) : index === 4 ? (
+            <Text style={styles.textShowDate}>{`${
+              startDate ? startDate : ''
+            } -- ${endDate ? endDate : ''}`}</Text>
+          ) : null}
         </View>
-        <View style={styles.viewContainerBalance}>
-          <View style={styles.viewHeaderBalance}>
-            <Text style={styles.textBalance}>Số dư</Text>
-            <Text style={styles.textNumberBalance}>163.621 đ</Text>
-          </View>
-          <View style={styles.viewContainerChooseBalance}>
-            <View style={styles.viewContainerIconBank}>
-              <TouchableOpacity>
-                <MaterialCommunityIcons
-                  name={'arrow-down-bold-box'}
-                  size={25}
-                  color={'#2ca11d'}
-                />
-              </TouchableOpacity>
-              <Text style={styles.textIconBank} numberOfLines={2}>
-                Rút về ngân hàng
-              </Text>
-            </View>
-            <View style={styles.viewContainerIconBank}>
-              <TouchableOpacity>
-                <MaterialIcons
-                  name={'work-history'}
-                  size={25}
-                  color={'#2ca11d'}
-                />
-              </TouchableOpacity>
-              <Text style={styles.textIconBank}>Lịch sử giao dịch</Text>
-            </View>
-          </View>
-        </View>
-        <View style={styles.viewContainerRevenueAdd}>
-          <Text style={styles.textRevenueAdd}>Doanh thu bổ sung</Text>
-          <TouchableOpacity style={styles.viewItemEndowment}>
-            <Image
-              style={styles.imageEndowment}
-              source={require('../../../assets/endowment.png')}
-            />
-            <Text style={styles.textEndowment}>Ưu đãi</Text>
+        <View style={styles.viewContainerIconRight}>
+          <TouchableOpacity onPress={handleNextDay}>
+            <FontAwesome6 name={'chevron-right'} size={23} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{marginHorizontal: 10}}
+            onPress={handleNextWeek}>
+            <FontAwesome6 name={'angles-right'} size={30} color={'#000'} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleNextMonth}>
+            <FontAwesome6 name={'caret-right'} size={30} color={'#000'} />
           </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.viewfooter}>
-        <TouchableOpacity style={styles.buttonHistory}>
-          <Text style={styles.textHistoryOrder}>Lịch sử đơn hàng</Text>
+      <View style={styles.viewButtonDateOptions}>
+        <TouchableOpacity
+          onPress={() => {
+            [setShowCalendar(!showCalendar), setIndex(4)];
+          }}
+          style={styles.buttonDateOptions}>
+          <Text style={styles.textDateOptions}>Tùy chọn ngày</Text>
         </TouchableOpacity>
+      </View>
+      <View style={styles.viewContainerShowCalender}>
+        {showCalendar && (
+          <Calendar
+            markingType={'period'}
+            markedDates={markedDates}
+            onDayPress={onDayPress}
+          />
+        )}
+      </View>
+      <View style={styles.viewContainerTotalRevenue}>
+        <View style={styles.viewTotalRevenue}>
+          <FontAwesome6
+            name={'coins'}
+            size={30}
+            color={'#FFFFFF'}
+            style={styles.iconCoins}
+          />
+          {index === 1 ? (
+            <Text style={styles.textShowDateRevenue}>{formattedDate}</Text>
+          ) : index === 2 ? (
+            <Text style={styles.textShowDateRevenue}>{`${
+              formattedStartWeek ? formattedStartWeek : ''
+            } -- ${formattedEndWeek ? formattedEndWeek : ''}`}</Text>
+          ) : index === 3 ? (
+            <Text style={styles.textShowDateRevenue}>{`${
+              formattedStartMonth ? formattedStartMonth : ''
+            } -- ${formattedEndMonth ? formattedEndMonth : ''}`}</Text>
+          ) : index === 4 ? (
+            <Text style={styles.textShowDateRevenue}>{`${
+              startDate ? startDate : ''
+            } -- ${endDate ? endDate : ''}`}</Text>
+          ) : null}
+        </View>
+        <View style={styles.viewContainerStatisticalRevenue}>
+          <View style={styles.viewItemStatistical}>
+            <Text style={styles.textNameStatistical}>Số đơn:</Text>
+            <Text style={styles.textNumberStatistical}>{revenue.success}</Text>
+          </View>
+          <View style={styles.viewItemStatistical}>
+            <Text style={styles.textNameStatistical}>Tổng thu nhập:</Text>
+            <Text style={styles.textNumberStatistical}>
+              {revenue.revenue} đ
+            </Text>
+          </View>
+          <View style={styles.viewItemStatistical}>
+            <Text style={styles.textNameStatistical}>Nhận tiền mặt:</Text>
+            <Text style={styles.textNumberStatistical}>
+              {revenue.payByCash} đ
+            </Text>
+          </View>
+          <View style={styles.viewItemStatistical}>
+            <Text style={styles.textNameStatistical}>Nhận vào app:</Text>
+            <Text style={styles.textNumberStatistical}>
+              {parseFloat(revenue.payByBanking) + parseFloat(revenue.payByZalo)}{' '}
+              đ
+            </Text>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -151,128 +337,99 @@ const Revenue = () => {
 export default Revenue;
 
 const styles = StyleSheet.create({
-  textHistoryOrder: {
-    color: '#2ca11d',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  buttonHistory: {
+  viewContainerShowCalender: {
     marginHorizontal: 20,
-    marginTop: 20,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 25,
-    borderColor: '#2ca11d',
-  },
-  viewfooter: {
-    borderTopWidth: 8,
-    borderTopColor: '#e6ebe6',
-  },
-  textEndowment: {
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  imageEndowment: {
-    width: 40,
-    height: 40,
-    marginBottom: 15,
-  },
-  viewItemEndowment: {
-    borderRadius: 10,
-    elevation: 4,
-    width: 130,
-    height: 130,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    marginTop: 15,
-  },
-  textRevenueAdd: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-  },
-  viewContainerRevenueAdd: {
-    marginTop: 30,
-    marginBottom: 20,
-  },
-  textIconBank: {
     marginTop: 10,
-  },
-  viewContainerIconBank: {
-    alignItems: 'center',
-    marginHorizontal: 20,
-  },
-  viewContainerChooseBalance: {
-    flexDirection: 'row',
-    marginVertical: 24,
-    justifyContent: 'center',
-  },
-  viewHeaderBalance: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    paddingBottom: 10,
-  },
-  viewContainerBalance: {
-    borderWidth: 1,
-    borderRadius: 15,
-    marginTop: 20,
-    padding: 15,
-  },
-  textSeeDetail: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  buttonDetailOrder: {
-    backgroundColor: '#2ca11d',
-    borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  viewDetaiOrder: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  textMoneyToday: {
-    marginTop: 10,
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  textToday: {
-    marginTop: 10,
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  viewContainerTabView: {
-    borderWidth: 1,
-    height: 190,
-    borderRadius: 15,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     overflow: 'hidden',
-    marginTop: 15,
-    backgroundColor: '#f2f7f4',
   },
-  textTotalRevenue: {
+  textDateOptions: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  buttonDateOptions: {
+    backgroundColor: '#19D6E5',
+    paddingHorizontal: 6,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  viewButtonDateOptions: {
     marginTop: 15,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  textNumberStatistical: {
+    color: '#232323',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  textNameStatistical: {
+    color: '#6C6C6C',
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  viewItemStatistical: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  viewContainerStatisticalRevenue: {
+    marginTop: 20,
+  },
+  textShowDateRevenue: {
+    color: '#232323',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
+    marginStart: 10,
   },
-  textRevenue: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  iconCoins: {
+    backgroundColor: '#005987',
+    padding: 10,
+    borderRadius: 50,
   },
-  viewContainerTitle: {
+  viewTotalRevenue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewContainerTotalRevenue: {
+    borderWidth: 1,
+    borderColor: '#D9D9D9',
     marginTop: 15,
-  },
-  backgroundContainer: {
+    borderRadius: 10,
+    padding: 20,
     backgroundColor: '#FFF',
-    paddingHorizontal: 20,
   },
-  container: {
+  textShowDate: {
+    color: '#000',
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  viewHeaderDate: {
+    backgroundColor: '#F8F8F8',
+    padding: 6,
+    borderRadius: 8,
+  },
+  viewContainerIconRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  viewContainerIconLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  viewContainerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  viewContainer: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#F5FEFF',
+    paddingHorizontal: 20,
+    paddingTop: 19,
   },
 });

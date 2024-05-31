@@ -24,14 +24,14 @@ export const getShipperReview = async () =>{
     }
 }
 //6604e1ec5a6c5ad8711aebf9
-export const revenueShipperTimeTwoTime = async (ID, startDate) =>{
+export const revenueShipperTimeTwoTime = async (ID, startDate, endDate) =>{
     try {
         const axiosInstance = AxiosInstance();
         const url = 'shippers/RevenueTTT';
         const body = {
             ID: ID, 
             startDate: startDate,
-            endDate: startDate
+            endDate: endDate
         }
         return await axiosInstance.post(url, body);
     } catch (error) {
@@ -131,13 +131,26 @@ export const uploadImage = async (form) =>{
     }
 }
 
-// export const UpdateOrder = async (id) =>{
-//     try {
-//         const axiosInstance = AxiosInstance();
-//         const url ='files/upload';
-//         return await axiosInstance.post(url,form)
-//     } catch (error) {
-//         console.log(error);
-//         throw error;
-//     }
-// }
+export const UpdateOrder = async (id, data) =>{
+    try {
+        const axiosInstance = AxiosInstance();
+        const url ='orders/updateOrder';
+        const params = {id: id}
+        return await axiosInstance.post(url,data,{params})
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+export const CreateReivew = async (data) =>{
+    try {
+        const axiosInstance = AxiosInstance();
+        const url ='reviews/createReview';
+        return await axiosInstance.post(url, data)
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+

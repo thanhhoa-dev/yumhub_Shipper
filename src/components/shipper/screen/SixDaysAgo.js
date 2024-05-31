@@ -23,15 +23,19 @@ const SixDaysAgo = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [revenue, setRevenur] = useState([]);
-  const [startDate, setStartDate] = useState(new Date())
+  const [startDate, setStartDate] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState(new Date());
   const {user} = useContext(UserContext);
-  const [ID, setID] = useState(user.data.checkAccount._id);
+  // const [ID, setID] = useState(user.data.checkAccount._id);
+  const ID = '6604e1ec5a6c5ad8711aebfa';
+  const layout = useWindowDimensions();
 
 
   useEffect(()=>{
     const fetchData = async () =>{
+      console.log(selectedDay);
       try {
-        const getOneRevenue = await revenueShipperTimeTwoTime(ID, startDate);
+        const getOneRevenue = await revenueShipperTimeTwoTime(ID, selectedDay);
         setRevenur(getOneRevenue);
       } catch (error) {
         console.log(error);
@@ -39,20 +43,22 @@ const SixDaysAgo = () => {
       }
     }
     fetchData();
-  },[])
+  },[selectedDay])
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || new Date();
     setShowDatePicker(false);
     setSelectedDate(currentDate);
+    setSelectedDay(currentDate);
   };
 
   const renderDay = date => {
     const isToday = isSameDay(date, new Date());
-    const dayStyle = isToday ? [styles.dayText, styles.today] : styles.dayText;
+    const isSelected = isSameDay(date, selectedDay);
+    const dayStyle = isSelected ? [styles.dayText, styles.today] : styles.dayText;
 
     return (
-      <TouchableOpacity>
+      <TouchableOpacity onPress={()=>{setSelectedDay(date)}}>
         <View style={styles.dayContainer}>
           <Text style={dayStyle}>{date.getDate()}</Text>
           <Text>{isToday ? 'Hôm nay' : getDayOfWeek(date)}</Text>
@@ -166,7 +172,6 @@ const SixDaysAgo = () => {
     second: SecondRoute,
     third: ThirdRoute,
   });
-  const layout = useWindowDimensions();
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
