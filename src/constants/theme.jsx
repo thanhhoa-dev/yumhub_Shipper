@@ -9,7 +9,11 @@ export const Color = {
     point2:"#E04444",
     point1:"#FC6E2A",
     background1:"#F5FEFF",
-    bgItem:"#F6F8FA"
+    bgItem:"#F6F8FA", 
+    textBlack:"#000000",
+    neutral300:"#6C6C6C",
+    neutral500:"#232323",
+    borderD9D9:"#D9D9D9",
 }
 
 export const Size = {

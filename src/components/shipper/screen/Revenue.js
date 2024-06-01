@@ -4,7 +4,8 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {Calendar} from 'react-native-calendars';
 import {revenueShipperTimeTwoTime} from '../ShipperHTTP';
 import Loading from './Loading';
-import { UserContext } from '../../user/UserContext';
+import {UserContext} from '../../user/UserContext';
+import { styles } from '../styles/RevenueStyle';
 
 const Revenue = () => {
   const [date, setDate] = useState(new Date());
@@ -27,7 +28,7 @@ const Revenue = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [revenue, setRevenue] = useState(null);
-  const {user} = useContext(UserContext)
+  const {user} = useContext(UserContext);
   const formattedDate = date.toLocaleDateString();
   var formattedStartWeek,
     formattedEndWeek,
@@ -43,7 +44,6 @@ const Revenue = () => {
   const fechDataRevenueDate = async (IDUser, start, end) => {
     try {
       const result = await revenueShipperTimeTwoTime(IDUser, start, end);
-      console.log(result);
       setRevenue(result);
     } catch (error) {
       console.error(error);
@@ -62,7 +62,6 @@ const Revenue = () => {
       fechDataRevenueDate(ID, startOfMonth, endOfMonth);
     } else if (index === 4) {
       if (startDate && endDate) {
-        console.log(startDate + endDate);
         fechDataRevenueDate(ID, startDate, endDate);
       }
     }
@@ -335,101 +334,3 @@ const Revenue = () => {
 };
 
 export default Revenue;
-
-const styles = StyleSheet.create({
-  viewContainerShowCalender: {
-    marginHorizontal: 20,
-    marginTop: 10,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    overflow: 'hidden',
-  },
-  textDateOptions: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '400',
-  },
-  buttonDateOptions: {
-    backgroundColor: '#19D6E5',
-    paddingHorizontal: 6,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  viewButtonDateOptions: {
-    marginTop: 15,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  textNumberStatistical: {
-    color: '#232323',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  textNameStatistical: {
-    color: '#6C6C6C',
-    fontSize: 12,
-    fontWeight: '400',
-  },
-  viewItemStatistical: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  viewContainerStatisticalRevenue: {
-    marginTop: 20,
-  },
-  textShowDateRevenue: {
-    color: '#232323',
-    fontSize: 16,
-    fontWeight: '600',
-    marginStart: 10,
-  },
-  iconCoins: {
-    backgroundColor: '#005987',
-    padding: 10,
-    borderRadius: 50,
-  },
-  viewTotalRevenue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  viewContainerTotalRevenue: {
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    marginTop: 15,
-    borderRadius: 10,
-    padding: 20,
-    backgroundColor: '#FFF',
-  },
-  textShowDate: {
-    color: '#000',
-    fontSize: 12,
-    fontWeight: '400',
-  },
-  viewHeaderDate: {
-    backgroundColor: '#F8F8F8',
-    padding: 6,
-    borderRadius: 8,
-  },
-  viewContainerIconRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewContainerIconLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewContainerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  viewContainer: {
-    flex: 1,
-    backgroundColor: '#F5FEFF',
-    paddingHorizontal: 20,
-    paddingTop: 19,
-  },
-});

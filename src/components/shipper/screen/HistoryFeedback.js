@@ -12,17 +12,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import StarRating from 'react-native-star-rating-widget';
-import {getShipperReview} from '../ShipperHTTP';
+import {getShipperReview, uploadImage} from '../ShipperHTTP';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {SetDeleteReview, UpdateShipperReview} from '../ShipperHTTP';
 import Loading from './Loading';
-import { styles } from '../styles/HistoryFeedbackStyle';
+import {styles} from '../styles/HistoryFeedbackStyle';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const HistoryFeedback = () => {
   const [reviews, setReviews] = useState([]);
@@ -31,6 +32,7 @@ const HistoryFeedback = () => {
   const [ratingModal, setRatingModal] = useState(null);
   const [descriptionModal, setDescriptionModal] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [image, setImage] = useState([]);
 
   const fetchData = async () => {
     try {
@@ -49,10 +51,6 @@ const HistoryFeedback = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  if (loading) {
-    return <Loading />;
-  }
 
   const handlDeleteReview = async id => {
     try {
@@ -78,6 +76,7 @@ const HistoryFeedback = () => {
             setSelectedItem(item);
             setRatingModal(item.review.rating);
             setDescriptionModal(item.review.description);
+            setImage(item.image);
             setModalVisible(true);
           }}>
           <View style={styles.viewItemHeader}>
@@ -115,6 +114,7 @@ const HistoryFeedback = () => {
     const data = {
       description: descriptionModal,
       rating: ratingModal,
+      images: image,
     };
     try {
       const updatedReview = await UpdateShipperReview(id, data);
@@ -126,6 +126,48 @@ const HistoryFeedback = () => {
       console.log(error);
     }
   };
+
+  /// xử lý hình ảnh
+  const takePhoto = useCallback(async response => {
+    if (response.didCancel) return;
+    if (response.errorCode) {
+      console.error('ImagePicker Error: ', response.errorCode);
+      return;
+    }
+    if (response.errorMessage) {
+      console.error('ImagePicker Error: ', response.errorMessage);
+      return;
+    }
+    if (response.assets && response.assets.length > 0) {
+      const asset = response.assets[0];
+      const formData = new FormData();
+      formData.append('file', {
+        uri: asset.uri,
+        type: asset.type,
+        name: asset.fileName,
+      });
+      try {
+        const result = await uploadImage(formData);
+        setImage([result.url]);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
+  }, []);
+
+  //hiển thị thư viện
+  const openLibrary = useCallback(async () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+      saveToPhotos: true,
+    };
+    await launchImageLibrary(options, takePhoto);
+  }, []);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.viewContainerBackgroundColor}>
@@ -196,7 +238,9 @@ const HistoryFeedback = () => {
             </View>
             <View style={styles.viewContainerImage}>
               <View style={styles.viewIcon}>
-                <TouchableOpacity style={styles.buttonIcon}>
+                <TouchableOpacity
+                  onPress={openLibrary}
+                  style={styles.buttonIcon}>
                   <FontAwesome6 name={'images'} size={30} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonIcon}>
@@ -204,10 +248,12 @@ const HistoryFeedback = () => {
                 </TouchableOpacity>
               </View>
               <View style={styles.viewImage}>
-                <Image
-                  style={{width: '100%', height: '100%', resizeMode: 'cover'}}
-                  source={require('../../../assets/ZaloPlay.png')}
-                />
+                {image.length > 0 ? (
+                  <Image
+                    style={{width: '100%', height: '100%', resizeMode: 'cover'}}
+                    source={{uri: `${image[0]}`}}
+                  />
+                ) : null}
               </View>
             </View>
             <View style={styles.viewContenDetailHistory}>

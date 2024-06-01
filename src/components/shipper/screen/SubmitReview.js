@@ -4,12 +4,13 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import StarRating from 'react-native-star-rating-widget';
-import {CreateReivew, uploadImage} from '../ShipperHTTP';
+import {CreateReivew, GetOrderByID, uploadImage} from '../ShipperHTTP';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {styles} from '../styles/SubmitReviewStyle';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,6 +18,7 @@ import {useSafeAreaFrame} from 'react-native-safe-area-context';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {UserContext} from '../../user/UserContext';
 
 const SubmitReview = () => {
   const navigation = useNavigation();
@@ -24,11 +26,28 @@ const SubmitReview = () => {
   const [ratingMerchant, setRatingMerchant] = useState(0);
   const [descriptionCustomer, setDescriptionCustomer] = useState('');
   const [descriptionMerchant, setDescriptionMerchant] = useState('');
-  const [image, setImage] = useState(null);
+  const [order, setOrder] = useState(null);
+  const [image, setImage] = useState([]);
+  const {user} = useContext(UserContext);
 
   const route = useRoute();
   const {id} = route.params;
-  const idUser = '6604e1ec5a6c5ad8711aebfa';
+  const idUser = user.checkAccount._id;
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const result = await GetOrderByID(id);
+        setOrder(result);
+      } catch (error) {
+        console.log('Error fetching order:', error);
+        throw error;
+      }
+    };
+    if (id) {
+      fetchOrder();
+    }
+  }, [id]);
 
   const handleCreateReview = async () => {
     const customerReviewData = {
@@ -37,6 +56,7 @@ const SubmitReview = () => {
       description: descriptionCustomer,
       rating: ratingCustomer,
       typeOfReview: 3,
+      images: image,
     };
 
     const merchantReviewData = {
@@ -51,7 +71,8 @@ const SubmitReview = () => {
       await CreateReivew(customerReviewData);
       const result = await CreateReivew(merchantReviewData);
       if (result.result) {
-        navigation.navigate('Goong');
+        navigation.navigate('Trang chủ');
+        ToastAndroid.show('Gửi đánh giá thành công', ToastAndroid.SHORT);
       }
     } catch (error) {
       console.log('Error creating review:', error);
@@ -79,7 +100,7 @@ const SubmitReview = () => {
       });
       try {
         const result = await uploadImage(formData);
-        setImage(result.url);
+        setImage([result.url]);
       } catch (error) {
         console.error('Error uploading image:', error);
       }
@@ -111,10 +132,12 @@ const SubmitReview = () => {
         <View>
           <View style={{flex: 1}}>
             <View style={styles.viewContainerReviewCustomer}>
-              <Image
-                style={styles.imageAvatar}
-                source={require('../../../assets/ZaloPlay.png')}
-              />
+              {order && (
+                <Image
+                  style={styles.imageAvatar}
+                  source={{uri: `${order.order.customerID.avatar}`}}
+                />
+              )}
               <Text style={styles.textReviewCustomer}>Đánh giá khách hàng</Text>
               <Text style={styles.textNumberStarRating}>
                 Bạn đánh giá khách hàng này như thế nào?
@@ -129,14 +152,16 @@ const SubmitReview = () => {
                   onChangeText={text => setDescriptionCustomer(text)}
                 />
               </View>
-              {image !== null && (
+              {image.length > 0 && (
                 <View style={styles.viewContainerImage}>
                   <View style={styles.viewIcon}>
-                    <TouchableOpacity onPress={openLibrary} style={styles.buttonIcon}>
+                    <TouchableOpacity
+                      onPress={openLibrary}
+                      style={styles.buttonIcon}>
                       <FontAwesome6 name={'images'} size={30} />
                     </TouchableOpacity>
                     <TouchableOpacity
-                      onPress={() => setImage(null)}
+                      onPress={() => setImage([])}
                       style={styles.buttonIcon}>
                       <MaterialIcons name={'delete'} size={30} />
                     </TouchableOpacity>
@@ -148,12 +173,12 @@ const SubmitReview = () => {
                         height: '100%',
                         resizeMode: 'cover',
                       }}
-                      source={{uri: image}}
+                      source={{uri: `${image[0]}`}}
                     />
                   </View>
                 </View>
               )}
-              {image === null && (
+              {image.length <= 0 && (
                 <TouchableOpacity onPress={openCamera}>
                   <MaterialCommunityIcons
                     name={'camera-plus-outline'}
@@ -171,10 +196,12 @@ const SubmitReview = () => {
               />
             </View>
             <View style={styles.viewContainerReviewCustomer}>
-              <Image
-                style={styles.imageAvatar}
-                source={require('../../../assets/ZaloPlay.png')}
-              />
+              {order && (
+                <Image
+                  style={styles.imageAvatar}
+                  source={{uri: `${order.order.merchantID.imageBackground}`}}
+                />
+              )}
               <Text style={styles.textReviewCustomer}>Đánh giá nhà hàng</Text>
               <Text style={styles.textNumberStarRating}>
                 Bạn đánh giá nhà hàng này như thế nào?

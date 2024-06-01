@@ -61,7 +61,6 @@ const Goong = () => {
   const [distanceCustomer, setDistanceCustomer] = useState(null);
   const [durationCustomer, setDurationCustomer] = useState(null);
   const [query, setQuery] = useState('');
-  const [places, setPlaces] = useState([]);
   const [destinationCustomer, setDestinationCustomer] = useState(null);
   const [detailFoodOrder, setDetailFoodOrder] = useState(null);
   const [image, setImage] = useState('');
@@ -96,7 +95,7 @@ const Goong = () => {
         throw error;
       }
     };
-    if (!order && statusShipper && index ===4) {
+    if (!order && statusShipper && index === 4) {
       fetchOrder();
     }
   }, [countdown, id, idUser, order, statusShipper]);
@@ -237,11 +236,10 @@ const Goong = () => {
 
   const updateOrderStatus = async (id, status) => {
     const data = {
-      status: status
-    }
+      status: status,
+    };
     try {
       await UpdateOrder(id, data);
-      console.log('Cập nhập trạng thái thành công');
     } catch (error) {
       console.error('Error updating order status:', error);
     }
@@ -391,14 +389,10 @@ const Goong = () => {
       await updateOrderStatus(id, 6);
       setOrder(null);
       translateX.setValue(0);
-       navigation.navigate('CancelSuccessOrder');
+      navigation.navigate('CancelSuccessOrder');
       setTimeout(() => {
-        navigation.navigate('Goong');
+        navigation.goBack();
       }, 5000);
-      // navigation.navigate('SuccessOrder');
-      // setTimeout(() => {
-      //   navigation.navigate('SubmitReview', {id: id});
-      // }, 5000);
     } catch (error) {
       console.log(error);
       throw error;
@@ -471,7 +465,6 @@ const Goong = () => {
       try {
         const result = await uploadImage(formData);
         const imageGiveFood = result.url;
-        console.log(result.url);
         handleConfirmCancel(imageGiveFood);
       } catch (error) {
         console.error('Error uploading image:', error);
@@ -570,7 +563,7 @@ const Goong = () => {
           </TouchableOpacity>
         </View>
         <MapView
-          style={{flex: 1, zIndex:-1}}
+          style={{flex: 1, zIndex: -1}}
           provider={PROVIDER_GOOGLE}
           initialRegion={
             locateCurrent
@@ -731,7 +724,9 @@ const Goong = () => {
                   )}
                   {detailFoodOrder && index == 1 && (
                     <View style={styles.viewListItemInformationFoodBottomSheet}>
-                      <Text style={styles.textCodeOrdersBottomSheet}>#{order.order._id}</Text>
+                      <Text style={styles.textCodeOrdersBottomSheet}>
+                        #{order.order._id}
+                      </Text>
                       <Text style={styles.textListFoodBottomSheet}>
                         Danh Sách Món
                       </Text>
