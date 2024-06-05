@@ -34,7 +34,7 @@ const NewPassword = () => {
     return (
         <View style={styles.viewContainer}>
             <View>
-                <Image style={styles.viewImage} source={require("../../user/image/arrow.png")}></Image>
+                <Image style={styles.viewImage} source={require("../../../assets/arrow.png")}></Image>
             </View>
             <View style={styles.viewText}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Đổi mật khẩu</Text>

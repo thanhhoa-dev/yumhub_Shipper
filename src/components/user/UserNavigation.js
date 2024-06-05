@@ -6,6 +6,10 @@ import Login from './screens/Login';
 import Signup from './screens/Signup';
 import SuccessOrder from '../shipper/screen/SuccessOrder';
 import CancelSuccessOrder from '../shipper/screen/CancelSuccessOrder';
+import ForgotPassword from './screens/ForgotPassword';
+import NewPassword from './screens/ChangePassword';
+import CheckOTP from './screens/CheckOTP';
+import ResetPassword from './screens/ResetPassword';
 
 
 const UserNavigation = () => {
@@ -30,6 +34,21 @@ const UserNavigation = () => {
         options={{headerShown: false}}
         name="CancelSuccessOrder"
         component={CancelSuccessOrder}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="ForgotPassword"
+        component={ForgotPassword}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="Checkotp"
+        component={CheckOTP}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="ResetPassword"
+        component={ResetPassword}
       />
     </Stack.Navigator>
   );

@@ -11,7 +11,7 @@ const ResetPassword = () => {
                 const result = await resetpass(id, password);
                 if (result.status) {
                     ToastAndroid.show('doi mat khau thanh cong', ToastAndroid.SHORT);
-                    // navigation.navigate('Login');
+                    navigation.navigate('Login');
                 }
             } else {
                 ToastAndroid.show('mat khau ko trung', ToastAndroid.SHORT);
@@ -26,7 +26,7 @@ const ResetPassword = () => {
     return (
         <View style={styles.viewContainer}>
             <View>
-                <Image style={styles.viewImage} source={require("../../user/image/arrow.png")}></Image>
+                <Image style={styles.viewImage} source={require("../../../assets/arrow.png")}></Image>
             </View>
             <View style={styles.viewText}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Nhập mật khẩu mới</Text>
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#BBBBBB',
         borderRadius: 10,
         height: 50,
-        flexDirection: 'row',
+        flexDirection: 'row', 
         marginStart: 20,
         alignItems: 'center',
         justifyContent: 'center',
