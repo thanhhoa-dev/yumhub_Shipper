@@ -10,11 +10,23 @@ import ForgotPassword from './screens/ForgotPassword';
 import NewPassword from './screens/ChangePassword';
 import CheckOTP from './screens/CheckOTP';
 import ResetPassword from './screens/ResetPassword';
+import Menu from '../shipper/screen/Menu';
+import Profile from '../shipper/screen/Profile';
 
 
 const UserNavigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Login">
+    <Stack.Navigator initialRouteName="Menu">
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="Menu"
+        component={Menu}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="Profile"
+        component={Profile}
+      />
       <Stack.Screen
         options={{headerShown: false}}
         name="Login"

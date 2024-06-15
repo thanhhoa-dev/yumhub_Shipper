@@ -153,3 +153,14 @@ export const CreateReivew = async data => {
     throw error;
   }
 };
+
+export const getAll = async data => {
+  try {
+    const axiosInstance = AxiosInstance();
+    const url = 'shippers/getAllShipper';
+    return await axiosInstance.get(url);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

@@ -17,17 +17,7 @@ const Login = ({navigation}) => {
   const [password, setPassword] = useState('');
   const { setUser } = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
-  // Sto;
 
-  // const handleLogin = async () => {
-  //   try {
-  //     const result = await login(phoneNumber, password);
-  //     await AsyncStorage.setItem('token', result.data.token);
-  //     setUser(result.data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
 
   const handleLogin = async () => {
     try {
