@@ -12,6 +12,10 @@ import SubmitReview from './screen/SubmitReview';
 import SuccessOrder from './screen/SuccessOrder';
 import CancelSuccessOrder from './screen/CancelSuccessOrder';
 import Feedback from './screen/Feedback';
+import Notification from './screen/Notification';
+import HistoryFeedback from './screen/HistoryFeedback';
+import Menu from './screen/Menu';
+import Profile from './screen/Profile';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -88,12 +92,12 @@ const ShipperTabNavigation = () => {
       <Tab.Screen
         options={{headerShown: false}}
         name="Thông báo"
-        component={Feedback}
+        component={Notification}
       />
       <Tab.Screen
         options={{headerShown: false}}
         name="Tài khoản"
-        component={Account}
+        component={Menu}
       />
     </Tab.Navigator>
   );
@@ -126,6 +130,21 @@ const ShipperStackNavigation = () => {
         options={{headerShown: false}}
         name="CancelSuccessOrder"
         component={CancelSuccessOrder}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="Feedback"
+        component={Feedback}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="HistoryFeedback"
+        component={HistoryFeedback}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="Profile"
+        component={Profile}
       />
     </Stack.Navigator>
   );

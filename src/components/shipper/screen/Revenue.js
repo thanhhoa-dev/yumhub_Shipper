@@ -2,10 +2,9 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useContext, useEffect, useState} from 'react';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import {Calendar} from 'react-native-calendars';
-import {revenueShipperTimeTwoTime} from '../ShipperHTTP';
-import Loading from './Loading';
 import {UserContext} from '../../user/UserContext';
 import { styles } from '../styles/RevenueStyle';
+import DetailRevenue from './DetailRevenue';
 
 const Revenue = () => {
   const [date, setDate] = useState(new Date());
@@ -27,45 +26,15 @@ const Revenue = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [revenue, setRevenue] = useState(null);
   const {user} = useContext(UserContext);
   const formattedDate = date.toLocaleDateString();
-  var formattedStartWeek,
-    formattedEndWeek,
-    formattedStartMonth,
-    formattedEndMonth;
   const ID = user.checkAccount._id;
 
-  formattedStartWeek = new Date(startDateWeek).toLocaleDateString();
-  formattedEndWeek = new Date(endDateWeek).toLocaleDateString();
-  formattedStartMonth = new Date(startOfMonth).toLocaleDateString();
-  formattedEndMonth = new Date(endOfMonth).toLocaleDateString();
 
-  const fechDataRevenueDate = async (IDUser, start, end) => {
-    try {
-      const result = await revenueShipperTimeTwoTime(IDUser, start, end);
-      setRevenue(result);
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+  const formatedAlllDate = dateFormat => {
+    const formatedAll = new Date(dateFormat).toLocaleDateString();
+    return formatedAll;
   };
-
-  useEffect(() => {
-    if (index === 1) {
-      fechDataRevenueDate(ID, date, date);
-    } else if (index === 2) {
-      if (startDateWeek && endDateWeek) {
-        fechDataRevenueDate(ID, startDateWeek, endDateWeek);
-      }
-    } else if (index === 3) {
-      fechDataRevenueDate(ID, startOfMonth, endOfMonth);
-    } else if (index === 4) {
-      if (startDate && endDate) {
-        fechDataRevenueDate(ID, startDate, endDate);
-      }
-    }
-  }, [index, date, startDate, endDate]);
 
   const handlePreviousDay = () => {
     setIndex(1);
@@ -208,9 +177,13 @@ const Revenue = () => {
     }
   };
 
-  if (revenue === null) {
-    return <Loading />;
-  }
+  const formatDate = dateString => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
   return (
     <View style={styles.viewContainer}>
@@ -235,16 +208,24 @@ const Revenue = () => {
             </Text>
           ) : index === 2 ? (
             <Text style={styles.textShowDate}>{`${
-              formattedStartWeek ? formattedStartWeek : ''
-            } -- ${formattedEndWeek ? formattedEndWeek : ''}`}</Text>
+              formatedAlllDate(startDateWeek)
+                ? formatedAlllDate(startDateWeek)
+                : ''
+            } -- ${
+              formatedAlllDate(endDateWeek) ? formatedAlllDate(endDateWeek) : ''
+            }`}</Text>
           ) : index === 3 ? (
             <Text style={styles.textShowDate}>{`${
-              formattedStartMonth ? formattedStartMonth : ''
-            } -- ${formattedEndMonth ? formattedEndMonth : ''}`}</Text>
+              formatedAlllDate(startOfMonth)
+                ? formatedAlllDate(startOfMonth)
+                : ''
+            } -- ${
+              formatedAlllDate(endOfMonth) ? formatedAlllDate(endOfMonth) : ''
+            }`}</Text>
           ) : index === 4 ? (
             <Text style={styles.textShowDate}>{`${
-              startDate ? startDate : ''
-            } -- ${endDate ? endDate : ''}`}</Text>
+              startDate ? formatDate(startDate) : ''
+            } -- ${endDate ? formatDate(endDate) : ''}`}</Text>
           ) : null}
         </View>
         <View style={styles.viewContainerIconRight}>
@@ -288,46 +269,44 @@ const Revenue = () => {
             style={styles.iconCoins}
           />
           {index === 1 ? (
-            <Text style={styles.textShowDateRevenue}>{formattedDate}</Text>
-          ) : index === 2 ? (
-            <Text style={styles.textShowDateRevenue}>{`${
-              formattedStartWeek ? formattedStartWeek : ''
-            } -- ${formattedEndWeek ? formattedEndWeek : ''}`}</Text>
-          ) : index === 3 ? (
-            <Text style={styles.textShowDateRevenue}>{`${
-              formattedStartMonth ? formattedStartMonth : ''
-            } -- ${formattedEndMonth ? formattedEndMonth : ''}`}</Text>
-          ) : index === 4 ? (
-            <Text style={styles.textShowDateRevenue}>{`${
-              startDate ? startDate : ''
-            } -- ${endDate ? endDate : ''}`}</Text>
-          ) : null}
+                <Text style={styles.textShowDateRevenue}>{formattedDate}</Text>
+              ) : index === 2 ? (
+                <Text style={styles.textShowDateRevenue}>{`${
+                  formatedAlllDate(startDateWeek)
+                    ? formatedAlllDate(startDateWeek)
+                    : ''
+                } -- ${
+                  formatedAlllDate(endDateWeek)
+                    ? formatedAlllDate(endDateWeek)
+                    : ''
+                }`}</Text>
+              ) : index === 3 ? (
+                <Text style={styles.textShowDateRevenue}>{`${
+                  formatedAlllDate(startOfMonth)
+                    ? formatedAlllDate(startOfMonth)
+                    : ''
+                } -- ${
+                  formatedAlllDate(endOfMonth)
+                    ? formatedAlllDate(endOfMonth)
+                    : ''
+                }`}</Text>
+              ) : index === 4 ? (
+                <Text style={styles.textShowDateRevenue}>{`${
+                  startDate ? formatDate(startDate) : ''
+                } -- ${endDate ? formatDate(endDate) : ''}`}</Text>
+              ) : null}
         </View>
-        <View style={styles.viewContainerStatisticalRevenue}>
-          <View style={styles.viewItemStatistical}>
-            <Text style={styles.textNameStatistical}>Số đơn:</Text>
-            <Text style={styles.textNumberStatistical}>{revenue.success}</Text>
-          </View>
-          <View style={styles.viewItemStatistical}>
-            <Text style={styles.textNameStatistical}>Tổng thu nhập:</Text>
-            <Text style={styles.textNumberStatistical}>
-              {revenue.revenue} đ
-            </Text>
-          </View>
-          <View style={styles.viewItemStatistical}>
-            <Text style={styles.textNameStatistical}>Nhận tiền mặt:</Text>
-            <Text style={styles.textNumberStatistical}>
-              {revenue.payByCash} đ
-            </Text>
-          </View>
-          <View style={styles.viewItemStatistical}>
-            <Text style={styles.textNameStatistical}>Nhận vào app:</Text>
-            <Text style={styles.textNumberStatistical}>
-              {parseFloat(revenue.payByBanking) + parseFloat(revenue.payByZalo)}{' '}
-              đ
-            </Text>
-          </View>
-        </View>
+        <DetailRevenue
+              ID={ID}
+              startDateWeek={startDateWeek}
+              endDateWeek={endDateWeek}
+              startOfMonth={startOfMonth}
+              endOfMonth={endOfMonth}
+              startDate={startDate}
+              endDate={endDate}
+              index={index}
+              date={date}
+            />
       </View>
     </View>
   );

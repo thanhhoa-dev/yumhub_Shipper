@@ -16,17 +16,7 @@ import Profile from '../shipper/screen/Profile';
 
 const UserNavigation = () => {
   return (
-    <Stack.Navigator initialRouteName="Menu">
-       <Stack.Screen
-        options={{headerShown: false}}
-        name="Menu"
-        component={Menu}
-      />
-      <Stack.Screen
-        options={{headerShown: false}}
-        name="Profile"
-        component={Profile}
-      />
+    <Stack.Navigator initialRouteName="Login">
       <Stack.Screen
         options={{headerShown: false}}
         name="Login"
