@@ -2,12 +2,12 @@ import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image } from 'rea
 import React from 'react'
 
 
-const Menu = ({navigation}) => {
+const Menu = ({ navigation }) => {
     return (
-        <View>
+        <ScrollView>
             <View style={styles.viewHeader}>
                 <View style={{ marginTop: 20, alignSelf: 'center', marginTop: 119 }}>
-                    <Text style={{ color: "white", fontSize: 16, fontWeight: '400' }}>Số dư của cửa hàng</Text>
+                    <Text style={{ color: "white", fontSize: 16, fontWeight: '400' }}>Số dư của bạn</Text>
                 </View>
                 <View style={{ marginTop: 20, alignSelf: 'center', marginTop: 1 }}>
                     <Text style={{ color: "white", fontSize: 40, fontWeight: '700' }}>500.000.000 đ</Text>
@@ -30,23 +30,10 @@ const Menu = ({navigation}) => {
                         <View>
                             <Text style={styles.textContent}>Thông tin cá nhân của bạn</Text>
                         </View>
-                        <TouchableOpacity onPress={()=>navigation.navigate('Profile')}>
+                        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
                             <Image source={require('../../../assets/eye.png')} />
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.viewItem}>
-                        <View>
-                            <Image source={require('../../../assets/back.png')} />
-                        </View>
-                        <View>
-                            <Text style={styles.textContent}>Thông tin của cửa hàng</Text>
-                        </View>
-                        <TouchableOpacity>
-                            <Image source={require('../../../assets/eye.png')} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={styles.viewBoder}>
                     <View style={styles.viewItem}>
                         <View>
                             <Image source={require('../../../assets/back.png')} />
@@ -58,12 +45,29 @@ const Menu = ({navigation}) => {
                             <Image source={require('../../../assets/eye.png')} />
                         </TouchableOpacity>
                     </View>
+                </View>
+                <View style={styles.viewBoder}>
                     <View style={styles.viewItem}>
                         <View>
-                            <Image source={require('../../../assets/back.png')} />
+                            <TouchableOpacity onPress={() => { navigation.navigate('Feedback') }}>
+                                <Image source={require('../../../assets/back.png')} />
+                            </TouchableOpacity>
                         </View>
                         <View>
-                            <Text style={styles.textContent}>Quản lý tài khoản nhân viên</Text>
+                            <Text style={styles.textContent}>Đánh giá của khách hàng</Text>
+                        </View>
+                        <TouchableOpacity>
+                            <Image source={require('../../../assets/eye.png')} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.viewItem}>
+                        <View>
+                            <TouchableOpacity onPress={() => navigation.navigate('HistoryFeedback')}>
+                                <Image source={require('../../../assets/back.png')} />
+                            </TouchableOpacity>
+                        </View>
+                        <View>
+                            <Text style={styles.textContent}>Lịch sử đánh giá</Text>
                         </View>
                         <TouchableOpacity>
                             <Image source={require('../../../assets/eye.png')} />
@@ -95,7 +99,7 @@ const Menu = ({navigation}) => {
                     </View>
                 </View>
             </ScrollView>
-        </View>
+        </ScrollView>
     )
 }
 
@@ -105,8 +109,8 @@ const styles = StyleSheet.create({
     viewItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginEnd:15,
-        marginStart:15,
+        marginEnd: 15,
+        marginStart: 15,
         marginTop: 28,
     },
     textContent: {
