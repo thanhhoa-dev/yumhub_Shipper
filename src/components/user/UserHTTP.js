@@ -30,13 +30,13 @@ export const changePass = async (id, passNew, passOld) => {
   }
 };
 
-export const resetpass = async (id, password) => {
+export const resetpass = async (email, password) => {
   try {
     const axiosInstance = await AxiosInstance();
-    const url = '/shippers/resetPass/:id';
+    const url = '/shippers/resetPass/';
     const body = {
-      id: id,
       password: password,
+      email: email,
     };
     return await axiosInstance.post(url, body);
   } catch (error) {

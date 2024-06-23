@@ -1,29 +1,34 @@
 import { StyleSheet, Text, View, Image, TextInput, Modal, TouchableOpacity, TouchableWithoutFeedback, FlatList, ScrollView } from 'react-native'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { getAll } from '../ShipperHTTP';
+import { UserContext } from '../../user/UserContext';
+import { Dropdown } from 'react-native-element-dropdown';
+
+
+const data = [
+    { label: 'Nam', value: '1' },
+    { label: 'Nữ', value: '2' },
+
+];
 
 const Profile = ({ navigation }) => {
-    const [modalVisible, setModalVisible] = useState(false);
-    const [gender, setGender] = useState('Nam');
-    const genders = ['Nam', 'Nữ'];
+    const [value, setValue] = useState(null);
+    const [isFocus, setIsFocus] = useState(false);
+    const [visible, setVisible] = useState(false);
+    const { user } = useContext(UserContext);
+    const { setUser } = useContext(UserContext);
+    const idUser = user.checkAccount._id;
+    // console.log(user);
 
-    const handleGenderSelect = (selectedGender) => {
-        setGender(selectedGender);
-        setModalVisible(false);
-    };
-    useEffect(() => {
-        // lấy danh sách từ api
-        const fetchData = async () => {
-            try {
-                const result = await getAll();
-                setDataOrder(result.AllShipper);
-                // console.log(result)
-            } catch (error) {
-                console.log('>>>>>error data 143: ', error);
-            }
+    const renderLabel = () => {
+        if (value || isFocus) {
+
         }
-        fetchData();
-    }, [])
+        return null;
+    };
+
+ 
+   
     return (
         <ScrollView style={{ flex: 1, backgroundColor: 'white', marginBottom: 40 }}>
             <View style={styles.viewHeader}>
@@ -40,7 +45,7 @@ const Profile = ({ navigation }) => {
                 <View>
                     <Text style={styles.textContent}>Họ tên</Text>
                     <TextInput style={styles.viewInput}
-                        placeholder='Nguyễn Văn A'
+                        value={user.checkAccount.fullName}
                         paddingStart={20}
                     />
                 </View>
@@ -48,7 +53,7 @@ const Profile = ({ navigation }) => {
                 <View>
                     <Text style={styles.textContent}>Email</Text>
                     <TextInput style={styles.viewInput}
-                        placeholder='Nguyễn Văn A'
+                        value={user.checkAccount.email}
                         paddingStart={20}
                     />
                 </View>
@@ -56,7 +61,7 @@ const Profile = ({ navigation }) => {
                 <View>
                     <Text style={styles.textContent}>Số điện thoại</Text>
                     <TextInput style={styles.viewInput}
-                        placeholder='Nguyễn Văn A'
+                        value={user.checkAccount.phoneNumber}
                         keyboardType='numeric'
                         paddingStart={20}
                     />
@@ -64,44 +69,33 @@ const Profile = ({ navigation }) => {
 
                 <View>
                     <Text style={styles.textContent}>Giới tính</Text>
-                    <View style={styles.viewInput}>
-                        <Text style={{ fontSize: 16, fontWeight: '400', alignSelf: 'center', marginStart: 20 }}>{gender}</Text>
-                        <TouchableOpacity onPress={() => setModalVisible(true)}>
-                            <Image style={{ height: 20, width: 20, marginEnd: 20, marginTop: 15 }} source={require('../../../assets/arrow.png')} />
-                        </TouchableOpacity>
-                    </View>
-                    <Modal
-                        transparent={true}
-                        animationType="slide"
-                        visible={modalVisible}
-                        onRequestClose={() => setModalVisible(false)}>
-                        <TouchableWithoutFeedback
-                            activeOpacity={1}
-                            onPress={() => setModalVisible(false)}>
-                            <View style={styles.modalOverlay} />
-                        </TouchableWithoutFeedback>
-                        <View style={styles.modalContent}>
-                            <FlatList
-                                data={genders}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        style={styles.modalItem}
-                                        onPress={() => handleGenderSelect(item)}
-                                    >
-                                        <Text style={styles.modalItemText}>{item}</Text>
-                                    </TouchableOpacity>
-                                )}
-                                keyExtractor={(item) => item}
-                            />
-                        </View>
-                    </Modal>
+                    {renderLabel()}
+                    <Dropdown
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={data}
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={user.checkAccount.sex === 1 ? 'Nam' : 'Nữ'}
+                        value={value}
+                        onFocus={() => setIsFocus(true)}
+                        onBlur={() => setIsFocus(false)}
+                        onChange={item => {
+                            setValue(item.value);
+                            setIsFocus(false);
+                        }}
+                    />
                 </View>
 
                 <View>
                     <Text style={styles.textContent}>Ngày sinh</Text>
                     <TextInput style={styles.viewInput}
-                        placeholder='Nguyễn Văn A'
-                        keyboardType='numeric'
+                        value={user.checkAccount.birthDay}
+                     
                         paddingStart={20}
                     />
                 </View>
@@ -109,8 +103,8 @@ const Profile = ({ navigation }) => {
                 <View>
                     <Text style={styles.textContent}>Hãng xe</Text>
                     <TextInput style={styles.viewInput}
-                        placeholder='Nguyễn Văn A'
-                        keyboardType='numeric'
+                        value={user.checkAccount.modeCode}
+                   
                         paddingStart={20}
                     />
                 </View>
@@ -118,8 +112,8 @@ const Profile = ({ navigation }) => {
                 <View>
                     <Text style={styles.textContent}>Biển số xe</Text>
                     <TextInput style={styles.viewInput}
-                        placeholder='Nguyễn Văn A'
-                        keyboardType='numeric'
+                        value={user.checkAccount.brandBike}
+                    
                         paddingStart={20}
                     />
                 </View>
@@ -134,6 +128,19 @@ const Profile = ({ navigation }) => {
 export default Profile
 
 const styles = StyleSheet.create({
+    
+    dropdown: {
+        alignSelf: 'center',
+        marginTop: 8,
+        width: 328,
+        height: 56,
+        backgroundColor: '#F0F5FA',
+        borderRadius: 10,
+        paddingHorizontal: 8,
+    },
+    icon: {
+        marginRight: 5,
+    },
     viewLogin: {
         marginStart: 20,
         marginTop: 31,

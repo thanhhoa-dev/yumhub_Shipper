@@ -164,3 +164,19 @@ export const getAll = async data => {
     throw error;
   }
 };
+
+export const changePass = async (passOld, passNew,id) => {
+  try {
+      const axiosInstance = await AxiosInstance();
+      const url = '/shippers/changePass'
+      const params = {id:id};
+      const body = {
+          passOld: passOld,
+          passNew: passNew
+      }
+      return await axiosInstance.post(url, body,{params})
+  } catch (error) {
+
+      ToastAndroid.show('error', ToastAndroid.SHORT)
+  }
+}
