@@ -16,6 +16,7 @@ import Notification from './screen/Notification';
 import HistoryFeedback from './screen/HistoryFeedback';
 import Menu from './screen/Menu';
 import Profile from './screen/Profile';
+import ChangePass from './screen/ChangePass';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -145,6 +146,11 @@ const ShipperStackNavigation = () => {
         options={{headerShown: false}}
         name="Profile"
         component={Profile}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="ChangePass"
+        component={ChangePass}
       />
     </Stack.Navigator>
   );

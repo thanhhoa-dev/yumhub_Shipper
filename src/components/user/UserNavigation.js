@@ -9,9 +9,10 @@ import CancelSuccessOrder from '../shipper/screen/CancelSuccessOrder';
 import ForgotPassword from './screens/ForgotPassword';
 import NewPassword from './screens/ChangePassword';
 import CheckOTP from './screens/CheckOTP';
-import ResetPassword from './screens/ResetPassword';
+
 import Menu from '../shipper/screen/Menu';
 import Profile from '../shipper/screen/Profile';
+import ResetPassword from './screens/ResetPassword';
 
 
 const UserNavigation = () => {

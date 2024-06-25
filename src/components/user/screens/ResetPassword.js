@@ -1,98 +1,129 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Image, Text, TouchableOpacity } from 'react-native';
+import { View, TextInput,  StyleSheet, Image, Text, TouchableOpacity, ToastAndroid } from 'react-native';
 import { resetpass } from '../UserHTTP';
 
 
-const ResetPassword = () => {
+
+const ResetPassword = (props) => {
+    const { route: { params: { email } } } = props;
+    const navigation = props.navigation;
     const [password, setPassWord] = useState('');
+    const [passConfirm, setPassWordConfirm] = useState('');
     const handleNext = async () => {
         try {
             if (password === passConfirm) {
-                const result = await resetpass(id, password);
-                if (result.status) {
-                    ToastAndroid.show('doi mat khau thanh cong', ToastAndroid.SHORT);
+                const result = await resetpass( password,email);
+                console.log(result);
+                if (result.result) {
+                    ToastAndroid.show('Đổi mật khẩu thành công', ToastAndroid.SHORT);
                     navigation.navigate('Login');
                 }
             } else {
-                ToastAndroid.show('mat khau ko trung', ToastAndroid.SHORT);
+                ToastAndroid.show('Mật khẩu không trùng', ToastAndroid.SHORT);
             }
-
         } catch (error) {
-            console.log('......dong 37', error);
+            console.log('......dong 21', error);
             ToastAndroid.show('login failed', ToastAndroid.SHORT);
         }
     };
 
     return (
+        <View style={{ flex: 1, backgroundColor: '#005987' }}>
         <View style={styles.viewContainer}>
             <View>
-                <Image style={styles.viewImage} source={require("../../../assets/arrow.png")}></Image>
+                <Image style={{ height: 117, width: 117, marginEnd: 30 }} source={require("../../../assets/iconAsset.png")}></Image>
+                <Text style={styles.viewText}>Đổi mật khẩu</Text>
+
             </View>
-            <View style={styles.viewText}>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>Nhập mật khẩu mới</Text>
+        </View>
+        <View style={styles.viewBody}>
+            <View style={styles.viewEmail}>
+                <Text style={styles.viewTextEmail}>Mật khẩu mới</Text>
             </View>
-            <View style={styles.viewInput}>
+            <View style={styles.viewTextInputPassword}>
                 <TextInput
-                    style={styles.passInput}
                     value={password}
                     onChangeText={setPassWord}
-                    placeholder='Password'
-                    secureTextEntry={false}></TextInput>
+                    style={styles.viewTextInputEmail}
+                    paddingStart={20}
+                />
             </View>
-
-            <TouchableOpacity onPress={handleNext} style={styles.viewBorder}>
-                <Text style={{ width: 340, fontSize: 18, fontWeight: '400', color: 'grey', textAlign: 'center', }}>Xong</Text>
+            <View style={styles.viewEmail}>
+                <Text style={styles.viewTextEmail}> Nhập lại mật khẩu mới</Text>
+            </View>
+            <View style={styles.viewTextInputPassword}>
+                <TextInput
+                    value={passConfirm}
+                    onChangeText={setPassWordConfirm}
+                    style={styles.viewTextInputEmail}
+                    paddingStart={20}
+                />
+            </View>
+            <TouchableOpacity onPress={handleNext} style={styles.viewLogin}>
+                <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>Xác nhận</Text>
             </TouchableOpacity>
         </View>
+    </View>
     )
 };
 
 const styles = StyleSheet.create({
-    viewBorder: {
-        marginTop: 20,
-        width: '90%',
-        backgroundColor: '#BBBBBB',
-        borderRadius: 10,
-        height: 50,
-        flexDirection: 'row', 
+    viewLogin: {
         marginStart: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    passInput: {
-        marginTop: 4,
+        marginTop: 31,
         width: "80%",
-        height: 48,
-        padding: 10,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: '#4E4B66',
-        backgroundColor: '#fff',
-        marginStart: 20,
-    },
-    viewInput: {
+        height: 62,
+        borderRadius: 12,
         flexDirection: 'row',
-        marginStart: 10,
-        marginTop: 50,
+        alignItems: 'center',
+        backgroundColor: '#19D6E5',
+        justifyContent: 'center',
+        marginStart: 40,
     },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        marginBottom: 20,
-        width: '13%',
-        borderRadius: 15,
-        height: 60,
-        marginEnd: 10,
-        textAlign: 'center'
+    viewForgotPass: {
+        marginTop: 25,
+        marginStart: 270,
+    },
+    viewTextInputEmail: {
+        width: 327,
+        height: 62,
+        backgroundColor: '#F0F5FA',
+        alignSelf: 'center',
+        marginTop: 8,
+        borderRadius: 8,
+
+    },
+    viewTextEmail: {
+        fontSize: 13,
+        fontWeight: '400',
+        color: '#32343E',
+        marginStart: 44,
+        marginTop: 24,
+    },
+    viewText2: {
+        fontSize: 16,
+        fontWeight: '400',
+        color: 'white',
+        alignSelf: 'center',
+        marginTop: 9,
     },
     viewText: {
-        marginTop: 30,
-        marginStart: 10,
+        fontSize: 30,
+        fontWeight: '700',
+        color: 'white',
+        alignSelf: 'center',
+        marginTop: 12,
     },
-    viewImage: {
-        marginTop: 20,
-        marginStart: 10,
+    viewBody: {
+        backgroundColor: 'white',
+        width: '100%',
+        height: '100%',
+        borderRadius: 25,
+    },
+    viewContainer: {
+        backgroundColor: '#005987',
+        width: '100%',
+        height: 230,
     }
 });
 

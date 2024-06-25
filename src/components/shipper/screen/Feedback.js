@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import StarRating from 'react-native-star-rating-widget';
@@ -14,19 +14,26 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import {getShipperBeReview} from '../ShipperHTTP';
 import Loading from './Loading';
 import {styles} from '../styles/FeedbackStyle';
+import { UserContext } from '../../user/UserContext';
+import { useNavigation } from '@react-navigation/native';
 
 const Feedback = () => {
+  const navigation = useNavigation();
   const [reviews, setReviews] = useState([]);
   const [ratingAverageTotal, setRatingAverageTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const {user} = useContext(UserContext);
+  const idUser = user.checkAccount._id;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getShipperBeReview();
+        const response = await getShipperBeReview(idUser);
         const sortedReviews = response.history.sort((a, b) => {
           return new Date(b.review.createAt) - new Date(a.review.createAt);
         });
         setReviews(sortedReviews);
+        setLoading(false);
       } catch (error) {
         console.log(error);
       }
@@ -49,7 +56,7 @@ const Feedback = () => {
     }
   }, [reviews]);
 
-  if (reviews) {
+  if (loading) {
     return <Loading />;
   }
 
@@ -152,7 +159,7 @@ const Feedback = () => {
     <View style={styles.viewContainerBackgroundColor}>
       <View style={styles.viewContainer}>
         <View style={styles.viewHeader}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <AntDesign name={'left'} size={20} />
           </TouchableOpacity>
           <Text style={styles.titleHeader}>Phản hồi từ khách hàng</Text>

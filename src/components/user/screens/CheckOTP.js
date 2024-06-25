@@ -1,8 +1,6 @@
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ToastAndroid } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { checkotp } from '../UserHTTP';
-
-
 
 const CheckOTP = (props) => {
     const { route: { params: { email } } } = props;
@@ -12,6 +10,11 @@ const CheckOTP = (props) => {
     const [otp_3, setOTP3] = useState('');
     const [otp_4, setOTP4] = useState('');
     const [otp, setOTP] = useState('');
+
+    const otp1Ref = useRef(null);
+    const otp2Ref = useRef(null);
+    const otp3Ref = useRef(null);
+    const otp4Ref = useRef(null);
    
     const handleNext = async () => {
         try {
@@ -27,6 +30,13 @@ const CheckOTP = (props) => {
         } catch (error) {
             console.log('......dong 37', error);
             ToastAndroid.show(' failed', ToastAndroid.SHORT);
+        }
+    };
+
+    const handleOTPChange = (otp, setOTP, nextRef) => {
+        setOTP(otp);
+        if (otp && nextRef) {
+            nextRef.current.focus();
         }
     };
     return (
@@ -48,34 +58,34 @@ const CheckOTP = (props) => {
                 </View>
                 <View style={styles.viewTextInputOTP}>
                     <TextInput
+                        ref={otp1Ref}
                         value={otp_1}
-                        onChangeText={(e) => setOTP1(e)}
+                        onChangeText={(otp) => handleOTPChange(otp, setOTP1, otp2Ref)}
                         maxLength={1}
-                        placeholder=""
                         style={styles.viewTextInputEmail}
                         keyboardType="numeric"
                     />
                     <TextInput
+                        ref={otp2Ref}
                         value={otp_2}
-                        onChangeText={(e) => setOTP2(e)}
+                        onChangeText={(otp) => handleOTPChange(otp, setOTP2, otp3Ref)}
                         maxLength={1}
-                        placeholder=""
                         style={styles.viewTextInputEmail}
                         keyboardType="numeric"
                     />
                     <TextInput
+                        ref={otp3Ref}
                         value={otp_3}
-                        onChangeText={(e) => setOTP3(e)}
+                        onChangeText={(otp) => handleOTPChange(otp, setOTP3, otp4Ref)}
                         maxLength={1}
-                        placeholder=""
                         style={styles.viewTextInputEmail}
                         keyboardType="numeric"
                     />
                     <TextInput
+                        ref={otp4Ref}
                         value={otp_4}
-                        onChangeText={(e) => setOTP4(e)}
+                        onChangeText={(otp) => handleOTPChange(otp, setOTP4, null)}
                         maxLength={1}
-                        placeholder=""
                         style={styles.viewTextInputEmail}
                         keyboardType="numeric"
                     />

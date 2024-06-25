@@ -13,7 +13,7 @@ const ForgotPassword = (props) => {
             return;
         }
         try {
-            console.log(email);
+            // console.log(email);
             const result = await forgotPass(email);
             if ( result.result) {
                 navigation.navigate('Checkotp', { email: email })

@@ -13,8 +13,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserContext } from '../UserContext';
 
 const Login = ({navigation}) => {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('0983826756');
+  const [password, setPassword] = useState('846710');
   const { setUser } = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
 

@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import StarRating from 'react-native-star-rating-widget';
@@ -24,8 +24,11 @@ import {SetDeleteReview, UpdateShipperReview} from '../ShipperHTTP';
 import Loading from './Loading';
 import {styles} from '../styles/HistoryFeedbackStyle';
 import {launchImageLibrary} from 'react-native-image-picker';
+import { UserContext } from '../../user/UserContext';
+import { useNavigation } from '@react-navigation/native';
 
 const HistoryFeedback = () => {
+  const navigation = useNavigation();
   const [reviews, setReviews] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -33,10 +36,12 @@ const HistoryFeedback = () => {
   const [descriptionModal, setDescriptionModal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [image, setImage] = useState([]);
+  const {user} = useContext(UserContext);
+  const idUser = user.checkAccount._id;
 
   const fetchData = async () => {
     try {
-      const response = await getShipperReview();
+      const response = await getShipperReview(idUser);
       const sortedReviews = response.history.sort((a, b) => {
         return new Date(b.review.createAt) + new Date(a.review.createAt);
       });
@@ -166,14 +171,14 @@ const HistoryFeedback = () => {
   }, []);
 
   if (loading) {
-    return <Loading />;
+    return <Loading />;r
   }
 
   return (
     <View style={styles.viewContainerBackgroundColor}>
       <View style={styles.viewContainer}>
         <View style={styles.viewHeader}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <AntDesign name={'left'} size={20} />
           </TouchableOpacity>
           <Text style={styles.textHistoryFeedback}>Lịch sử đánh giá</Text>

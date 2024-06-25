@@ -1,10 +1,10 @@
 import AxiosInstance from '../../http/AxiosInstance';
 
-export const getShipperBeReview = async () => {
+export const getShipperBeReview = async (id) => {
   try {
     const axiosInstance = AxiosInstance();
     const url = 'orders/historyShipperIsReview';
-    const params = {id: '6604e1ec5a6c5ad8711aebf9'};
+    const params = {id: id};
     return await axiosInstance.get(url, {params});
   } catch (error) {
     console.log(error);
@@ -12,11 +12,11 @@ export const getShipperBeReview = async () => {
   }
 };
 
-export const getShipperReview = async () => {
+export const getShipperReview = async (id) => {
   try {
     const axiosInstance = AxiosInstance();
     const url = 'orders/historyShipperReview';
-    const params = {id: '6604e1ec5a6c5ad8711aebf9'};
+    const params = {id: id};
     return await axiosInstance.get(url, {params});
   } catch (error) {
     console.log(error);
@@ -164,3 +164,19 @@ export const getAll = async data => {
     throw error;
   }
 };
+
+export const changePass = async (passOld, passNew,id) => {
+  try {
+      const axiosInstance = await AxiosInstance();
+      const url = '/shippers/changePass'
+      const params = {id:id};
+      const body = {
+          passOld: passOld,
+          passNew: passNew
+      }
+      return await axiosInstance.post(url, body,{params})
+  } catch (error) {
+
+      ToastAndroid.show('error', ToastAndroid.SHORT)
+  }
+}
