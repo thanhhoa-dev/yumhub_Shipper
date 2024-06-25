@@ -23,7 +23,6 @@ const Login = ({navigation}) => {
     try {
       const result = await login(phoneNumber, password);
       await AsyncStorage.setItem('token', result.data.token);
-      console.log(result);
       setUser(result.data);
       await AsyncStorage.setItem('userPhone', phoneNumber);
       await AsyncStorage.setItem('userPassword', password);
