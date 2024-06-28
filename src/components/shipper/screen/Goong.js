@@ -51,6 +51,10 @@ const Goong = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisibleConfirm, setModalVisibleConfirm] = useState(false);
   const [modalVisibleCancelOrder, setModalVisibleCancelOrder] = useState(false);
+  const [
+    modalVisibleCancelOrderFromMerchant,
+    setModalVisibleCancelOrderFromMerchant,
+  ] = useState(false);
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
@@ -77,9 +81,9 @@ const Goong = () => {
   const {user, sendMessage, receiveMessage} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
-  const id = '6627e8b6bfd9baea698a1d4b';
+  var id;
   const idUser = user.checkAccount._id;
-
+  const currentOrder = useRef(null);
   //websocket
 
   useEffect(() => {
@@ -87,13 +91,18 @@ const Goong = () => {
       receiveMessage(async message => {
         switch (message.command) {
           case 'placeOrder':
-            setOrder(message.order);
-            await UpdateShipperInformation(idUser, 8);
-            setModalVisible(true);
-            setIsTimerRunning(true);
+            setOrder(message);
+            if (message.command === 'placeOrder') {
+              id = message.order._id;
+              const ai = await UpdateShipperInformation(idUser, 8);
+              console.log(ai);
+              setModalVisible(true);
+              setIsTimerRunning(true);
+            }
             break;
           case 'cancelled_from_merchant':
             console.log('cancelled_from_merchant');
+            setModalVisibleCancelOrderFromMerchant(true);
             break;
           default:
             console.log('Unknown command:', message.command);
@@ -103,11 +112,17 @@ const Goong = () => {
     } else {
       console.log('User is not set or receiveMessage is not defined');
     }
-  }, [user, receiveMessage]);
+  }, [
+    user,
+    receiveMessage,
+    countdown,
+    id,
+    idUser,
+    order,
+    statusShipper,
+    index,
+  ]);
 
-  const handleSendMessage = command => {
-    sendMessage('shipper', command, order);
-  };
   //websocket
 
   // useEffect(() => {
@@ -125,10 +140,18 @@ const Goong = () => {
   //       throw error;
   //     }
   //   };
-  //   if (!order && statusShipper && index === 4) {
+  //   if (!order && statusShipper) {
   //     fetchOrder();
   //   }
   // }, [countdown, id, idUser, order, statusShipper]);
+
+  useEffect(() => {
+    currentOrder.current = order;
+  }, [order]);
+
+  const handleSendMessage = command => {
+    sendMessage('shipper', command, currentOrder.current.order);
+  };
 
   useEffect(() => {
     const timeReceiveApplication = async () => {
@@ -291,22 +314,20 @@ const Goong = () => {
     try {
       if (status === 3) {
         setDestination({
-          latitude: order.merchantID.latitude,
-          longitude: order.merchantID.longitude,
+          latitude: order.order.merchantID.latitude,
+          longitude: order.order.merchantID.longitude,
         });
-        handleSendMessage('accept');
-        setQuery(`${order.deliveryAddress}`);
+        setQuery(`${order.order.deliveryAddress}`);
         setModalVisible(false);
         setModalVisibleConfirm(false);
         setIsTimerRunning(false);
         setCountdown(60);
         handlePresentPress();
 
-        await updateOrderStatus(id, 3);
+        await updateOrderStatus(id, 8);
         await UpdateShipperInformation(idUser, 5);
+        handleSendMessage('accept');
       } else if (status === 5) {
-        handleSendMessage('refuse');
-
         setModalVisible(false);
         setModalVisibleConfirm(false);
         setOrder(null);
@@ -314,6 +335,7 @@ const Goong = () => {
         setCountdown(60);
         await updateOrderStatus(id, 6);
         await UpdateShipperInformation(idUser, 3);
+        handleSendMessage('refuse');
       } else {
         console.warn('Lựa chọn không hợp lệ');
       }
@@ -375,7 +397,6 @@ const Goong = () => {
   const handleShowDetail = async () => {
     try {
       const result = await ShowDetail(id);
-      await UpdateShipperInformation(idUser, 6);
       setDetailFoodOrder(result);
     } catch (error) {
       console.log(error);
@@ -418,40 +439,36 @@ const Goong = () => {
   const handleConfirmCancelOrder = async () => {
     try {
       setModalVisibleCancelOrder(false);
+      setModalVisibleCancelOrderFromMerchant(false);
       handleClosePress();
       setIndex(0);
-      await updateOrderStatus(id, 6);
-      await UpdateShipperInformation(idUser, 3);
-      setOrder(null);
+      handleSendMessage('cancelled_from_shipper');
       translateX.setValue(0);
-      navigation.navigate('CancelSuccessOrder');
-      setTimeout(() => {
-        navigation.goBack();
-      }, 5000);
+      navigation.navigate('CancelSuccessOrder', {order: currentOrder.current});
+      setOrder(null);
     } catch (error) {
       console.log(error);
       throw error;
     }
   };
 
-  const handleUpdateIndex = () => {
-    setIndex(async prevIndex => {
+  const handleUpdateIndex = order => {
+    setIndex(prevIndex => {
       const newIndex = (prevIndex + 1) % (items.length + 1);
       switch (newIndex) {
         case 1:
           handleShowDetail();
+          handleSendMessage('waiting');
           break;
         case 2:
+          handleSendMessage('delivering');
           break;
         case 3:
-          await UpdateShipperInformation(idUser, 7);
-          console.log('đi giao');
+          handleSendMessage('arrived');
           break;
         case 4:
           setIndex(3);
           openCamera();
-          await UpdateShipperInformation(idUser, 3);
-          console.log('đang hoat động');
           break;
         default:
           break;
@@ -470,8 +487,8 @@ const Goong = () => {
         }
       },
       onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dx >= width * 0.7) {
-          handleUpdateIndex();
+        if (gestureState.dx >= width * 0.7 && currentOrder.current) {
+          handleUpdateIndex(currentOrder.current);
         }
         Animated.timing(translateX, {
           toValue: 0,
@@ -526,12 +543,10 @@ const Goong = () => {
     Linking.openURL(`tel:${phoneNumber}`);
   };
 
-  const handleSetStatusShipper = async () => {
+  const handleSetStatusShipper = () => {
     if (statusShipper) {
-      await UpdateShipperInformation(idUser, 4);
       setStatusShipper(false);
     } else {
-      await UpdateShipperInformation(idUser, 3);
       setStatusShipper(true);
     }
   };
@@ -564,11 +579,12 @@ const Goong = () => {
         setIndex(0);
         await updateOrderStatus(id, 5);
         await UpdateOrder(id, data);
-        setOrder(null);
         translateX.setValue(0);
+        handleSendMessage('success');
         navigation.navigate('SuccessOrder');
         setTimeout(() => {
-          navigation.navigate('SubmitReview', {id: id});
+          navigation.navigate('SubmitReview', {order: currentOrder.current});
+          setOrder(null);
         }, 5000);
       } else {
         setIndex(3);
@@ -626,27 +642,27 @@ const Goong = () => {
               <CustomMarker />
             </Marker>
           )}
-          {destination && order && order.result && (
+          {destination && order && (
             <Marker
               draggable
-              title={`${order.merchantID.name}`}
+              title={`${order.order.merchantID.name}`}
               coordinate={destination}
               onDragEnd={directions => {
                 setDestination(directions.nativeEvent.coordinate);
               }}
             />
           )}
-          {destinationCustomer && order && order.result && (
+          {destinationCustomer && order && (
             <Marker
               draggable
-              title={`${order.customerID.fullName}`}
+              title={`${order.order.customerID.fullName}`}
               coordinate={{
                 latitude: destinationCustomer.lat,
                 longitude: destinationCustomer.lng,
               }}
             />
           )}
-          {routeCoordinates.length > 0 && (
+          {order && routeCoordinates.length > 0 && (
             <Polyline
               coordinates={routeCoordinates}
               strokeWidth={4}
@@ -654,7 +670,7 @@ const Goong = () => {
             />
           )}
 
-          {routeCoordinatesCustomer.length > 0 && (
+          {order && routeCoordinatesCustomer.length > 0 && (
             <Polyline
               coordinates={routeCoordinatesCustomer}
               strokeWidth={4}
@@ -662,7 +678,7 @@ const Goong = () => {
             />
           )}
         </MapView>
-        {order && order.result && destination && isBottomSheetVisible && (
+        {order && destination && isBottomSheetVisible && (
           <BottomSheet
             index={0}
             snapPoints={snapPoints}
@@ -683,12 +699,12 @@ const Goong = () => {
                         <Text
                           style={styles.textNameMerchantBottomSheet}
                           numberOfLines={1}>
-                          {order.merchantID.name}
+                          {order.order.merchantID.name}
                         </Text>
                         <Text
                           style={styles.textAddressMerchantBottomSheet}
                           numberOfLines={1}>
-                          {order.merchantID.address}
+                          {order.order.merchantID.address}
                         </Text>
                         <View style={styles.viewContainerRating}>
                           <StarRating
@@ -701,7 +717,7 @@ const Goong = () => {
                             onChange={() => {}}
                           />
                           <Text style={styles.textRatingBottomSheet}>
-                            {order.merchantID.rating}
+                            {order.order.merchantID.rating}
                           </Text>
                         </View>
                       </View>
@@ -710,7 +726,7 @@ const Goong = () => {
                     <View style={styles.viewInformationMerchantBottomSheet}>
                       <Image
                         style={styles.imageMerchantBottomSheet}
-                        source={{uri: `${order.customerID.avatar}`}}
+                        source={{uri: `${order.order.customerID.avatar}`}}
                       />
                       <View
                         style={
@@ -719,12 +735,12 @@ const Goong = () => {
                         <Text
                           style={styles.textNameMerchantBottomSheet}
                           numberOfLines={1}>
-                          {order.customerID.fullName}
+                          {order.order.customerID.fullName}
                         </Text>
                         <Text
                           style={styles.textAddressMerchantBottomSheet}
                           numberOfLines={1}>
-                          {order.deliveryAddress}
+                          {order.order.deliveryAddress}
                         </Text>
                         <View style={styles.viewContainerRating}>
                           <StarRating
@@ -737,7 +753,7 @@ const Goong = () => {
                             onChange={() => {}}
                           />
                           <Text style={styles.textRatingBottomSheet}>
-                            {order.merchantID.rating}
+                            {order.order.merchantID.rating}
                           </Text>
                         </View>
                       </View>
@@ -766,7 +782,7 @@ const Goong = () => {
                   {detailFoodOrder && index == 1 && (
                     <View style={styles.viewListItemInformationFoodBottomSheet}>
                       <Text style={styles.textCodeOrdersBottomSheet}>
-                        #{order._id}
+                        #{order.order._id}
                       </Text>
                       <Text style={styles.textListFoodBottomSheet}>
                         Danh Sách Món
@@ -969,7 +985,7 @@ const Goong = () => {
                         Giá tiền
                       </Text>
                       <Text style={styles.textItemSummaryBottmSheet}>
-                        {order.totalPaid
+                        {order.order.totalPaid
                           .toString()
                           .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
                       </Text>
@@ -979,7 +995,7 @@ const Goong = () => {
                         Phí giao hàng
                       </Text>
                       <Text style={styles.textItemSummaryBottmSheet}>
-                        {order.deliveryCost
+                        {order.order.deliveryCost
                           .toString()
                           .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
                       </Text>
@@ -1058,10 +1074,10 @@ const Goong = () => {
                 <View style={styles.viewContainerCallUserBottomSheet}>
                   {!showNumberPhone && (
                     <View style={styles.viewInformationUserBottomSheet}>
-                      {order.customerID.avatar ? (
+                      {order.order.customerID.avatar ? (
                         <Image
                           style={{height: 70, width: 70, borderRadius: 50}}
-                          source={{uri: `${order.customerID.avatar}`}}
+                          source={{uri: `${order.order.customerID.avatar}`}}
                         />
                       ) : (
                         <Image
@@ -1071,7 +1087,7 @@ const Goong = () => {
                       )}
                       <View style={styles.viewContainerInformationCustomer}>
                         <Text style={styles.textUserBottomSheet}>
-                          {order.customerID.fullName}
+                          {order.order.customerID.fullName}
                         </Text>
                         <View style={styles.viewContainerRating}>
                           <StarRating
@@ -1116,11 +1132,11 @@ const Goong = () => {
                         {justifyContent: 'space-between', flex: 1},
                       ]}>
                       <Text style={styles.textCustomerPhoneNumber}>
-                        {order.customerID.phoneNumber}
+                        {order.order.customerID.phoneNumber}
                       </Text>
                       <TouchableOpacity
                         onPress={() => {
-                          handleCall(order.customerID.phoneNumber);
+                          handleCall(order.order.customerID.phoneNumber);
                         }}>
                         <Ionicons
                           style={styles.iconCallBottomSheet}
@@ -1137,7 +1153,7 @@ const Goong = () => {
           </BottomSheet>
         )}
       </GestureHandlerRootView>
-      {order !== null && (
+      {order && (
         <Modal
           animationType="slide"
           transparent={true}
@@ -1160,22 +1176,22 @@ const Goong = () => {
                 <View style={styles.viewContainerNameUser}>
                   <Text style={styles.textInformation}>Đặt bởi: </Text>
                   <Text style={styles.textInformation}>
-                    {order.customerID.fullName}
+                    {order.order.customerID.fullName}
                   </Text>
                 </View>
                 <Text style={styles.textInformation} numberOfLines={1}>
-                  {order.deliveryAddress}
+                  {order.order.deliveryAddress}
                 </Text>
               </View>
               <View style={styles.viewContainerInformation}>
                 <View style={styles.viewContainerNameUser}>
                   <Text style={styles.textInformation}>Nhà hàng: </Text>
                   <Text style={styles.textInformation}>
-                    {order.merchantID.name}
+                    {order.order.merchantID.name}
                   </Text>
                 </View>
                 <Text style={styles.textInformation} numberOfLines={1}>
-                  {order.merchantID.address}
+                  {order.order.merchantID.address}
                 </Text>
               </View>
               <View style={styles.viewContainerInformationIncom}>
@@ -1188,7 +1204,7 @@ const Goong = () => {
                 <View style={styles.viewItemIncom}>
                   <Text style={styles.textItemIncom}>Tổng hóa đơn:</Text>
                   <Text style={styles.textItemIncom}>
-                    {order.totalPaid
+                    {order.order.totalPaid
                       .toString()
                       .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
                     đ
@@ -1197,7 +1213,7 @@ const Goong = () => {
                 <View style={styles.viewItemIncom}>
                   <Text style={styles.textItemIncom}>Thu nhập:</Text>
                   <Text style={styles.textItemIncom}>
-                    {order.deliveryCost
+                    {order.order.deliveryCost
                       .toString()
                       .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
                     đ
@@ -1205,7 +1221,7 @@ const Goong = () => {
                 </View>
               </View>
               <TouchableOpacity
-                onPress={() => handleShipperDecision(order._id, 3)}
+                onPress={() => handleShipperDecision(order.order._id, 3)}
                 style={styles.buttonReceiveOrder}>
                 <Text style={styles.textReceiveOrder}>NHẬN ĐƠN</Text>
                 <Text style={[styles.textReceiveOrder, {marginStart: 10}]}>
@@ -1238,7 +1254,7 @@ const Goong = () => {
                 <Text style={styles.textConfirmYes}>Hủy</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => handleShipperDecision(order._id, 5)}
+                onPress={() => handleShipperDecision(order.order._id, 5)}
                 style={[styles.buttonConfirm, styles.buttonConfirmNo]}>
                 <Text style={styles.textConfirmNo}>Từ Chối</Text>
               </TouchableOpacity>
@@ -1280,6 +1296,46 @@ const Goong = () => {
           </View>
         </View>
       </Modal>
+
+      {order && modalVisibleCancelOrderFromMerchant && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisibleCancelOrderFromMerchant}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+            setModalVisibleCancelOrderFromMerchant(
+              !modalVisibleCancelOrderFromMerchant,
+            );
+          }}>
+          <View style={styles.viewContainerModalOrder}>
+            <View style={[styles.centeredView, {backgroundColor: '#F6F8FA'}]}>
+              {/* <TouchableOpacity
+              onPress={() => {
+                setModalVisibleCancelOrder(false);
+              }}
+              style={styles.buttonCloseOrder}>
+              <Text style={styles.textXClose}>X</Text>
+            </TouchableOpacity> */}
+              <Text style={styles.textReasonForCancellation}>
+                Nhà hàng hết món
+              </Text>
+              {/* <View style={styles.viewContainerTextInputCancelOrder}>
+              <TextInput
+                style={styles.textInputCancelOrder}
+                placeholder="Nhập lý do hủy đơn"
+                multiline
+              />
+            </View> */}
+              <TouchableOpacity
+                onPress={handleConfirmCancelOrder}
+                style={styles.buttonReceiveCancelOrder}>
+                <Text style={styles.textReceiveCancelOrder}>Xác nhận</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 };

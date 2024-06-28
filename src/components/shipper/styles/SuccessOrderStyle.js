@@ -10,14 +10,15 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
   image: {
-    width: 160,
-    height: 160,
+    width: '100%',
+    height:'50%',
   },
   viewContainer: {
     flex: 1,
     backgroundColor: Color.background1,
     justifyContent: 'center',
     alignItems: 'center',
-    fontFamily: FontFamily.poppins
+    fontFamily: FontFamily.poppins,
+    backgroundColor:Color.white
   },
 });

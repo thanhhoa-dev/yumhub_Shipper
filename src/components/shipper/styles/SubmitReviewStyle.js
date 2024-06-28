@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
     height: 220,
     backgroundColor: Color.white,
-    width:'100%',
+    width: '100%',
   },
   imageAvatar: {
     width: 68,
@@ -34,32 +34,34 @@ export const styles = StyleSheet.create({
     top: -30,
   },
   textSumbmitReview: {
-    color: Color.white,
-    fontSize: Size.S14,
-    fontWeight: FontWeight.FW700,
+    color: '#333',
+    fontSize: 18,
+    fontWeight: '700',
   },
   buttonSubmitReview: {
     alignItems: 'center',
-    backgroundColor: Color.primary1,
+    backgroundColor: '#29D8E4',
     borderRadius: 12,
-    paddingVertical: 22,
-    marginHorizontal: 8,
+    paddingVertical: 16,
+    marginHorizontal: 18,
     marginBottom: 70,
-    marginTop:46
+    marginTop: 46,
   },
-  textInputSubmitReview:{
-    color: '#646982',
+  textInputSubmitReview: {
+    color: '#74788C',
     fontSize: 12,
     fontWeight: '400',
     padding: 10,
   },
-  viewContainerInput:{
+  viewContainerInput: {
     height: 74,
     borderRadius: 15,
-    backgroundColor: Color.bgInput,
+    backgroundColor: '#FFF9E6',
     marginTop: 23,
     width: '100%',
-    marginBottom:17,
+    marginBottom: 17,
+    borderWidth: 1,
+    borderColor: '#EBA078',
   },
   textNumberStarRating: {
     marginTop: 5,
@@ -75,15 +77,15 @@ export const styles = StyleSheet.create({
   },
   viewContainerReviewCustomer: {
     alignItems: 'center',
-    backgroundColor: Color.bgItem,
+    backgroundColor: '#F2F2F2',
     borderRadius: 15,
     marginTop: 59,
-    paddingHorizontal:23,
-    position:'relative'
+    paddingHorizontal: 23,
+    position: 'relative',
+    marginHorizontal: 16,
   },
   viewContainer: {
     flex: 1,
-    paddingHorizontal: 16,
     backgroundColor: Color.white,
     fontFamily: FontFamily.poppins,
   },

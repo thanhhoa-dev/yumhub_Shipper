@@ -147,6 +147,7 @@ export const styles = StyleSheet.create({
   viewInformationUserBottomSheet: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent:'space-between'
   },
   viewContainerCallUserBottomSheet: {
     marginTop: 27,

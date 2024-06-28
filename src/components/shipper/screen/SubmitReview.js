@@ -19,6 +19,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {UserContext} from '../../user/UserContext';
+import Feather from 'react-native-vector-icons/Feather';
 
 const SubmitReview = () => {
   const navigation = useNavigation();
@@ -26,32 +27,32 @@ const SubmitReview = () => {
   const [ratingMerchant, setRatingMerchant] = useState(0);
   const [descriptionCustomer, setDescriptionCustomer] = useState('');
   const [descriptionMerchant, setDescriptionMerchant] = useState('');
-  const [order, setOrder] = useState(null);
+  // const [order, setOrder] = useState(null);
   const [image, setImage] = useState([]);
   const {user} = useContext(UserContext);
 
   const route = useRoute();
-  const {id} = route.params;
+  const {order} = route.params;
   const idUser = user.checkAccount._id;
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const result = await GetOrderByID(id);
-        setOrder(result);
-      } catch (error) {
-        console.log('Error fetching order:', error);
-        throw error;
-      }
-    };
-    if (id) {
-      fetchOrder();
-    }
-  }, [id]);
+  // useEffect(() => {
+  //   const fetchOrder = async () => {
+  //     try {
+  //       const result = await GetOrderByID(id);
+  //       setOrder(result);
+  //     } catch (error) {
+  //       console.log('Error fetching order:', error);
+  //       throw error;
+  //     }
+  //   };
+  //   if (id) {
+  //     fetchOrder();
+  //   }
+  // }, [id]);
 
   const handleCreateReview = async () => {
     const customerReviewData = {
-      orderID: id,
+      orderID: order.order._id,
       reviewID: idUser,
       description: descriptionCustomer,
       rating: ratingCustomer,
@@ -60,7 +61,7 @@ const SubmitReview = () => {
     };
 
     const merchantReviewData = {
-      orderID: id,
+      orderID: order.order._id,
       reviewID: idUser,
       description: descriptionMerchant,
       rating: ratingMerchant,
@@ -128,11 +129,45 @@ const SubmitReview = () => {
 
   return (
     <View style={styles.viewContainer}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 20,
+          borderBottomWidth: 1,
+          borderBlockColor: '#5C94B2',
+          paddingHorizontal: 20,
+          paddingBottom: 8,
+        }}>
+        <View style={{width:50, height:50}}/>
+        <Text
+          style={{
+            color: '#005987',
+            fontSize: 20,
+            fontWeight: '700',
+          }}>
+          Đánh giá của bạn
+        </Text>
+        <TouchableOpacity
+        onPress={()=>{navigation.navigate('Trang chủ')}}
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 50,
+            backgroundColor: '#F5FEFF',
+            alignItems: 'center',
+            justifyContent: 'center',
+            elevation: 5,
+          }}>
+          <Feather name={'home'} size={30} color={'#19D6E5'} />
+        </TouchableOpacity>
+      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
           <View style={{flex: 1}}>
             <View style={styles.viewContainerReviewCustomer}>
-              {order && (
+              {order.order.customerID.avatar && (
                 <Image
                   style={styles.imageAvatar}
                   source={{uri: `${order.order.customerID.avatar}`}}
@@ -145,6 +180,7 @@ const SubmitReview = () => {
               <View style={styles.viewContainerInput}>
                 <TextInput
                   placeholder="Nhập phản hồi"
+                  placeholderTextColor={'#74788C'}
                   multiline
                   numberOfLines={5}
                   textAlignVertical="top"
@@ -196,7 +232,7 @@ const SubmitReview = () => {
               />
             </View>
             <View style={styles.viewContainerReviewCustomer}>
-              {order && (
+              {order.order.merchantID.imageBackground && (
                 <Image
                   style={styles.imageAvatar}
                   source={{uri: `${order.order.merchantID.imageBackground}`}}
