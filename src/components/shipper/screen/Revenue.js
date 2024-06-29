@@ -1,9 +1,10 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useContext, useEffect, useState} from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import {Calendar} from 'react-native-calendars';
-import {UserContext} from '../../user/UserContext';
+import { Calendar } from 'react-native-calendars';
+import { UserContext } from '../../user/UserContext';
 import { styles } from '../styles/RevenueStyle';
+import History from './History';
 import DetailRevenue from './DetailRevenue';
 
 const Revenue = () => {
@@ -26,7 +27,7 @@ const Revenue = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const {user} = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const formattedDate = date.toLocaleDateString();
   const ID = user.checkAccount._id;
 
@@ -193,7 +194,7 @@ const Revenue = () => {
             <FontAwesome6 name={'caret-left'} size={30} color={'#000'} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={{marginHorizontal: 10}}
+            style={{ marginHorizontal: 10 }}
             onPress={handlePreviousWeek}>
             <FontAwesome6 name={'angles-left'} size={30} color={'#000'} />
           </TouchableOpacity>
@@ -207,25 +208,20 @@ const Revenue = () => {
               {formattedDate} -- {formattedDate}
             </Text>
           ) : index === 2 ? (
-            <Text style={styles.textShowDate}>{`${
-              formatedAlllDate(startDateWeek)
-                ? formatedAlllDate(startDateWeek)
-                : ''
-            } -- ${
-              formatedAlllDate(endDateWeek) ? formatedAlllDate(endDateWeek) : ''
-            }`}</Text>
+            <Text style={styles.textShowDate}>{`${formatedAlllDate(startDateWeek)
+              ? formatedAlllDate(startDateWeek)
+              : ''
+              } -- ${formatedAlllDate(endDateWeek) ? formatedAlllDate(endDateWeek) : ''
+              }`}</Text>
           ) : index === 3 ? (
-            <Text style={styles.textShowDate}>{`${
-              formatedAlllDate(startOfMonth)
-                ? formatedAlllDate(startOfMonth)
-                : ''
-            } -- ${
-              formatedAlllDate(endOfMonth) ? formatedAlllDate(endOfMonth) : ''
-            }`}</Text>
+            <Text style={styles.textShowDate}>{`${formatedAlllDate(startOfMonth)
+              ? formatedAlllDate(startOfMonth)
+              : ''
+              } -- ${formatedAlllDate(endOfMonth) ? formatedAlllDate(endOfMonth) : ''
+              }`}</Text>
           ) : index === 4 ? (
-            <Text style={styles.textShowDate}>{`${
-              startDate ? formatDate(startDate) : ''
-            } -- ${endDate ? formatDate(endDate) : ''}`}</Text>
+            <Text style={styles.textShowDate}>{`${startDate ? formatDate(startDate) : ''
+              } -- ${endDate ? formatDate(endDate) : ''}`}</Text>
           ) : null}
         </View>
         <View style={styles.viewContainerIconRight}>
@@ -233,7 +229,7 @@ const Revenue = () => {
             <FontAwesome6 name={'chevron-right'} size={23} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={{marginHorizontal: 10}}
+            style={{ marginHorizontal: 10 }}
             onPress={handleNextWeek}>
             <FontAwesome6 name={'angles-right'} size={30} color={'#000'} />
           </TouchableOpacity>
@@ -260,6 +256,10 @@ const Revenue = () => {
           />
         )}
       </View>
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+      >
+        <View>
       <View style={styles.viewContainerTotalRevenue}>
         <View style={styles.viewTotalRevenue}>
           <FontAwesome6
@@ -269,45 +269,53 @@ const Revenue = () => {
             style={styles.iconCoins}
           />
           {index === 1 ? (
-                <Text style={styles.textShowDateRevenue}>{formattedDate}</Text>
-              ) : index === 2 ? (
-                <Text style={styles.textShowDateRevenue}>{`${
-                  formatedAlllDate(startDateWeek)
-                    ? formatedAlllDate(startDateWeek)
-                    : ''
-                } -- ${
-                  formatedAlllDate(endDateWeek)
-                    ? formatedAlllDate(endDateWeek)
-                    : ''
-                }`}</Text>
-              ) : index === 3 ? (
-                <Text style={styles.textShowDateRevenue}>{`${
-                  formatedAlllDate(startOfMonth)
-                    ? formatedAlllDate(startOfMonth)
-                    : ''
-                } -- ${
-                  formatedAlllDate(endOfMonth)
-                    ? formatedAlllDate(endOfMonth)
-                    : ''
-                }`}</Text>
-              ) : index === 4 ? (
-                <Text style={styles.textShowDateRevenue}>{`${
-                  startDate ? formatDate(startDate) : ''
-                } -- ${endDate ? formatDate(endDate) : ''}`}</Text>
-              ) : null}
+            <Text style={styles.textShowDateRevenue}>{formattedDate}</Text>
+          ) : index === 2 ? (
+            <Text style={styles.textShowDateRevenue}>{`${formatedAlllDate(startDateWeek)
+              ? formatedAlllDate(startDateWeek)
+              : ''
+              } -- ${formatedAlllDate(endDateWeek)
+                ? formatedAlllDate(endDateWeek)
+                : ''
+              }`}</Text>
+          ) : index === 3 ? (
+            <Text style={styles.textShowDateRevenue}>{`${formatedAlllDate(startOfMonth)
+              ? formatedAlllDate(startOfMonth)
+              : ''
+              } -- ${formatedAlllDate(endOfMonth)
+                ? formatedAlllDate(endOfMonth)
+                : ''
+              }`}</Text>
+          ) : index === 4 ? (
+            <Text style={styles.textShowDateRevenue}>{`${startDate ? formatDate(startDate) : ''
+              } -- ${endDate ? formatDate(endDate) : ''}`}</Text>
+          ) : null}
         </View>
+      
+      
         <DetailRevenue
-              ID={ID}
-              startDateWeek={startDateWeek}
-              endDateWeek={endDateWeek}
-              startOfMonth={startOfMonth}
-              endOfMonth={endOfMonth}
-              startDate={startDate}
-              endDate={endDate}
-              index={index}
-              date={date}
-            />
-      </View>
+          ID={ID}
+          startDateWeek={startDateWeek}
+          endDateWeek={endDateWeek}
+          startOfMonth={startOfMonth}
+          endOfMonth={endOfMonth}
+          startDate={startDate}
+          endDate={endDate}
+          index={index}
+          date={date}
+        />
+        </View>
+        {index === 1 ? (
+          <History startDate={date} endDate={date} />
+        ) : index === 2 ? (
+          <History startDate={startDateWeek} endDate={endDateWeek} />
+        ) : index === 3 ? (
+          <History startDate={startOfMonth} endDate={endOfMonth} />
+        ) : index === 4 ? (
+          <History startDate={startDate} endDate={endDate} />
+        ) : null}
+        </View>
+      </ScrollView>
     </View>
   );
 };
