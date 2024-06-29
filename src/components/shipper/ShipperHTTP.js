@@ -180,3 +180,25 @@ export const changePass = async (passOld, passNew,id) => {
       ToastAndroid.show('error', ToastAndroid.SHORT)
   }
 }
+export const getHistoryShipper = async(id) =>{
+  try {
+      const axiosInstance = AxiosInstance();
+      const url = 'shippers/getHistoryOrder';
+      const params = {id: id};
+      return await axiosInstance.get(url, {params});
+  } catch (error) {
+      console.log(error);
+      throw error;
+  }
+}
+
+export const getReviewOfOrder = async (id) => {
+  try {
+      const axiosInstance =  AxiosInstance();
+      const url = '/orders/getReviewOfOrder/'
+      const params = {id: id};
+      return await axiosInstance.get(url, {params})
+  } catch (error) {
+      console.log(error)
+  }
+}

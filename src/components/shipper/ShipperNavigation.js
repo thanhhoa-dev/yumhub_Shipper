@@ -17,6 +17,8 @@ import HistoryFeedback from './screen/HistoryFeedback';
 import Menu from './screen/Menu';
 import Profile from './screen/Profile';
 import ChangePass from './screen/ChangePass';
+import DetailHistory from './screen/DetailHistory';
+import History from './screen/History';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -151,6 +153,16 @@ const ShipperStackNavigation = () => {
         options={{headerShown: false}}
         name="ChangePass"
         component={ChangePass}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="DetailHistory"
+        component={DetailHistory}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="History"
+        component={History}
       />
     </Stack.Navigator>
   );
