@@ -1,5 +1,5 @@
 import {Dimensions, StyleSheet, Text, View} from 'react-native';
-import { Color, Size, FontWeight, FontFamily } from '../../../constants/theme';
+import {Color, Size, FontWeight, FontFamily} from '../../../constants/theme';
 const {height} = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
@@ -91,6 +91,11 @@ export const styles = StyleSheet.create({
     borderTopStartRadius: Size.S24,
     padding: Size.S10,
   },
+  textDate: {
+    color: '#32343E',
+    fontSize: 12,
+    fontWeight: '400',
+  },
   textNameFeedback: {
     fontWeight: FontWeight.FW700,
     color: '#000',
@@ -109,10 +114,14 @@ export const styles = StyleSheet.create({
   },
   textHistoryFeedback: {
     marginStart: Size.S10,
+    fontSize: 17,
+    fontWeight: '400',
+    color: '#32343E',
   },
   viewHeader: {
     flexDirection: 'row',
-    marginTop: Size.S10,
+    marginTop: 20,
+    alignItems: 'center',
   },
   viewContainer: {
     flex: 1,
@@ -121,6 +130,6 @@ export const styles = StyleSheet.create({
   viewContainerBackgroundColor: {
     backgroundColor: Color.white,
     flex: 1,
-    fontFamily: FontFamily.poppins
+    fontFamily: FontFamily.poppins,
   },
 });

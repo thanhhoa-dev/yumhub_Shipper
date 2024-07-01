@@ -3,27 +3,31 @@ import {Color, Size, FontWeight, FontFamily} from '../../../constants/theme';
 
 export const styles = StyleSheet.create({
   viewContainerShowCalender: {
-    marginHorizontal: Size.S20,
     marginTop: Size.S10,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     overflow: 'hidden',
   },
+  viewLine: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#DFDFDF',
+    marginVertical: 20,
+  },
   textDateOptions: {
     color: Color.white,
-    fontSize: Size.S12,
+    fontSize: Size.S16,
     fontWeight: FontWeight.FW400,
   },
   buttonDateOptions: {
     backgroundColor: Color.primary2,
-    paddingHorizontal: 6,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderRadius: 8,
+    height: 40,
+    justifyContent: 'center',
   },
   viewButtonDateOptions: {
     marginTop: 15,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
   textNumberStatistical: {
     color: Color.neutral500,

@@ -1,33 +1,32 @@
 import {Image, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import FastImage from 'react-native-fast-image';
 import { styles } from '../styles/SuccessOrderStyle';
+import { UpdateShipperInformation } from '../ShipperHTTP';
+import { UserContext } from '../../user/UserContext';
 
 const SuccessOrder = () => {
-  const [showStaticImage, setShowStaticImage] = useState(false);
+  const {user} = useContext(UserContext);
+  const id = user.checkAccount._id;
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowStaticImage(true);
-    }, 1600);
-
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      try {
+        await UpdateShipperInformation(id, 3);
+      } catch (error) {
+        throw error;
+      }
+    };
+    fetchData();
   }, []);
   return (
     <View style={styles.viewContainer}>
-      {showStaticImage ? (
-        <Image
-          style={styles.image}
-          source={require('../../../assets/successGIF.gif')}
-        />
-      ) : (
         <FastImage
           style={styles.image}
-          source={require('../../../assets/successGIF.gif')}
+          source={{uri:'https://cdn.dribbble.com/users/251873/screenshots/9289747/13540-sign-for-success-alert.gif'}}
           priority={FastImage.priority.normal}
           resizeMode={FastImage.resizeMode.contain}
         />
-      )}
       <Text style={styles.textSuccessOrder}>
         Chúc mừng bạn đã hoàn thành chuyến đi !
       </Text>

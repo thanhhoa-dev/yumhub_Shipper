@@ -179,7 +179,7 @@ const HistoryFeedback = () => {
       <View style={styles.viewContainer}>
         <View style={styles.viewHeader}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <AntDesign name={'left'} size={20} />
+            <Entypo name={'chevron-left'} size={30} color='#32343E' />
           </TouchableOpacity>
           <Text style={styles.textHistoryFeedback}>Lịch sử đánh giá</Text>
         </View>

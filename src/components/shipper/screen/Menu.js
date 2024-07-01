@@ -62,7 +62,7 @@ const Menu = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.viewBoder}>
-                    <TouchableOpacity style={styles.viewItem}>
+                    <TouchableOpacity onPress={() => {navigation.navigate('Feedback')}} style={styles.viewItem}>
                         <View>
                             <View>
                                 <Feather name={'file-text'} size={30} color="#19D6E5" />
@@ -73,7 +73,7 @@ const Menu = ({ navigation }) => {
                         </View>
                         <Icon name="chevron-right" size={20} color="#005987" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.viewItem}>
+                    <TouchableOpacity onPress={()=>{navigation.navigate('HistoryFeedback')}} style={styles.viewItem}>
                         <View>
                             <Feather name={'file-text'} size={30} color="#19D6E5" />
                         </View>

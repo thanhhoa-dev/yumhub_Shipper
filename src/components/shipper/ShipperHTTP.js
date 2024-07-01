@@ -89,7 +89,7 @@ export const UpdateShipperInformation = async (id, status) => {
     const body = {
       status: status,
     };
-    return await axiosInstance.patch(url, {params}, body);
+    return await axiosInstance.patch(url, body, {params});
   } catch (error) {
     console.log(error);
     throw error;
