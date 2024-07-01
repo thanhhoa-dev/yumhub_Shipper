@@ -14,6 +14,7 @@ export const Color = {
     neutral300:"#6C6C6C",
     neutral500:"#232323",
     borderD9D9:"#D9D9D9",
+    actionText:'#FFF9E6'
 }
 
 export const Size = {

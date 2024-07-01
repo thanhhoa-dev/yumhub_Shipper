@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
-import { Color, Size, FontWeight, FontFamily } from '../../../constants/theme';
+import {Color, Size, FontWeight, FontFamily} from '../../../constants/theme';
 
 export const styles = StyleSheet.create({
   textNameFeedback: {
@@ -68,16 +68,19 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     paddingStart: 20,
     paddingEnd: 10,
-    borderWidth: 1,
     elevation: 15,
+    paddingVertical:8
   },
   titleHeader: {
     marginStart: 20,
+    color: '#32343E',
+    fontSize: 17,
+    fontWeight: '400',
   },
   viewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 20,
   },
   viewContainer: {
     flex: 1,
@@ -86,6 +89,6 @@ export const styles = StyleSheet.create({
   viewContainerBackgroundColor: {
     backgroundColor: Color.white,
     flex: 1,
-    fontFamily: FontFamily.poppins
+    fontFamily: FontFamily.poppins,
   },
 });

@@ -134,7 +134,7 @@ const Feedback = () => {
             </TouchableOpacity>
           </View>
           <Text style={styles.textNameFeedback}>
-            {item.review.typeOfReview}
+            {item.user.fullName}
           </Text>
           <View style={{width: 100, paddingVertical: 10}}>
             <StarRating
@@ -160,7 +160,7 @@ const Feedback = () => {
       <View style={styles.viewContainer}>
         <View style={styles.viewHeader}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <AntDesign name={'left'} size={20} />
+            <Entypo name={'chevron-left'} size={30} color={'#32343E'} />
           </TouchableOpacity>
           <Text style={styles.titleHeader}>Phản hồi từ khách hàng</Text>
         </View>

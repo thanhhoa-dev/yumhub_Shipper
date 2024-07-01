@@ -1,5 +1,6 @@
 import {StyleSheet} from 'react-native';
 import {Size, Color, FontWeight, FontFamily} from '../../../constants/theme';
+import { rgbaArrayToRGBAColor } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
 
 export const styles = StyleSheet.create({
   buttonPowerOffStatusShipper: {
@@ -29,6 +30,7 @@ export const styles = StyleSheet.create({
   },
   viewContainerBottomSheet: {
     flex: 1,
+    marginHorizontal:20,
   },
   textCustomerPhoneNumber: {
     color: Color.primary1,
@@ -39,17 +41,20 @@ export const styles = StyleSheet.create({
     marginStart: 10,
   },
   textReceiveCancelOrder: {
-    color: Color.white,
-    fontSize: Size.S20,
+    color: Color.textBold,
+    fontSize: Size.S16,
     fontWeight: FontWeight.FW700,
-    paddingVertical: 10,
-    textAlign: 'center',
   },
   buttonReceiveCancelOrder: {
-    borderRadius: Size.S20,
+    borderRadius: Size.S12,
     backgroundColor: Color.primary2,
+    height: 50,
     marginHorizontal: 40,
     marginVertical: 35,
+    borderWidth:1,
+    borderColor:Color.text,
+    justifyContent:'center',
+    alignItems:'center'
   },
   textInputCancelOrder: {
     color: Color.textBold,
@@ -57,18 +62,17 @@ export const styles = StyleSheet.create({
     fontWeight: FontWeight.FW400,
   },
   viewContainerTextInputCancelOrder: {
-    backgroundColor: Color.bgInput,
     borderRadius: 15,
     marginHorizontal: Size.S20,
-    marginTop: 15,
+    marginTop: 35,
     paddingHorizontal: 10,
-    height: 190,
   },
   textReasonForCancellation: {
     color: Color.textBold,
     fontSize: Size.S20,
     fontWeight: FontWeight.FW700,
     marginStart: Size.S20,
+    textAlign:'center'
   },
   textTakePhotoBottomSheet: {
     color: Color.white,
@@ -79,7 +83,6 @@ export const styles = StyleSheet.create({
   buttonTakePhotoBottomSheet: {
     backgroundColor: Color.primary2,
     borderRadius: 15,
-    marginHorizontal: 15,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: Size.S20,
@@ -87,8 +90,7 @@ export const styles = StyleSheet.create({
   textListFoodBottomSheet: {
     color: Color.textBold,
     fontSize: Size.S20,
-    fontWeight: FontWeight.FW400,
-    marginStart: 15,
+    fontWeight: FontWeight.FW700,
   },
   textInformationFoodBottomSheet: {
     color: Color.textBold,
@@ -110,11 +112,10 @@ export const styles = StyleSheet.create({
     marginTop: 10,
   },
   textCodeOrdersBottomSheet: {
-    color: Color.point2,
-    textAlign: "center",
-    fontSize: 20,
+    color: '#646982',
     fontWeight: '400',
-    marginBottom: 13,
+    flexShrink: 1,
+    marginStart:10
   },
   viewListItemInformationFoodBottomSheet: {
     marginTop: 30,
@@ -128,7 +129,6 @@ export const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: Color.white,
     borderRadius: 50,
-    marginEnd: 15,
     borderColor: Color.primary1,
     borderWidth: 1,
   },
@@ -143,24 +143,22 @@ export const styles = StyleSheet.create({
   viewContainerIconBottomSheet: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent:'space-between'
   },
   viewInformationUserBottomSheet: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent:'space-between'
   },
   viewContainerCallUserBottomSheet: {
     marginTop: 27,
-    flexDirection: 'row',
-    paddingVertical: Size.S20,
+    paddingVertical: Size.S18,
     paddingHorizontal: 25,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderWidth: 1,
     marginHorizontal: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
     height: 116,
+    justifyContent:'center'
   },
   textArriveRestaurantBottomSheet: {
     color: Color.white,
@@ -189,7 +187,6 @@ export const styles = StyleSheet.create({
   },
   viewArriveRestaurantBottomSheet: {
     marginTop: Size.S20,
-    marginHorizontal: 15,
   },
   textIncomeBottomSheet: {
     fontWeight: FontWeight.FW600,
@@ -212,9 +209,13 @@ export const styles = StyleSheet.create({
     fontWeight: FontWeight.FW600,
     paddingBottom: Size.S20,
   },
+  viewLine:{
+    borderBottomWidth:3,
+    borderBottomColor:'#DFDFDF',
+    marginVertical:20
+  },
   viewSummaryBottomSheet: {
-    paddingHorizontal: 10,
-    marginTop: Size.S20,
+    // marginTop: Size.S20,
   },
   viewConnectingWireBottomSheet: {
     height: 25,
@@ -237,10 +238,8 @@ export const styles = StyleSheet.create({
   viewStepsDeliveryBottomSheet: {
     flexDirection: 'row',
     alignItems: 'center',
-    // paddingBottom: 25,
   },
   viewContainerStepsDeliveryBottomSheet: {
-    paddingHorizontal: 30,
     marginTop: 30,
   },
   textWishBottomSheet: {
@@ -290,7 +289,6 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   viewInformationMerchantBottomSheet: {
-    marginHorizontal: 30,
     paddingTop: Size.S20,
     flexDirection: 'row',
   },
@@ -307,7 +305,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   textConfirmNo: {
-    color: Color.textBold,
+    color: Color.actionText,
     fontSize: Size.S20,
     fontWeight: FontWeight.FW700,
     paddingVertical: 10,
@@ -315,7 +313,7 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
   textConfirmYes: {
-    color: Color.text,
+    color: Color.actionText,
     fontSize: Size.S20,
     fontWeight: FontWeight.FW700,
     paddingVertical: 10,
@@ -323,10 +321,13 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonConfirmNo: {
-    backgroundColor: Color.primary2,
+    backgroundColor: '#E46929',
+    borderWidth:1,
+    borderColor:Color.text
+    
   },
   buttonConfirmYes: {
-    backgroundColor: Color.background1,
+    backgroundColor: Color.text,
   },
   buttonConfirm: {
     borderRadius: 15,
@@ -339,7 +340,7 @@ export const styles = StyleSheet.create({
     marginBottom: 15,
   },
   TextConfirmOrder: {
-    color: Color.text,
+    color: '#333',
     textAlign: 'center',
     fontSize: Size.S16,
     fontWeight: FontWeight.FW700,
@@ -350,10 +351,11 @@ export const styles = StyleSheet.create({
     backgroundColor: Color.bgInput,
     borderRadius: 10,
     padding: 15,
+    elevation:10,
   },
   textXClose: {
     fontSize: Size.S16,
-    color: '#000',
+    color: '#FFF',
   },
   buttonCloseOrder: {
     position: 'absolute',
@@ -367,7 +369,7 @@ export const styles = StyleSheet.create({
     borderRadius: Size.S20,
   },
   textReceiveOrder: {
-    color: Color.white,
+    color: '#333333',
     fontSize: Size.S16,
     fontWeight: FontWeight.FW700,
     paddingVertical: Size.S20,
@@ -391,7 +393,8 @@ export const styles = StyleSheet.create({
   viewItemIncom: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingBottom: 6,
+    alignItems:'center',
+    paddingBottom: 16,
   },
   viewContainerInformationIncom: {
     marginTop: 13,
@@ -406,8 +409,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   viewContainerInformation: {
-    borderBottomWidth: 1,
-    borderBottomColor: Color.background1,
     paddingVertical: Size.S14,
   },
   textOrderNew: {
@@ -421,6 +422,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+    backgroundColor:'rgba(0,0,0,0.5)'
   },
   viewButtonOrder: {
     flexDirection: 'row',
@@ -429,11 +431,13 @@ export const styles = StyleSheet.create({
     marginTop: Size.S20,
   },
   centeredView: {
-    width: '85%',
+    width: '90%',
     backgroundColor: '#F6F8FA',
     borderRadius: 35,
     paddingVertical: Size.S20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
+    borderWidth:1,
+    borderColor:'#29D8E4'
   },
   viewContainerGoong: {
     flex: 1,

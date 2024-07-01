@@ -25,6 +25,7 @@ export const styles = StyleSheet.create({
     height: 220,
     backgroundColor: Color.white,
     width: '100%',
+    marginBottom:20
   },
   imageAvatar: {
     width: 68,
@@ -54,7 +55,7 @@ export const styles = StyleSheet.create({
     padding: 10,
   },
   viewContainerInput: {
-    height: 74,
+    height: 151,
     borderRadius: 15,
     backgroundColor: '#FFF9E6',
     marginTop: 23,
@@ -62,6 +63,7 @@ export const styles = StyleSheet.create({
     marginBottom: 17,
     borderWidth: 1,
     borderColor: '#EBA078',
+    position:'relative'
   },
   textNumberStarRating: {
     marginTop: 5,
@@ -70,19 +72,45 @@ export const styles = StyleSheet.create({
     fontWeight: FontWeight.FW400,
   },
   textReviewCustomer: {
-    marginTop: 60,
     color: Color.textBold,
-    fontSize: Size.S14,
+    fontSize: Size.S20,
     fontWeight: FontWeight.FW700,
+    marginTop:15
   },
   viewContainerReviewCustomer: {
     alignItems: 'center',
     backgroundColor: '#F2F2F2',
     borderRadius: 15,
-    marginTop: 59,
     paddingHorizontal: 23,
     position: 'relative',
     marginHorizontal: 16,
+    borderBottomWidth:1,
+    borderColor:'#DFDFDF',
+    marginTop:10
+  },
+  buttonHeaderHome:{
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    backgroundColor: '#F5FEFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+  },
+  textTitleHeader:{
+    color: '#005987',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  viewContainerHeader:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+    borderBottomWidth: 1,
+    borderBlockColor: '#5C94B2',
+    paddingHorizontal: 20,
+    paddingBottom: 8,
   },
   viewContainer: {
     flex: 1,

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -14,7 +15,6 @@ import {CreateReivew, GetOrderByID, uploadImage} from '../ShipperHTTP';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {styles} from '../styles/SubmitReviewStyle';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useSafeAreaFrame} from 'react-native-safe-area-context';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -27,28 +27,14 @@ const SubmitReview = () => {
   const [ratingMerchant, setRatingMerchant] = useState(0);
   const [descriptionCustomer, setDescriptionCustomer] = useState('');
   const [descriptionMerchant, setDescriptionMerchant] = useState('');
-  // const [order, setOrder] = useState(null);
+  const [index, setIndex] = useState(null);
   const [image, setImage] = useState([]);
+  const [imageCustomer, setImageCustomer] = useState([]);
   const {user} = useContext(UserContext);
 
   const route = useRoute();
   const {order} = route.params;
   const idUser = user.checkAccount._id;
-
-  // useEffect(() => {
-  //   const fetchOrder = async () => {
-  //     try {
-  //       const result = await GetOrderByID(id);
-  //       setOrder(result);
-  //     } catch (error) {
-  //       console.log('Error fetching order:', error);
-  //       throw error;
-  //     }
-  //   };
-  //   if (id) {
-  //     fetchOrder();
-  //   }
-  // }, [id]);
 
   const handleCreateReview = async () => {
     const customerReviewData = {
@@ -66,17 +52,24 @@ const SubmitReview = () => {
       description: descriptionMerchant,
       rating: ratingMerchant,
       typeOfReview: 4,
+      images: imageCustomer,
     };
 
-    try {
-      await CreateReivew(customerReviewData);
-      const result = await CreateReivew(merchantReviewData);
-      if (result.result) {
+    if (ratingCustomer !== 0 || ratingMerchant !== 0) {
+      try {
+        if (ratingCustomer !== 0) {
+          await CreateReivew(customerReviewData);
+        }
+        if (ratingMerchant !== 0) {
+          await CreateReivew(merchantReviewData);
+        }
         navigation.navigate('Trang chủ');
         ToastAndroid.show('Gửi đánh giá thành công', ToastAndroid.SHORT);
+      } catch (error) {
+        console.log('Error creating review:', error);
       }
-    } catch (error) {
-      console.log('Error creating review:', error);
+    } else {
+      Alert.alert('Bạn chưa đánh giá nào!!');
     }
   };
 
@@ -101,7 +94,11 @@ const SubmitReview = () => {
       });
       try {
         const result = await uploadImage(formData);
-        setImage([result.url]);
+        if (index === 1) {
+          setImage([result.url]);
+        } else {
+          setImageCustomer([result.url]);
+        }
       } catch (error) {
         console.error('Error uploading image:', error);
       }
@@ -109,6 +106,7 @@ const SubmitReview = () => {
   }, []);
 
   const openCamera = useCallback(() => {
+    console.log('ahihi');
     const options = {
       mediaType: 'photo',
       quality: 1,
@@ -129,37 +127,14 @@ const SubmitReview = () => {
 
   return (
     <View style={styles.viewContainer}>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: 20,
-          borderBottomWidth: 1,
-          borderBlockColor: '#5C94B2',
-          paddingHorizontal: 20,
-          paddingBottom: 8,
-        }}>
-        <View style={{width:50, height:50}}/>
-        <Text
-          style={{
-            color: '#005987',
-            fontSize: 20,
-            fontWeight: '700',
-          }}>
-          Đánh giá của bạn
-        </Text>
+      <View style={styles.viewContainerHeader}>
+        <View style={{width: 50, height: 50}} />
+        <Text style={styles.textTitleHeader}>Đánh giá của bạn</Text>
         <TouchableOpacity
-        onPress={()=>{navigation.navigate('Trang chủ')}}
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: 50,
-            backgroundColor: '#F5FEFF',
-            alignItems: 'center',
-            justifyContent: 'center',
-            elevation: 5,
-          }}>
+          onPress={() => {
+            navigation.navigate('Trang chủ');
+          }}
+          style={styles.buttonHeaderHome}>
           <Feather name={'home'} size={30} color={'#19D6E5'} />
         </TouchableOpacity>
       </View>
@@ -167,26 +142,38 @@ const SubmitReview = () => {
         <View>
           <View style={{flex: 1}}>
             <View style={styles.viewContainerReviewCustomer}>
-              {order.order.customerID.avatar && (
-                <Image
-                  style={styles.imageAvatar}
-                  source={{uri: `${order.order.customerID.avatar}`}}
-                />
-              )}
-              <Text style={styles.textReviewCustomer}>Đánh giá khách hàng</Text>
-              <Text style={styles.textNumberStarRating}>
-                Bạn đánh giá khách hàng này như thế nào?
+              <Text style={styles.textReviewCustomer}>
+                Mời tài xế đánh giá cửa hàng
               </Text>
+              <StarRating
+                rating={ratingMerchant}
+                color="#FC6E2A"
+                starSize={40}
+                onChange={rating => setRatingMerchant(rating)}
+                style={{marginTop: 20, marginBottom: 12}}
+                enableHalfStar={false}
+              />
               <View style={styles.viewContainerInput}>
                 <TextInput
-                  placeholder="Nhập phản hồi"
+                  placeholder="Nhận xét và đánh giá..."
                   placeholderTextColor={'#74788C'}
                   multiline
                   numberOfLines={5}
                   textAlignVertical="top"
                   style={styles.textInputSubmitReview}
-                  onChangeText={text => setDescriptionCustomer(text)}
+                  onChangeText={text => setDescriptionMerchant(text)}
                 />
+                <TouchableOpacity
+                  style={{position: 'absolute', bottom: 5, right: 5}}
+                  onPress={() => {
+                    [openCamera(), setIndex(1)];
+                  }}>
+                  <MaterialCommunityIcons
+                    name={'camera-plus-outline'}
+                    size={35}
+                    color={'#333'}
+                  />
+                </TouchableOpacity>
               </View>
               {image.length > 0 && (
                 <View style={styles.viewContainerImage}>
@@ -214,51 +201,66 @@ const SubmitReview = () => {
                   </View>
                 </View>
               )}
-              {image.length <= 0 && (
-                <TouchableOpacity onPress={openCamera}>
-                  <MaterialCommunityIcons
-                    name={'camera-plus-outline'}
-                    size={50}
-                    color={'#000'}
-                  />
-                </TouchableOpacity>
-              )}
+            </View>
+            <View style={styles.viewContainerReviewCustomer}>
+              <Text style={styles.textReviewCustomer}>
+                Mời tài xế đánh giá khách hàng
+              </Text>
               <StarRating
                 rating={ratingCustomer}
                 color="#FC6E2A"
                 starSize={40}
                 onChange={rating => setRatingCustomer(rating)}
-                style={{marginTop: 20, marginBottom: 12}}
+                style={{marginTop: 15, marginBottom: 12}}
+                enableHalfStar={false}
               />
-            </View>
-            <View style={styles.viewContainerReviewCustomer}>
-              {order.order.merchantID.imageBackground && (
-                <Image
-                  style={styles.imageAvatar}
-                  source={{uri: `${order.order.merchantID.imageBackground}`}}
-                />
-              )}
-              <Text style={styles.textReviewCustomer}>Đánh giá nhà hàng</Text>
-              <Text style={styles.textNumberStarRating}>
-                Bạn đánh giá nhà hàng này như thế nào?
-              </Text>
               <View style={styles.viewContainerInput}>
                 <TextInput
-                  placeholder="Nhập phản hồi"
+                  placeholder="Nhận xét và đánh giá..."
                   multiline
                   numberOfLines={5}
                   textAlignVertical="top"
                   style={styles.textInputSubmitReview}
-                  onChangeText={text => setDescriptionMerchant(text)}
+                  onChangeText={text => setDescriptionCustomer(text)}
                 />
+                <TouchableOpacity
+                  style={{position: 'absolute', bottom: 5, right: 5}}
+                  onPress={() => {
+                    [openCamera(), setIndex(2)];
+                  }}>
+                  <MaterialCommunityIcons
+                    name={'camera-plus-outline'}
+                    size={35}
+                    color={'#333'}
+                  />
+                </TouchableOpacity>
               </View>
-              <StarRating
-                rating={ratingMerchant}
-                color="#FC6E2A"
-                starSize={40}
-                onChange={rating => setRatingMerchant(rating)}
-                style={{marginTop: 15, marginBottom: 12}}
-              />
+              {imageCustomer.length > 0 && (
+                <View style={styles.viewContainerImage}>
+                  <View style={styles.viewIcon}>
+                    <TouchableOpacity
+                      onPress={openLibrary}
+                      style={styles.buttonIcon}>
+                      <FontAwesome6 name={'images'} size={30} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setImageCustomer([])}
+                      style={styles.buttonIcon}>
+                      <MaterialIcons name={'delete'} size={30} />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.viewImage}>
+                    <Image
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        resizeMode: 'cover',
+                      }}
+                      source={{uri: `${imageCustomer[0]}`}}
+                    />
+                  </View>
+                </View>
+              )}
             </View>
           </View>
           <TouchableOpacity

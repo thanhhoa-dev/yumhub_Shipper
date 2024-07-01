@@ -28,16 +28,6 @@ const CancelSuccessOrder = () => {
     };
     fetchData();
   }, []);
-
-  // const [showStaticImage, setShowStaticImage] = useState(false);
-
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     setShowStaticImage(true);
-  //   }, 2600);
-
-  //   return () => clearTimeout(timer);
-  // }, []);
   return (
     <View style={styles.viewContainer}>
       <View style={styles.viewHeaderContainer}>
@@ -80,9 +70,6 @@ const CancelSuccessOrder = () => {
         Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi. Mọi ý kiến đóng góp
         xin liên hệ{' '}
         <Text
-          onPress={() => {
-            navigation.navigate('SubmitReview', {order: order});
-          }}
           style={{
             color: '#E46929',
             textDecorationLine: 'underline',
@@ -90,6 +77,13 @@ const CancelSuccessOrder = () => {
           tại đây
         </Text>
       </Text>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate('SubmitReview', {order: order});
+        }}
+        style={styles.buttonReviewOrder}>
+        <Text style={styles.textReviewOrder}>Đánh giá</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -97,6 +91,20 @@ const CancelSuccessOrder = () => {
 export default CancelSuccessOrder;
 
 const styles = StyleSheet.create({
+  textReviewOrder: {
+    color: '#333',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  buttonReviewOrder: {
+    marginHorizontal: 30,
+    borderRadius: 10,
+    backgroundColor: '#29D8E4',
+    marginTop: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
   textContentAdmin: {
     color: '#333',
     fontSize: 10,
