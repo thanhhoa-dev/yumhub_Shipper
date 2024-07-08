@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "185943946998",
+    "project_id": "yumhub-api-c3646",
+    "storage_bucket": "yumhub-api-c3646.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:185943946998:android:7e3d075fb21d2c85f75ed7",
+        "android_client_info": {
+          "package_name": "com.merchant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE4qx-ZYTxuja5FS2SaASc6VHRjBohezA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -11,6 +11,7 @@ import { UserContext } from '../../user/UserContext';
 import { styles } from '../styles/RevenueStyle';
 import DetailRevenue from './DetailRevenue';
 import DropdownComponent from './DropdownComponent';
+import History from './History';
 
 const Revenue = () => {
   const [date, setDate] = useState(new Date());
@@ -307,6 +308,15 @@ const Revenue = () => {
               date={date}
             />
           </View>
+          {index === 1 ? (
+          <History startDate={date} endDate={date} />
+        ) : index === 2 ? (
+          <History startDate={startDateWeek} endDate={endDateWeek} />
+        ) : index === 3 ? (
+          <History startDate={startOfMonth} endDate={endOfMonth} />
+        ) : index === 4 ? (
+          <History startDate={startDate} endDate={endDate} />
+        ) : null}
         </View>
       </ScrollView>
     </View>

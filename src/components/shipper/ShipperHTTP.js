@@ -192,13 +192,24 @@ export const getHistoryShipper = async(id) =>{
   }
 }
 
-export const getReviewOfOrder = async (id) => {
+export const getReviewOfOrder = async id => {
   try {
-      const axiosInstance =  AxiosInstance();
-      const url = '/orders/getReviewOfOrder/'
-      const params = {id: id};
-      return await axiosInstance.get(url, {params})
+    const axiosInstance = AxiosInstance();
+    const url = 'orders/getReviewOfOrder/';
+    const params = {id: id};
+    return await axiosInstance.get(url, {params});
   } catch (error) {
-      console.log(error)
+    console.log(error);
+  }
+};
+export const topUp = async (id, data) =>{
+  try {
+      const axiosInstance = AxiosInstance();
+      const url ='shippers/topUp';
+      const params = {id: id}
+      return await axiosInstance.post(url,data,{params})
+  } catch (error) {
+      console.log(error);
+      throw error;
   }
 }
