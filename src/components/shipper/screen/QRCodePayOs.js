@@ -9,7 +9,7 @@ import RNFS from 'react-native-fs';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import { FontWeight } from '../../../constants/theme';
-import { styles } from '../styles/TopUpPaymentMethodStyle'
+import { styles } from '../styles/TopUpPaymentMethodStyle';
 
 
 const formatCurrency2 = (amount) => {
@@ -23,12 +23,10 @@ const QRCodePayOs = () => {
     const { paymentLinkRes, data } = route.params;
     const viewShotRef = useRef(null);
     const [isChecking, setIsChecking] = useState(false);
-    console.log("xxx");
 
     const cancelPayment = async () => {
         const payOS = new PayOS("d595ed43-ecf6-4f2a-9c9b-c3a0a00aeb5d", "8e8f0123-db64-468d-92cc-68d990a9bd11", "58dbb967ca269e3b2b9f51c3e85a79a1251027b8004910b05ad2b460a7a12bd1");
         const cancelledPaymentLink = await payOS.cancelPaymentLink(paymentLinkRes.orderCode);
-        console.log(cancelledPaymentLink);
         if (cancelledPaymentLink.status === "CANCELLED") {
             Alert.alert('đã hủy giao dịch')
             navigation.goBack()
@@ -65,46 +63,59 @@ const QRCodePayOs = () => {
     };
 
     const downloadImg = async (uri) => {
-        try {
-            const fileName = uri.substring(uri.lastIndexOf('/') + 1);
-            const destination = `${RNFS.DownloadDirectoryPath}/${fileName}`;
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                {
-                    title: 'cấp quyền bộ nhớ',
-                    message: 'Vui lòng cho phép ứng dụng ghi file vào bộ nhớ thiết bị',
-                    buttonNeutral: 'Ask Me Later',
-                    buttonNegative: 'Cancel',
-                    buttonPositive: 'OK',
-                },
-            );
-
-            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                Alert.alert('Từ chối quyền!', 'bạn cần cho phép ứng dụng ghi file vào bộ nhớ thiết bị');
-                return;
+        async function requestWriteStoragePermission() {
+            try {
+                const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+                if (hasPermission)
+                    return true;
+                else {
+                    const granted = await PermissionsAndroid.request(
+                        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                        {
+                            title: "Cấp quyền!",
+                            message: "Cho phép truy cập Lưu vào bộ nhớ",
+                            buttonNeutral: "Để lần sau",
+                            buttonNegative: "Từ chối",
+                            buttonPositive: "Đồng Ý"
+                        }
+                    );
+                    return (granted === PermissionsAndroid.RESULTS.GRANTED);
+                }
+            } catch (err) {
+                console.warn(err);
+                return false;
             }
+        }
+        const permissionGranted = await requestWriteStoragePermission()
+        if (permissionGranted) {
+            try {
+                const fileName = uri.substring(uri.lastIndexOf('/') + 1);
+                const destination = `${RNFS.DownloadDirectoryPath}/${fileName}`;
 
-            const { promise } = RNFS.downloadFile({
-                fromUrl: uri,
-                toFile: destination,
-            });
 
-            const result = await promise;
-            if (result.statusCode === 200) {
-                Alert.alert('Thành công', `File downloaded successfully to ${destination}`);
-            } else {
-                Alert.alert('Failed', 'Failed to download file');
+                const { promise } = RNFS.downloadFile({
+                    fromUrl: uri,
+                    toFile: destination,
+                });
+
+                const result = await promise;
+                if (result.statusCode === 200) {
+                    Alert.alert('Thành công', `đã lưu file về máy' ${destination}`);
+                } else {
+                    Alert.alert('Lỗi', 'Không thể lưu file');
+                }
+            } catch (error) {
+                console.error('Download error:', error);
+                Alert.alert('Lỗi', 'Không thể lưu file');
             }
-        } catch (error) {
-            console.error('Download error:', error);
-            Alert.alert('Error', 'Failed to download file');
+        }else{
+            Alert.alert("Chưa cấp quyền truy cập bộ nhớ")
         }
     }
 
     const checkPayment = async () => {
         const payOS = new PayOS("d595ed43-ecf6-4f2a-9c9b-c3a0a00aeb5d", "8e8f0123-db64-468d-92cc-68d990a9bd11", "58dbb967ca269e3b2b9f51c3e85a79a1251027b8004910b05ad2b460a7a12bd1");
         const paymentLink = await payOS.getPaymentLinkInformation(paymentLinkRes.orderCode);
-        console.log(paymentLink);
         switch (paymentLink.status) {
             case "PENDING":
                 break;
@@ -257,7 +268,7 @@ const QRCodePayOs = () => {
                     fgColor="white"
                 />
             </ViewShot>
-            <TouchableOpacity style={[styles.bntConfirm, {marginTop : 28, marginBottom : 80}]}
+            <TouchableOpacity style={[styles.bntConfirm, { marginTop: 28, marginBottom: 80 }]}
                 onPress={captureQRCode}
             >
                 <Text style={styles.txtConfirm}>Lưu QR Code</Text>

@@ -43,7 +43,6 @@ const History = ({ startDate, endDate }) => {
             try {
                 const response = await getHistoryShipper(idShipper);
                 setlistHistory(response.historyShipper);
-
             } catch (error) {
                 console.log(error);
             }
@@ -112,7 +111,7 @@ const History = ({ startDate, endDate }) => {
             >
                 <View style={styles.itemHeader}>
                     <Text style={styles.itemTime}>{formatDate(item.timeBook)}</Text>
-                    <Text style={[styles.itemStatus, { color: status(item.status).color }]}>{status(item.status).text}</Text>
+                    <Text style={[styles.itemStatus, { color: status(item.status._id).color }]}>{status(item.status._id).text}</Text>
                     <Text style={styles.itemID}>{item._id.slice(-9)}</Text>
                 </View>
                 <View style={styles.itemName}>
