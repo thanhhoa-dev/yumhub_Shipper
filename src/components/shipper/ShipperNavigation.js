@@ -98,7 +98,7 @@ const ShipperTabNavigation = () => {
       <Tab.Screen
         options={{headerShown: false}}
         name="Thông báo"
-        component={ChatWithCustomer}
+        component={Notification}
       />
       <Tab.Screen
         options={{headerShown: false}}
@@ -177,11 +177,11 @@ const ShipperStackNavigation = () => {
         name="TopUpPaymentMethod"
         component={TopUpPaymentMethod}
       />
-       {/* <Stack.Screen
+       <Stack.Screen
         options={{headerShown: false}}
         name="ChatWithCustomer"
         component={ChatWithCustomer}
-      /> */}
+      />
     </Stack.Navigator>
   );
 };

@@ -1,10 +1,10 @@
 import {
     View, Text, TouchableWithoutFeedback,
-    FlatList, ScrollView, TextInput,
+    FlatList, TextInput,
     TouchableOpacity,
     Image
 } from 'react-native'
-import React, { useContext, useEffect, useState, useCallback } from 'react'
+import React, { useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { UserContext } from '../../user/UserContext'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from '../styles/ChatWithCustomerStyle';
@@ -38,87 +38,9 @@ const renderContentMessage = (type_mess, message) => {
 
 const ChatWithCustomer = () => {
     const navigation = useNavigation();
-    const [image, setImage] = useState([]);
     const route = useRoute();
-
-    // const { order } = route.params;
-    const order = {
-        _id: "660c9dc319f26b917ea15837",
-        customerID: {
-            _id: "6678dfdc0d224fa4bbb27fa9",
-            fullName: "Test 17/6",
-            phoneNumber: "0123456789",
-            email: "Thanhhoa@gmail.com",
-            password: "$2b$10$adM7xLbBVXsIk2yKhEySPew/3NRF17CCyiV9/0/8SX8NR0bCexlIO",
-            deleted: false,
-            joinDay: "2024-06-17T15:46:52.045Z",
-            __v: 0
-        },
-        merchantID: {
-            _id: "660c99c2fc13ae788b50fbdc",
-            name: "Cơm chay",
-            address: "Cộng Hòa",
-            joinDay: "2023-11-22T17:00:00.000Z",
-            type: "664ecba2c0ff64d4f3536c62",
-            openTime: "9 AM",
-            closeTime: "11:53 PM",
-            rating: 4780644259,
-            deleted: false,
-            longitude: 106.691645,
-            latitude: 10.847346,
-            status: 3,
-            balance: 50000,
-            email: "hoanglv.610@gmail.com",
-            __v: 0,
-            imageBackground: "https://topbrands.vn/wp-content/uploads/2021/06/Food-house-1.jpg"
-        },
-        shipperID: {
-            _id: "6659909e220eacc819e64ff2",
-            joinDay: "2024-05-31T08:55:58.078Z",
-            idBike: "123456789",
-            status: 3,
-            sex: "Male",
-            birthDay: "6/9/2023",
-            phoneNumber: "0983826756",
-            email: "bason1607@gmail.com",
-            address: "97637 Springview Center",
-            brandBike: "49643-373",
-            modeCode: "Violet",
-            deleted: false,
-            balance: 0,
-            fullName: "Ozawoa Gregi",
-            avatar: "https://th.bing.com/th/id/OIP.EZSE_R9Nk9jBS6EGWJss4gHaJ2?rs=1&pid=ImgDetMain",
-            __v: 0,
-            password: "$2b$10$BfCye2IwVD3yQ2l6awPhq.qkQG7lldsiAgUu/qVcyTI3p7eoJJCpu"
-        },
-        voucherID: {
-            _id: "665fca7c09384790694a53fb",
-            startDate: "2024-06-06T00:00:00.000Z",
-            endDate: "2024-06-06T00:00:00.000Z",
-            nameVoucher: "Lễ Hội Ẩm Thực",
-            discountAmount: 14000,
-            typeOfVoucherID: "6656cfad8913d56206f64e06",
-            code: "LEHOI",
-            conditionsApply: 120000,
-            __v: 0
-        },
-        deliveryAddress: "183 Phạm Huy Thông, Phường 6, Gò Vấp, Thành phố Hồ Chí Minh, Vietnam",
-        priceFood: 158784,
-        deliveryCost: 41249,
-        totalPaid: 1347215,
-        timeBook: "2024-03-15T17:00:00.000Z",
-        timeGetFood: "2023-09-02T17:00:00.000Z",
-        timeGiveFood: "2024-01-09T17:00:00.000Z",
-        totalDistance: "5",
-        status: "661760e3fc13ae3574ab8dde",
-        imageGetFood: "https://th.bing.com/th/id/OIP.eGCsbVXzHIb6Scm1EVVm3wHaHa?w=512&h=512&rs=1&pid=ImgDetMain",
-        imageGiveFood: "https://thumbs.dreamstime.com/b/fat-man-eating-fast-food-hamberger-breakfast-overweight-person-diet-failure-happy-smile-who-spoiled-healthy-huge-92164278.jpg?w=400",
-        __v: 0,
-        paymentMethod: 1,
-        revenueDelivery: 37124.1,
-        revenueMerchant: 142905.6
-    }
-    // end orderdummy
+    const flatListRef = useRef(null);
+    const { order } = route.params;
     const [dataMessage, setdataMessage] = useState(null)
     const { user, sendMessageChat, receiveMessageChat } = useContext(UserContext);
     const [message, setmessage] = useState("")
@@ -134,7 +56,6 @@ const ChatWithCustomer = () => {
             console.error('ImagePicker Error: ', response.errorMessage);
             return;
         }
-        console.log(response);
         if (response.assets && response.assets.length > 0) {
             const asset = response.assets[0];
             const formData = new FormData();
@@ -144,11 +65,8 @@ const ChatWithCustomer = () => {
                 name: asset.fileName,
             });
             try {
-                console.log();
                 const result = await uploadImage(formData);
                 if (result) {
-                    // setImage([result.url]);
-                    console.log("xxx", result.url);
                     handleSendMessage(result.url, "image")
                 } else {
                     const options = {
@@ -258,8 +176,8 @@ const ChatWithCustomer = () => {
                 switch (message.command) {
                     case 'chat':
                         if (message.order._id == order._id) {
-                            setdataMessage(message.fullchat);
-                            console.log(dataMessage);
+                            setdataMessage(message.fullchat)
+                            flatListRef.current.scrollToEnd({ animated: true });
                         }
                         break;
                     default:
@@ -314,9 +232,11 @@ const ChatWithCustomer = () => {
                 <FlatList style={styles.containerMessage}
                     data={dataMessage}
                     renderItem={renderMessage}
-                >
-
-                </FlatList>
+                    keyExtractor={(item, index) => index.toString()}
+                    showsHorizontalScrollIndicator={false}
+                    showsVerticalScrollIndicator={false}
+                    ref={flatListRef}
+                />
                 <View style={styles.viewInput}>
                     <TouchableOpacity
                         onPress={openCamera}
@@ -353,7 +273,11 @@ const ChatWithCustomer = () => {
                         style={styles.btnSend}
                     >
                         <View>
-                            <Text style={styles.txtSend}>Gửi</Text>
+                            <Icon
+                            name="paper-plane"
+                            size={22}
+                            color="#005987"
+                            />
                         </View>
                     </TouchableOpacity>
                 </View>

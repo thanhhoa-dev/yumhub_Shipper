@@ -4,11 +4,8 @@ import {Color, Size, FontWeight, FontFamily} from '../../../constants/theme';
 export const styles = StyleSheet.create({
   container : {
     flex: 1,
-    borderWidth: 0.5,
-    borderColor: "#FFD9D9D9",
     fontFamily : FontFamily.poppins,
     paddingVertical : 20,
-    paddingHorizontal : 20
   },
   viewIcon : {
     width : 40,
