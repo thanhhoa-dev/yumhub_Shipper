@@ -618,9 +618,9 @@ const Goong = () => {
     }
   };
 
-  if (!locateCurrent) {
-    return <Loading />;
-  }
+  // if (!locateCurrent) {
+  //   return <Loading />;
+  // }
 
   return (
     <View style={styles.viewContainerGoong}>
