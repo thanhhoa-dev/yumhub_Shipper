@@ -32,7 +32,9 @@ const Menu = ({ navigation }) => {
                     <Text style={{ color: "white", fontSize: 40, fontWeight: '700' }}>{user.checkAccount.balance} đ</Text>
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginStart: 20, marginEnd: 20, marginTop: 15 }}>
-                    <TouchableOpacity style={styles.viewButton}>
+                <TouchableOpacity style={styles.viewButton}
+                        onPress={()=> navigation.navigate('TopUpPaymentMethod')}
+                    >
                         <Text style={styles.textButton}>Nạp tiền</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.viewButton}>
