@@ -19,6 +19,9 @@ import Profile from './screen/Profile';
 import ChangePass from './screen/ChangePass';
 import DetailHistory from './screen/DetailHistory';
 import History from './screen/History';
+import TopUpPaymentMethod from './screen/TopUpPaymentMethod';
+import QRCodePayOs from './screen/QRCodePayOs';
+import ChatWithCustomer from './screen/ChatWithCustomer'
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -95,7 +98,7 @@ const ShipperTabNavigation = () => {
       <Tab.Screen
         options={{headerShown: false}}
         name="Thông báo"
-        component={Notification}
+        component={ChatWithCustomer}
       />
       <Tab.Screen
         options={{headerShown: false}}
@@ -164,6 +167,21 @@ const ShipperStackNavigation = () => {
         name="History"
         component={History}
       />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="QRCodePayOs"
+        component={QRCodePayOs}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="TopUpPaymentMethod"
+        component={TopUpPaymentMethod}
+      />
+       {/* <Stack.Screen
+        options={{headerShown: false}}
+        name="ChatWithCustomer"
+        component={ChatWithCustomer}
+      /> */}
     </Stack.Navigator>
   );
 };

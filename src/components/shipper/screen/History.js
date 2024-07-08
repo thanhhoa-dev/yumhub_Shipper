@@ -3,14 +3,14 @@ import {
     Image,
     TouchableOpacity
 } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { styles } from '../styles/HistoryStyle'
 import { getHistoryShipper } from '../ShipperHTTP'
 import Loading from './Loading'
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import { Color, Size, FontWeight, FontFamily } from '../../../constants/theme';
 import { useNavigation } from '@react-navigation/native';
-
+import { UserContext } from '../../user/UserContext'
 
 const filterByDateRange = (list, startDate, endDate) => {
     if (!startDate && !endDate) {
@@ -34,8 +34,10 @@ const filterByDateRange = (list, startDate, endDate) => {
 };
 const History = ({ startDate, endDate }) => {
     const navigation = useNavigation();
-    const idShipper = "6604e1ec5a6c5ad8711aebfa";
+    const { user } = useContext(UserContext);
+    const idShipper = user.checkAccount._id;
     const [listHistory, setlistHistory] = useState([])
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -56,6 +58,7 @@ const History = ({ startDate, endDate }) => {
     };
 
     function capitalizeWords(str) {
+        if(str == undefined) return ''
         return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }
 
