@@ -13,16 +13,16 @@ export const UserProvider = (props) => {
     const { children } = props;
     const [user, setUser] = useState(null);
     const [socket, setSocket] = useState(null);
-    const [tokenNotifaction, setTokenNotification] = useState(null);
+    const [tokenNotification, setTokenNotification] = useState(null);
 
     useEffect(() => {
-        if (user && tokenNotifaction) {
+        if (user && tokenNotification) {
             const socketInstance = io(SOCKET_URL, {
                 query: {
                     id_user: user.checkAccount._id,
                     type_user: "shipper",
                     id_merchant: "shipper",
-                    tokenNotifaction: tokenNotifaction,
+                    tokenNotification: tokenNotification,
                 },
             });
 
@@ -44,7 +44,7 @@ export const UserProvider = (props) => {
                 socketInstance.disconnect();
             };
         }
-    }, [tokenNotifaction]);
+    }, [tokenNotification]);
 
     const sendMessage = useCallback((type_user, command, order) => {
         if (socket) {
