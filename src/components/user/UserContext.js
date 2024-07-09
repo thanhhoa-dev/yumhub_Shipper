@@ -61,9 +61,9 @@ export const UserProvider = (props) => {
             });
         }
     }, [socket]);
-    const sendMessageChat = useCallback((order, type_user, message, type_mess) => {
+    const sendMessageChat = useCallback((type_user, command, order, message, type_mess) => {
         if (socket) {
-            socket.emit('chatMessage', { order, type_user, message, type_mess });
+            socket.emit('message', { type_user, command, order, message, type_mess });
         } else {
             console.log('Socket is not connected');
         }
@@ -71,7 +71,7 @@ export const UserProvider = (props) => {
 
     const receiveMessageChat = useCallback((callback) => {
         if (socket) {
-            socket.on('chatMessage', (message) => {
+            socket.on('message', (message) => {
                 callback(message);
             });
         }
