@@ -41,6 +41,7 @@ const ChatWithCustomer = () => {
     const route = useRoute();
     const flatListRef = useRef(null);
     const { order } = route.params;
+    console.log(order);
     const [dataMessage, setdataMessage] = useState(null)
     const { user, sendMessageChat, receiveMessageChat } = useContext(UserContext);
     const [message, setmessage] = useState("")
@@ -158,7 +159,7 @@ const ChatWithCustomer = () => {
     }, []);
 
     const handleSendMessage = (message, typeMessage) => {
-        sendMessageChat(order, 'shipper', message, typeMessage);
+        sendMessageChat('shipper', 'chat', order, message, typeMessage);
     };
 
     useEffect(() => {
@@ -175,8 +176,8 @@ const ChatWithCustomer = () => {
             receiveMessageChat(async message => {
                 switch (message.command) {
                     case 'chat':
-                        if (message.order._id == order._id) {
-                            setdataMessage(message.fullchat)
+                        if (message.order.orderID == order._id) {
+                            setdataMessage(message.order.fullChat)
                             flatListRef.current.scrollToEnd({ animated: true });
                         }
                         break;
