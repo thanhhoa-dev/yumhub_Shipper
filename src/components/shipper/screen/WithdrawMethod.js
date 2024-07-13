@@ -18,6 +18,8 @@ import { NativeModules, NativeEventEmitter } from 'react-native';
 import moment from 'moment';
 import CryptoJS from 'crypto-js'
 import axios from 'axios';
+import { VietQR } from 'vietqr';
+import { Dropdown } from 'react-native-element-dropdown';
 
 function generateRandomNumber(length) {
     let result = '';
@@ -28,7 +30,7 @@ function generateRandomNumber(length) {
     return result;
 }
 
-const TopUpPaymentMethod = () => {
+const WithdrawPaymentMethod = () => {
 
     const navigation = useNavigation();
     const { user } = useContext(UserContext);
@@ -36,7 +38,26 @@ const TopUpPaymentMethod = () => {
     const [numericValue, setNumericValue] = useState('');
     const [confirm, setconfirm] = useState(false)
     const [methodSelect, setmethodSelect] = useState(null)
+    const [listBank, setlistBank] = useState(null)
+    const [numberBank, setnumberBank] = useState('')
+    const [name, setname] = useState('DOAN THANH HOA')
 
+    useEffect(() => {
+        let vietQR = new VietQR({
+            clientID: 'client_id_here',
+            apiKey: 'api_key_here',
+        });
+
+        // list banks are supported create QR code by Vietqr
+        vietQR.getBanks().then((banks) => {
+            const formattedBanks = banks.data.map(bank => ({
+                label: "(" + bank.code + ") " + bank.shortName,
+                name: bank.shortName,
+                value: bank.bin,
+            }));
+            setlistBank(formattedBanks);
+        }).catch((err) => { });
+    }, []);
     const formatCurrency = (numericValue) => {
         // Định dạng theo kiểu tiền tệ VNĐ
         if (numericValue) {
@@ -62,185 +83,25 @@ const TopUpPaymentMethod = () => {
         setFormattedValue(formattedValue);
     };
 
-    const methodZalo = () => {
+    const step2 = () => {
         if (numericValue == '' || numericValue == 0)
             Alert.alert("Nhập số tiền muốn nạp")
         else if (numericValue > 999 && numericValue < 50000000) {
-            setmethodSelect('ZaloPay')
             setconfirm(!confirm)
             Keyboard.dismiss();
         } else
             Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
     }
-
-    const methodPayOs = () => {
-        if (numericValue == '' || numericValue == 0)
-            Alert.alert("Nhập số tiền muốn nạp")
-        else if (numericValue > 999 && numericValue < 50000000) {
-            setmethodSelect('QRCode')
-            setconfirm(!confirm)
-            Keyboard.dismiss();
-        } else
-            Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
-    }
-
-    const methodCard = () => {
-        if (numericValue == '' || numericValue == 0)
-            Alert.alert("Nhập số tiền muốn nạp")
-        else if (numericValue > 999 && numericValue < 50000000) {
-            setmethodSelect('Card')
-            setconfirm(!confirm)
-            Keyboard.dismiss();
-        } else
-            Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
-    }
-
-    /// PayOs 
-
-    const handlePaymentQRCode = async () => {
-        const amount = Number(numericValue);
-        try {
-            const payOS = new PayOS("d595ed43-ecf6-4f2a-9c9b-c3a0a00aeb5d",
-                "8e8f0123-db64-468d-92cc-68d990a9bd11",
-                "58dbb967ca269e3b2b9f51c3e85a79a1251027b8004910b05ad2b460a7a12bd1");
-            let orderCode = Number(generateRandomNumber(15));
-            const body = {
-                orderCode: orderCode,
-                amount: amount,
-                description: 'Nộp tiền vào tài khoản',
-                items: [{
-                    idshipper: user.checkAccount._id,
-                    name: user.checkAccount.fullName,
-                    quantity: 1,
-                    price: amount
-                }],
-                cancelUrl: 'http://127.0.0.1:5500/src/return.html',
-                returnUrl: 'http://127.0.0.1:5500/src/return.html',
-                buyerName: user.checkAccount.fullName,
-                buyerEmail: user.checkAccount.email,
-                buyerPhone: user.checkAccount.phoneNumber
-            };
-            const paymentLinkRes = await payOS.createPaymentLink(body);
-            navigation.navigate("QRCodePayOs", { paymentLinkRes: paymentLinkRes, data: body })
-        } catch (error) {
-            Alert.alert("đã có lỗi xảy ra, thử lại sau!")
-            console.log(error);
-        }
-    }
-
-    /// visa/mastercard
-
-    const handlePaymentCard = async () => {
-        const amount = Number(numericValue);
-        const response = await axios.post('https://duantotnghiep-api-a32664265dc1.herokuapp.com/stripe/create-payment-intent', { amount: amount });
-        navigation.navigate("PaymentCard", {clientSecret : response.data.clientSecret, amount : amount, idShipper : user.checkAccount._id})
-    }
-
-    /// zalopay
-
-    const { PayZaloBridge } = NativeModules;
-    const config = {
-        app_id: "2554",
-        key1: "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn",
-        key2: "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf",
-        endpoint: "https://sb-openapi.zalopay.vn/v2/create"
-    };
-    const embed_data = {};
-    const createOrder = {
-        app_id: config.app_id,
-        app_trans_id: ``, // Translation missing: vi.docs.shared.sample_code.comments.app_trans_id
-        app_user: "user123",
-        app_time: Date.now(), // Milliseconds
-        item: JSON.stringify([{}]),
-        embed_data: JSON.stringify(embed_data),
-        amount: 5000,
-        description: ``,
-        bank_code: "zalopayapp",
-        mac: ""
-    };
-
-    const order = {
-        total: 50000,
-        listFood: [{}],
-        orderId: Math.floor(Math.random() * 1000000), // Thay bằng id của order trong database
-        userId: "user1234", // Thay bằng id người dùng
-    };
-    const convertToEmbed = (order) => {
-        const dummy_orderId = Math.floor(Math.random() * 1000000);
-        createOrder.app_id = config.app_id;
-        createOrder.app_trans_id = `${moment().format('YYMMDD')}_${dummy_orderId}`;
-        createOrder.app_user = order.userId;
-        createOrder.app_time = Date.now();
-        createOrder.item = JSON.stringify(order.listFood);
-        createOrder.embed_data = JSON.stringify(embed_data);
-        createOrder.amount = order.total;
-        createOrder.description = `Yumhub - Payment for the order #${order.orderId}`;
-        createOrder.bank_code = "zalopayapp";
-        const inputMac = config.app_id + "|" + createOrder.app_trans_id + "|" + order.userId + "|" + order.total + "|" + createOrder.app_time + "|" + createOrder.embed_data + "|" + createOrder.item;
-        createOrder.mac = CryptoJS.HmacSHA256(inputMac, config.key1).toString();
-    }
-    async function handlePaymentZalo() {
-        convertToEmbed(order);
-        try {
-            const response = await axios.post(config.endpoint, null, { params: createOrder });
-            if (response.data.return_code === 1) {
-                const zpTransToken = response.data.zp_trans_token;
-                PayZaloBridge.payOrder(zpTransToken);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    useEffect(() => {
-        if (methodSelect && methodSelect == "ZaloPay") {
-            const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
-            const subscription = payZaloBridgeEmitter.addListener(
-                'EventPayZalo',
-                (data) => {
-                    if (data.returnCode === 1) {
-                        OnPaymentZaloSuccess();
-                    } else {
-                        OnPaymentZaloFail();
-                    }
-                }
-            );
-            console.log("Listener for 'EventPayZalo' added");
-            return () => {
-                console.log("Listener for 'EventPayZalo' removed");
-                subscription.remove();
-
-            };
-        }
-    }, [methodSelect]);
-
-    const OnPaymentZaloSuccess = () => {
-        console.log("Thành công");
-    };
-
-    const OnPaymentZaloFail = () => {
-        console.log("Lỗi");
-    };
-
-    /// zalopay
-
-    const goToPaid = () => {
-        switch (methodSelect) {
-            case "ZaloPay":
-                handlePaymentZalo()
-                break;
-            default:
-            case "QRCode":
-                handlePaymentQRCode()
-                break;
-            case "Card":
-                handlePaymentCard()
-                break;
-        }
-    }
+    const getNameBank = () => {
+        const bank = listBank.find(bank => bank.value === methodSelect);
+        return bank ? bank.name : 'banking';
+      };
 
     return (
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-            <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={() => {
+            Keyboard.dismiss()
+        }}>
+            <ScrollView style={styles.container}>
                 <View style={styles.viewBack}>
                     <TouchableOpacity style={styles.viewICBack}
                         onPress={() => {
@@ -255,7 +116,7 @@ const TopUpPaymentMethod = () => {
                             FontWeight={FontWeight.FW700}
                         />
                     </TouchableOpacity>
-                    <Text style={styles.textHeader}>{confirm ? "Xác nhận giao dịch" : "Nạp tiền"}</Text>
+                    <Text style={styles.textHeader}>{confirm ? "Xác nhận giao dịch" : "Rút tiền"}</Text>
                 </View>
                 <View style={confirm ? { display: 'none' } : null}>
                     <View style={styles.rowQuickAmount}>
@@ -324,40 +185,100 @@ const TopUpPaymentMethod = () => {
                             maxLength={13}
                         />
                     </View>
+
                     <View style={styles.rowPaymentMethod}>
                         <Image source={require('../../../assets/dollar.png')} style={styles.icMoney} />
-                        <Text style={styles.txtMoney}>Nguồn tiền</Text>
+                        <Text style={styles.txtMoney}>Thông tin tài khoản ngân hàng nhận tiền</Text>
                     </View>
-                    <View style={styles.containerPaymentMethod}>
-                        <Text style={styles.txtTitleMethod}>Chọn nguồn tiền</Text>
-                        <TouchableOpacity
-                            onPress={methodZalo}
-                            style={styles.itemPaymentMethod}>
-                            <Image source={require('../../../assets/iczalo.png')} style={styles.icItemPayment} />
-                            <View style={styles.infoPaymentMethod}>
-                                <Text style={styles.nameZalo}>Ví ZaloPay</Text>
-                                <Text style={styles.desZalo}>
-                                    Nguồn tiền thanh toán sẽ dựa trên thứ tụ được thiết lập trong Tài khoản ZaloPay của bạn.
+                    <TouchableWithoutFeedback onPress={() => {
+                        // if (methodSelect) {
+                        //     var data = JSON.stringify({
+                        //         bin: methodSelect,
+                        //         accountNumber: numberBank
+                        //     });
+                        //     console.log(data);
+                        //     var config = {
+                        //         method: 'post',
+                        //         url: 'https://api.vietqr.io/v2/lookup',
+                        //         headers: {
+                        //             'x-client-id': '649d8eed-d8d6-47c6-a5f3-c3fbebd2e642',
+                        //             'x-api-key': 'b10976ce-ea0a-4344-9c9d-6ea845effc63',
+                        //             'Content-Type': 'application/json',
+                        //         },
+                        //         data: data
+                        //     };
+                        //     console.log(data);
+                        //     axios(config)
+                        //         .then(function (response) {
+                        //             console.log(response.data);
+                        //             setname(response.data.data.accountName)
+                        //         })
+                        //         .catch(function (error) {
+                        //             console.log(error);
+                        //         });
+                        // }
+                        Keyboard.dismiss()
+                    }}>
+                        <View style={styles.containerInputBank}>
+                            <View>
+                                <Text style={styles.label}>
+                                    Ngân hàng
                                 </Text>
+                                {
+                                    listBank && (
+                                        <Dropdown
+                                            style={styles.viewInput}
+                                            placeholderStyle={styles.placeholderStyle}
+                                            selectedTextStyle={styles.selectedTextStyle}
+                                            iconStyle={styles.iconStyle}
+                                            data={listBank}
+                                            maxHeight={300}
+                                            labelField="label"
+                                            valueField="value"
+                                            placeholder="Chọn ngân hàng"
+                                            value={methodSelect}
+                                            onChange={item => {
+                                                setmethodSelect(item.value);
+                                            }}
+                                        />)
+                                }
                             </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={methodPayOs}
-                            style={styles.itemPaymentMethod}>
-                            <Image source={require('../../../assets/icqrcode.png')} style={styles.icItemPayment} />
-                            <View style={styles.infoPaymentMethod}>
-                                <Text style={styles.nameZalo}>Nạp bằng app ngân hàng</Text>
+                            <View>
+                                <Text style={styles.label}>
+                                    Số tài khoản
+                                </Text>
+                                <TextInput
+                                    keyboardType='numeric'
+                                    style={styles.viewInput}
+                                    onChangeText={(text) => setnumberBank(text)}
+                                >
+
+                                </TextInput>
                             </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={methodCard}
-                            style={styles.itemPaymentMethod}>
-                            <Image source={require('../../../assets/card.png')} style={styles.icItemPayment} />
-                            <View style={styles.infoPaymentMethod}>
-                                <Text style={styles.nameZalo}>Nạp bằng Thẻ Visa/MasterCard</Text>
+                            <View>
+                                <Text style={styles.label}>
+                                    Tên chủ tài khoản
+                                </Text>
+                                <View
+
+                                    style={styles.viewInput}
+                                >
+                                    {name && (
+                                        <Text style={styles.input}>{name}</Text>
+                                    )}
+                                </View>
                             </View>
-                        </TouchableOpacity>
-                    </View>
+                            {name && (
+                                <TouchableOpacity style={styles.bntContinue}
+                                    onPress={step2}
+                                >
+                                    <Text style={styles.txtConfirm}>Tiếp tục</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </TouchableWithoutFeedback>
+
+
                 </View>
                 <View style={!confirm ? { display: 'none' } : null}>
                     <View style={styles.rowConfirmAmount}>
@@ -374,11 +295,11 @@ const TopUpPaymentMethod = () => {
                         </View>
                         <View style={styles.rowDetail}>
                             <Text style={styles.txtDetail}>Tài khoản</Text>
-                            <Text style={styles.txtDetail}>0337295209</Text>
+                            <Text style={styles.txtDetail}>{numberBank}</Text>
                         </View>
                         <View style={styles.rowDetail}>
                             <Text style={styles.txtDetail}>Hình thức TT</Text>
-                            <Text style={styles.txtDetail}>{methodSelect ? methodSelect : ""}</Text>
+                            <Text style={styles.txtDetail}>{getNameBank()}</Text>
                         </View>
                         <View style={styles.rowDetail}>
                             <Text style={styles.txtDetail}>Phí giao dịch</Text>
@@ -386,14 +307,14 @@ const TopUpPaymentMethod = () => {
                         </View>
                     </View>
                     <TouchableOpacity style={styles.bntConfirm}
-                        onPress={goToPaid}
+                        onPress={() => { }}
                     >
                         <Text style={styles.txtConfirm}>Xác nhận</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </ScrollView>
         </TouchableWithoutFeedback>
     )
 }
 
-export default TopUpPaymentMethod
+export default WithdrawPaymentMethod

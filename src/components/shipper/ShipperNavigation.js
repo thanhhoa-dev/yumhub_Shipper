@@ -22,6 +22,8 @@ import History from './screen/History';
 import TopUpPaymentMethod from './screen/TopUpPaymentMethod';
 import QRCodePayOs from './screen/QRCodePayOs';
 import ChatWithCustomer from './screen/ChatWithCustomer'
+import PaymentCard from './screen/PaymentCard'
+import WithdrawPaymentMethod from './screen/WithdrawMethod'
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -181,6 +183,16 @@ const ShipperStackNavigation = () => {
         options={{headerShown: false}}
         name="ChatWithCustomer"
         component={ChatWithCustomer}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="PaymentCard"
+        component={PaymentCard}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="WithdrawPaymentMethod"
+        component={WithdrawPaymentMethod}
       />
     </Stack.Navigator>
   );

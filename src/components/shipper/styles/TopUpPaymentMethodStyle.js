@@ -122,7 +122,8 @@ export const styles = StyleSheet.create({
   },
   icItemPayment : {
     width : 30,
-    height : 30
+    height : 30,
+    objectFit : 'scale-down'
   },
   infoPaymentMethod : {
     width : '68%'
@@ -136,6 +137,15 @@ export const styles = StyleSheet.create({
     fontSize : 9,
     fontWeight : '400',
     color : '#646982'
+  },
+  bntContinue : {
+    width : '100%',
+    height : 62,
+    backgroundColor : Color.primary2,
+    borderRadius : 10,
+    alignSelf : 'center',
+    justifyContent : 'center',
+    marginTop : 26
   },
   bntConfirm : {
     width : '100%',
@@ -197,5 +207,20 @@ export const styles = StyleSheet.create({
   viewQR : {
     marginTop : 29,
     alignSelf : 'center'
+  },
+  label : {
+    fontSize : 14,
+    fontWeight : '400',
+    color : 'black',
+    marginTop : 16
+  },
+  iconStyle : {
+    fontSize : 24,
+    color : 'black'
+  },
+  selectedTextStyle : {
+    fontSize : 12,
+    fontWeight : '400',
+    color : 'black'
   }
 })

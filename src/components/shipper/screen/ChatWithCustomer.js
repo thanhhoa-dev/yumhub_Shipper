@@ -41,7 +41,6 @@ const ChatWithCustomer = () => {
     const route = useRoute();
     const flatListRef = useRef(null);
     const { order } = route.params;
-    console.log(order);
     const [dataMessage, setdataMessage] = useState(null)
     const { user, sendMessageChat, receiveMessageChat } = useContext(UserContext);
     const [message, setmessage] = useState("")
@@ -196,7 +195,7 @@ const ChatWithCustomer = () => {
         return (
             <View style={[item.typeUser == 'shipper' ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }, styles.viewContent]}>
                 {
-                    (item.typeUser == 'shipper') ? null : <Image style={styles.icAvatarCustomer} source={{ uri: order.customerID.avatar ? order.customerID.avatar : 'https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png' }} />
+                    (item.typeUser == 'shipper') ? null : <Image style={styles.icAvatarCustomer} source={{ uri: order.shipperID.avatar ? order.shipperID.avatar : 'https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png' }} />
                 }
                 <View style={styles.content}>
                     {
