@@ -6,13 +6,32 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import {PermissionsAndroid} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 const AccessLocation = () => {
   const navigation = useNavigation();
+  useEffect(() => {
+    const fechLocation = async () => {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          navigation.replace('ShipperTabNavigation');
+        } else {
+          console.log('Location permission denied');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    };
+
+    fechLocation();
+  }, []);
+
   const handleEnableLocation = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -27,7 +46,7 @@ const AccessLocation = () => {
           },
         );
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          navigation.navigate('ShipperTabNavigation');
+          navigation.replace('ShipperTabNavigation');
         } else {
           console.log('Location permission denied');
         }

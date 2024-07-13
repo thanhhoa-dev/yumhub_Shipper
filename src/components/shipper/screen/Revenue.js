@@ -1,14 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
-import {
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import React, {useContext, useEffect, useState} from 'react';
+import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {Calendar} from 'react-native-calendars';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
-import { UserContext } from '../../user/UserContext';
-import { styles } from '../styles/RevenueStyle';
+import {UserContext} from '../../user/UserContext';
+import {styles} from '../styles/RevenueStyle';
 import DetailRevenue from './DetailRevenue';
 import DropdownComponent from './DropdownComponent';
 import History from './History';
@@ -140,6 +135,11 @@ const Revenue = () => {
     } else {
       const start = new Date(startDate);
       const end = new Date(day.dateString);
+
+      if (end <= start) {
+        Alert.alert('Error', 'Ngày kết thúc phải lớn hơn ngày bắt đầu');
+        return;
+      }
       const diffTime = Math.abs(end - start);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -245,11 +245,11 @@ const Revenue = () => {
         </View>
       </View>
 
+      <View style={styles.viewButtonDateOptions}>
+        <DropdownComponent index={index} setIndex={setIndex} />
+      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
-          <View style={styles.viewButtonDateOptions}>
-            <DropdownComponent index={index} setIndex={setIndex} />
-          </View>
           <View style={styles.viewContainerShowCalender}>
             {index === 4 && (
               <Calendar
@@ -308,15 +308,16 @@ const Revenue = () => {
               date={date}
             />
           </View>
+          <View style={styles.viewLine} />
           {index === 1 ? (
-          <History startDate={date} endDate={date} />
-        ) : index === 2 ? (
-          <History startDate={startDateWeek} endDate={endDateWeek} />
-        ) : index === 3 ? (
-          <History startDate={startOfMonth} endDate={endOfMonth} />
-        ) : index === 4 ? (
-          <History startDate={startDate} endDate={endDate} />
-        ) : null}
+            <History startDate={date} endDate={date} />
+          ) : index === 2 ? (
+            <History startDate={startDateWeek} endDate={endDateWeek} />
+          ) : index === 3 ? (
+            <History startDate={startOfMonth} endDate={endOfMonth} />
+          ) : index === 4 ? (
+            <History startDate={startDate} endDate={endDate} />
+          ) : null}
         </View>
       </ScrollView>
     </View>

@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Alert,
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -29,6 +30,7 @@ const Login = ({navigation}) => {
       Alert.alert('Thông tin đã được lưu thành công');
     } catch (e) {
       Alert.alert('Lỗi khi lưu thông tin');
+      throw e;
     }
   };
 

@@ -383,7 +383,8 @@ export const styles = StyleSheet.create({
     marginHorizontal: Size.S20,
     marginTop: 30,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal:30
   },
   textItemIncom: {
     color: Color.textBold,

@@ -22,8 +22,9 @@ import {
   PanResponder,
   Dimensions,
   ToastAndroid,
+  PermissionsAndroid,
 } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, {Marker, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {
   GetOrderByID,
@@ -32,21 +33,21 @@ import {
   UpdateOrder,
 } from '../ShipperHTTP';
 import axios from 'axios';
-import { UpdateShipperInformation } from '../ShipperHTTP';
-import { UserContext } from '../../user/UserContext';
+import {UpdateShipperInformation} from '../ShipperHTTP';
+import {UserContext} from '../../user/UserContext';
 import BottomSheet from '@gorhom/bottom-sheet';
-import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
+import {GestureHandlerRootView, ScrollView} from 'react-native-gesture-handler';
 import StarRating from 'react-native-star-rating-widget';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { launchCamera } from 'react-native-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import {launchCamera} from 'react-native-image-picker';
+import {useNavigation} from '@react-navigation/native';
 import Loading from './Loading';
-import { styles } from '../styles/GoogStyle';
-import { GOONG_API_KEY } from '@env';
+import {styles} from '../styles/GoogStyle';
+import {GOONG_API_KEY} from '@env';
 import DropdownComponentGoong from './DropdownComponentGoong';
 
 const Goong = () => {
@@ -74,7 +75,7 @@ const Goong = () => {
   const [index, setIndex] = useState(0);
   const [showNumberPhone, setShowNumberPhone] = useState(false);
   const translateX = useRef(new Animated.Value(0)).current;
-  const { width } = Dimensions.get('window');
+  const {width} = Dimensions.get('window');
   const bottomSheetRef = useRef(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
@@ -82,11 +83,11 @@ const Goong = () => {
   const [countdown, setCountdown] = useState(60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [valueCancelOrder, setValueCancelOrder] = useState(1);
-  const { user, sendMessage, receiveMessage } = useContext(UserContext);
+  const {user, sendMessage, receiveMessage} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
-  // var id = '6627e8b6bfd9baea698a1d4b';
-  var id;
+  var id = '6627e8b6bfd9baea698a1d4b';
+  // var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
   const currentOrderImage = useRef('');
@@ -98,7 +99,7 @@ const Goong = () => {
         switch (message.command) {
           case 'placeOrder':
             setOrder(message);
-            if (message.command === 'placeOrder') {
+            if (message.command === 'placeOrder' && statusShipper) {
               id = message.order._id;
               await UpdateShipperInformation(idUser, 8);
               setModalVisible(true);
@@ -120,12 +121,6 @@ const Goong = () => {
   }, [
     user,
     receiveMessage,
-    countdown,
-    id,
-    idUser,
-    order,
-    statusShipper,
-    index,
   ]);
 
   //websocket
@@ -171,8 +166,6 @@ const Goong = () => {
         setModalVisible(false);
         setCountdown(60);
         setIsTimerRunning(false);
-        await updateOrderStatus(id, 5);
-        await UpdateShipperInformation(idUser, 7);
       }
     };
     timeReceiveApplication();
@@ -181,20 +174,19 @@ const Goong = () => {
   useEffect(() => {
     Geolocation.getCurrentPosition(
       position => {
-        const { latitude, longitude } = position.coords;
+        const {latitude, longitude} = position.coords;
         setLocateCurrent({
           latitude,
           longitude,
         });
       },
       error => console.log(error.message),
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
+      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
     );
   }, []);
 
   useEffect(() => {
     if (locateCurrent && destination) {
-      console.log(destination);
       fetchRoute();
     }
   }, [locateCurrent, destination]);
@@ -222,7 +214,7 @@ const Goong = () => {
         },
       });
 
-      const { routes } = response.data;
+      const {routes} = response.data;
 
       if (routes && routes.length > 0) {
         const points = routes[0].overview_polyline.points;
@@ -247,7 +239,7 @@ const Goong = () => {
         },
       });
 
-      const { routes } = response.data;
+      const {routes} = response.data;
 
       if (routes && routes.length > 0) {
         const points = routes[0].overview_polyline.points;
@@ -323,7 +315,6 @@ const Goong = () => {
   }, []);
 
   const handleShipperDecision = async (id, status) => {
-    console.log(order.order.merchantID.latitude);
     try {
       if (status === 3) {
         if (
@@ -353,8 +344,6 @@ const Goong = () => {
         setOrder(null);
         setIsTimerRunning(false);
         setCountdown(60);
-        await updateOrderStatus(id, 6);
-        await UpdateShipperInformation(idUser, 3);
         handleSendMessage('refuse');
       } else {
         console.warn('Lựa chọn không hợp lệ');
@@ -366,10 +355,10 @@ const Goong = () => {
 
   const CustomMarker = () => {
     return (
-      <View style={{ alignItems: 'center' }}>
+      <View style={{alignItems: 'center'}}>
         <Image
           source={require('../../../assets/delivery-bike.png')}
-          style={{ width: 20, height: 20 }}
+          style={{width: 20, height: 20}}
         />
         <Text>Vị trí tôi</Text>
       </View>
@@ -423,7 +412,7 @@ const Goong = () => {
     }
   };
 
-  const handleFlatlistFood = ({ item }) => {
+  const handleFlatlistFood = ({item}) => {
     return (
       <View style={styles.viewContainerItemInformationFoodBottomSheet}>
         <View style={styles.viewItemInformationFoodBottomSheet}>
@@ -431,14 +420,14 @@ const Goong = () => {
           <Text
             style={[
               styles.textInformationFoodBottomSheet,
-              { color: '#646982', fontSize: 14 },
+              {color: '#646982', fontSize: 14},
             ]}>
             {item.food.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ
           </Text>
         </View>
         <View style={styles.viewItemImageFoodBottomSheet}>
           <Image
-            style={{ height: 47, width: 47, borderRadius: 50, marginEnd: 35 }}
+            style={{height: 47, width: 47, borderRadius: 50, marginEnd: 35}}
             source={require('../../../assets/ZaloPlay.png')}
           />
           <Text style={styles.textInformationFoodBottomSheet}>
@@ -464,7 +453,7 @@ const Goong = () => {
       setIndex(0);
       handleSendMessage('cancelled_from_shipper');
       translateX.setValue(0);
-      navigation.navigate('CancelSuccessOrder', { order: currentOrder.current });
+      navigation.navigate('CancelSuccessOrder', {order: currentOrder.current});
       setOrder(null);
     } catch (error) {
       console.log(error);
@@ -474,7 +463,17 @@ const Goong = () => {
 
   const handleUpdateIndex = order => {
     setIndex(prevIndex => {
-      const newIndex = (prevIndex + 1) % (items.length + 1);
+      let newIndex;
+      if (prevIndex === 3) {
+        if (currentOrderImage.current) {
+          newIndex = (prevIndex + 1) % (items.length + 1);
+        } else {
+          newIndex = 3;
+          Alert.alert('Phải chụp hình ảnh');
+        }
+      } else {
+        newIndex = (prevIndex + 1) % (items.length + 1);
+      }
       switch (newIndex) {
         case 1:
           handleShowDetail();
@@ -487,8 +486,6 @@ const Goong = () => {
           handleSendMessage('arrived');
           break;
         case 4:
-          setIndex(3);
-          // openCamera();
           handleConfirmCancel();
           break;
         default:
@@ -522,7 +519,10 @@ const Goong = () => {
 
   /// xử lý hình ảnh
   const takePhoto = useCallback(async response => {
-    if (response.didCancel) return;
+    if (response.didCancel) {
+      console.log('User cancelled image picker');
+      return;
+    }
     if (response.errorCode) {
       console.error('ImagePicker Error: ', response.errorCode);
       return;
@@ -542,8 +542,6 @@ const Goong = () => {
       try {
         const result = await uploadImage(formData);
         setImage(result.url);
-        // const imageGiveFood = result.url;
-        // handleConfirmCancel(imageGiveFood);
       } catch (error) {
         console.error('Error uploading image:', error);
       }
@@ -556,7 +554,6 @@ const Goong = () => {
       quality: 1,
       saveToPhotos: true,
     };
-    setIndex(3);
     launchCamera(options, takePhoto);
   }, [takePhoto]);
 
@@ -565,11 +562,17 @@ const Goong = () => {
     Linking.openURL(`tel:${phoneNumber}`);
   };
 
-  const handleSetStatusShipper = () => {
-    if (statusShipper) {
-      setStatusShipper(false);
-    } else {
-      setStatusShipper(true);
+  const handleSetStatusShipper = async () => {
+    try {
+      if (statusShipper) {
+        await UpdateShipperInformation(idUser, 4);
+        setStatusShipper(false);
+      } else {
+        await UpdateShipperInformation(idUser, 3);
+        setStatusShipper(true);
+      }
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -595,39 +598,32 @@ const Goong = () => {
     const data = {
       imageGiveFood: currentOrderImage.current,
     };
-    if (currentOrderImage.current) {
-      try {
-        handleClosePress();
-        setIndex(0);
-        await updateOrderStatus(id, 5);
-        await UpdateOrder(id, data);
-        translateX.setValue(0);
-        handleSendMessage('success');
-        navigation.navigate('SuccessOrder');
-        setTimeout(() => {
-          navigation.navigate('SubmitReview', { order: currentOrder.current });
-          setOrder(null);
-        }, 5000);
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    } else {
-      setIndex(3);
-      Alert.alert('Phải chụp hình ảnh');
+    try {
+      setIndex(0);
+      handleClosePress();
+      await updateOrderStatus(id, 5);
+      await UpdateOrder(id, data);
+      translateX.setValue(0);
+      handleSendMessage('success');
+      setImage('');
+      navigation.navigate('SuccessOrder', {order: currentOrder.current});
+      setOrder(null);
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
   };
 
-  // if (!locateCurrent) {
-  //   return <Loading />;
-  // }
+  if (!locateCurrent) {
+    return <Loading />;
+  }
 
   return (
     <View style={styles.viewContainerGoong}>
-      <GestureHandlerRootView style={{ flex: 1, position: 'relative' }}>
+      <GestureHandlerRootView style={{flex: 1, position: 'relative'}}>
         <View style={styles.viewStatusShipper}>
           {statusShipper ? (
-            <Text style={[styles.textStatusShipper, { color: '#005987' }]}>
+            <Text style={[styles.textStatusShipper, {color: '#005987'}]}>
               Đang hoạt động
             </Text>
           ) : (
@@ -642,16 +638,16 @@ const Goong = () => {
           </TouchableOpacity>
         </View>
         <MapView
-          style={{ flex: 1, zIndex: -1 }}
+          style={{flex: 1, zIndex: -1}}
           provider={PROVIDER_GOOGLE}
           initialRegion={
             locateCurrent
               ? {
-                latitude: locateCurrent.latitude,
-                longitude: locateCurrent.longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-              }
+                  latitude: locateCurrent.latitude,
+                  longitude: locateCurrent.longitude,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }
               : null
           }>
           {locateCurrent && (
@@ -660,7 +656,7 @@ const Goong = () => {
                 latitude: locateCurrent.latitude,
                 longitude: locateCurrent.longitude,
               }}
-              anchor={{ x: 0.5, y: 1 }}>
+              anchor={{x: 0.5, y: 1}}>
               <CustomMarker />
             </Marker>
           )}
@@ -735,8 +731,8 @@ const Goong = () => {
                             rating={1}
                             color={'#FC6E2A'}
                             starSize={22}
-                            starStyle={{ marginHorizontal: 0 }}
-                            onChange={() => { }}
+                            starStyle={{marginHorizontal: 0}}
+                            onChange={() => {}}
                           />
                           <Text style={styles.textRatingBottomSheet}>
                             {order.order.merchantID.rating}
@@ -748,7 +744,7 @@ const Goong = () => {
                     <View style={styles.viewInformationMerchantBottomSheet}>
                       <Image
                         style={styles.imageMerchantBottomSheet}
-                        source={{ uri: `${order.order.customerID.avatar}` }}
+                        source={{uri: `${order.order.customerID.avatar}`}}
                       />
                       <View
                         style={
@@ -771,8 +767,8 @@ const Goong = () => {
                             rating={1}
                             color={'#FC6E2A'}
                             starSize={22}
-                            starStyle={{ marginHorizontal: 0 }}
-                            onChange={() => { }}
+                            starStyle={{marginHorizontal: 0}}
+                            onChange={() => {}}
                           />
                           <Text style={styles.textRatingBottomSheet}>
                             {order.order.merchantID.rating}
@@ -806,7 +802,7 @@ const Goong = () => {
                       <View
                         style={[
                           styles.viewContainerIconBottomSheet,
-                          { marginBottom: 15 },
+                          {marginBottom: 15},
                         ]}>
                         <Text style={styles.textListFoodBottomSheet}>
                           Danh Sách Món
@@ -831,7 +827,7 @@ const Goong = () => {
                         <MaterialIcons
                           style={[
                             styles.IconStepsLoadDeliveryBottomSheet,
-                            { backgroundColor: '#005987' },
+                            {backgroundColor: '#005987'},
                           ]}
                           color={'white'}
                           name={'done'}
@@ -845,7 +841,7 @@ const Goong = () => {
                         <Feather
                           style={[
                             styles.IconStepsLoadDeliveryBottomSheet,
-                            { backgroundColor: '#005987' },
+                            {backgroundColor: '#005987'},
                           ]}
                           color={'white'}
                           name={'loader'}
@@ -859,7 +855,7 @@ const Goong = () => {
                       <View
                         style={[
                           styles.viewConnectingWireBottomSheet,
-                          { borderStartColor: '#19D6E5' },
+                          {borderStartColor: '#19D6E5'},
                         ]}
                       />
                     ) : (
@@ -871,7 +867,7 @@ const Goong = () => {
                         <Feather
                           style={[
                             styles.IconStepsLoadDeliveryBottomSheet,
-                            { backgroundColor: '#005987' },
+                            {backgroundColor: '#005987'},
                           ]}
                           color={'white'}
                           name={'loader'}
@@ -885,7 +881,7 @@ const Goong = () => {
                         <MaterialIcons
                           style={[
                             styles.IconStepsLoadDeliveryBottomSheet,
-                            { backgroundColor: '#005987' },
+                            {backgroundColor: '#005987'},
                           ]}
                           color={'white'}
                           name={'done'}
@@ -910,7 +906,7 @@ const Goong = () => {
                       <View
                         style={[
                           styles.viewConnectingWireBottomSheet,
-                          { borderStartColor: '#19D6E5' },
+                          {borderStartColor: '#19D6E5'},
                         ]}
                       />
                     ) : (
@@ -921,7 +917,7 @@ const Goong = () => {
                         <Feather
                           style={[
                             styles.IconStepsLoadDeliveryBottomSheet,
-                            { backgroundColor: '#005987' },
+                            {backgroundColor: '#005987'},
                           ]}
                           color={'white'}
                           name={'loader'}
@@ -935,7 +931,7 @@ const Goong = () => {
                         <MaterialIcons
                           style={[
                             styles.IconStepsLoadDeliveryBottomSheet,
-                            { backgroundColor: '#005987' },
+                            {backgroundColor: '#005987'},
                           ]}
                           color={'white'}
                           name={'done'}
@@ -961,7 +957,7 @@ const Goong = () => {
                       <View
                         style={[
                           styles.viewConnectingWireBottomSheet,
-                          { borderStartColor: '#19D6E5' },
+                          {borderStartColor: '#19D6E5'},
                         ]}
                       />
                     ) : (
@@ -972,7 +968,7 @@ const Goong = () => {
                         <Feather
                           style={[
                             styles.IconStepsLoadDeliveryBottomSheet,
-                            { backgroundColor: '#005987' },
+                            {backgroundColor: '#005987'},
                           ]}
                           color={'white'}
                           name={'loader'}
@@ -986,7 +982,7 @@ const Goong = () => {
                         <MaterialIcons
                           style={[
                             styles.IconStepsLoadDeliveryBottomSheet,
-                            { backgroundColor: '#005987' },
+                            {backgroundColor: '#005987'},
                           ]}
                           color={'white'}
                           name={'done'}
@@ -1061,8 +1057,8 @@ const Goong = () => {
                         marginTop: 10,
                       }}>
                       <Image
-                        style={{ width: '100%', height: '100%' }}
-                        source={{ uri: image }}
+                        style={{width: '100%', height: '100%'}}
+                        source={{uri: image}}
                       />
                     </View>
                   )}
@@ -1071,7 +1067,7 @@ const Goong = () => {
                       <Animated.View
                         style={[
                           styles.iconContainer,
-                          { transform: [{ translateX }] },
+                          {transform: [{translateX}]},
                         ]}
                         {...panResponder.panHandlers}>
                         <FontAwesome6
@@ -1093,7 +1089,7 @@ const Goong = () => {
                         }}
                         style={[
                           styles.buttonTakePhotoBottomSheet,
-                          { backgroundColor: '#E04444', flex: 1 },
+                          {backgroundColor: '#E04444', flex: 1},
                         ]}>
                         <Text style={styles.textTakePhotoBottomSheet}>
                           Hủy đơn
@@ -1103,7 +1099,7 @@ const Goong = () => {
                         onPress={openCamera}
                         style={[
                           styles.buttonTakePhotoBottomSheet,
-                          { marginStart: 20, flex: 1 },
+                          {marginStart: 20, flex: 1},
                         ]}>
                         <Text style={styles.textTakePhotoBottomSheet}>
                           Chụp ảnh
@@ -1118,7 +1114,7 @@ const Goong = () => {
                       }}
                       style={[
                         styles.buttonTakePhotoBottomSheet,
-                        { backgroundColor: '#E04444' },
+                        {backgroundColor: '#E04444'},
                       ]}>
                       <Text style={styles.textTakePhotoBottomSheet}>
                         Nhà hàng đóng cửa/hết món
@@ -1132,12 +1128,12 @@ const Goong = () => {
                       <View style={styles.viewInformationUserBottomSheet}>
                         {order.order.customerID.avatar ? (
                           <Image
-                            style={{ height: 70, width: 70, borderRadius: 50 }}
-                            source={{ uri: `${order.order.customerID.avatar}` }}
+                            style={{height: 70, width: 70, borderRadius: 50}}
+                            source={{uri: `${order.order.customerID.avatar}`}}
                           />
                         ) : (
                           <Image
-                            style={{ height: 70, width: 70, borderRadius: 50 }}
+                            style={{height: 70, width: 70, borderRadius: 50}}
                             source={require('../../../assets/ZaloPlay.png')}
                           />
                         )}
@@ -1152,8 +1148,8 @@ const Goong = () => {
                               rating={1}
                               color={'#FC6E2A'}
                               starSize={22}
-                              starStyle={{ marginHorizontal: 0 }}
-                              onChange={() => { }}
+                              starStyle={{marginHorizontal: 0}}
+                              onChange={() => {}}
                             />
                             <Text style={styles.textRatingBottomSheet}>
                               4.7
@@ -1175,7 +1171,9 @@ const Goong = () => {
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => {
-                            navigation.navigate("ChatWithCustomer", { order : order});
+                            navigation.navigate('ChatWithCustomer', {
+                              order: order,
+                            });
                           }}>
                           <FontAwesome6
                             style={styles.iconMessageBottomSheet}
@@ -1212,15 +1210,7 @@ const Goong = () => {
         )}
       </GestureHandlerRootView>
       {order && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-        // onRequestClose={() => {
-        //   Alert.alert('Modal has been closed.');
-        //   setModalVisible(!modalVisible);
-        // }}
-        >
+        <Modal animationType="slide" transparent={true} visible={modalVisible}>
           <View style={styles.viewContainerModalOrder}>
             <View style={styles.centeredView}>
               <TouchableOpacity
@@ -1234,7 +1224,7 @@ const Goong = () => {
               <View
                 style={[
                   styles.viewContainerInformation,
-                  { flexDirection: 'row' },
+                  {flexDirection: 'row'},
                 ]}>
                 <View
                   style={{
@@ -1246,7 +1236,7 @@ const Goong = () => {
                     marginTop: 5,
                   }}
                 />
-                <View>
+                <View style={{marginEnd: 10}}>
                   <View style={styles.viewContainerNameUser}>
                     <Text style={styles.textInformation}>Lấy: </Text>
                     <Text style={styles.textInformation}>
@@ -1254,13 +1244,13 @@ const Goong = () => {
                     </Text>
                   </View>
                   <Text
-                    style={[styles.textInformation, { fontWeight: '700' }]}
+                    style={[styles.textInformation, {fontWeight: '700'}]}
                     numberOfLines={2}>
                     {order.order.merchantID.address}
                   </Text>
                 </View>
               </View>
-              <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+              <View style={{flexDirection: 'row', justifyContent: 'center'}}>
                 <FontAwesome
                   name={'angle-double-down'}
                   size={30}
@@ -1286,7 +1276,7 @@ const Goong = () => {
                     marginTop: 5,
                   }}
                 />
-                <View>
+                <View style={{marginEnd: 10}}>
                   <View style={[styles.viewContainerNameUser, {}]}>
                     <Text style={styles.textInformation}>Giao: </Text>
                     <Text style={styles.textInformation}>
@@ -1294,7 +1284,7 @@ const Goong = () => {
                     </Text>
                   </View>
                   <Text
-                    style={[styles.textInformation, { fontWeight: '700' }]}
+                    style={[styles.textInformation, {fontWeight: '700'}]}
                     numberOfLines={2}>
                     {order.order.deliveryAddress}
                   </Text>
@@ -1305,14 +1295,14 @@ const Goong = () => {
                   <Text
                     style={[
                       styles.textItemIncom,
-                      { color: '#333', fontSize: 14 },
+                      {color: '#333', fontSize: 14},
                     ]}>
                     Quảng Đường ước tính:
                   </Text>
                   <Text
                     style={[
                       styles.textItemIncom,
-                      { color: '#005987', fontSize: 16, fontWeight: '800' },
+                      {color: '#005987', fontSize: 16, fontWeight: '800'},
                     ]}>
                     {order.order.totalDistance} km
                   </Text>
@@ -1321,7 +1311,7 @@ const Goong = () => {
                   <Text
                     style={[
                       styles.textItemIncom,
-                      { color: '#333', fontSize: 14 },
+                      {color: '#333', fontSize: 14},
                     ]}>
                     Thu nhập từ đơn này:
                   </Text>
@@ -1348,11 +1338,12 @@ const Goong = () => {
                   handleShipperDecision(order.order._id, 3);
                 }}
                 style={styles.buttonReceiveOrder}>
+                <View style={{width: 12}} />
                 <Text style={styles.textReceiveOrder}>NHẬN ĐƠN</Text>
                 <Text
                   style={[
                     styles.textReceiveOrder,
-                    { marginStart: 20, color: '#E46929', fontSize: 12 },
+                    {color: '#E46929', fontSize: 12},
                   ]}>
                   {formatTime(countdown)}
                 </Text>
@@ -1366,12 +1357,7 @@ const Goong = () => {
         <Modal
           animationType="slide"
           transparent={true}
-          visible={modalVisibleConfirm}
-        // onRequestClose={() => {
-        //   Alert.alert('Modal has been closed.');
-        //   setModalVisibleConfirm(!modalVisibleConfirm);
-        // }}
-        >
+          visible={modalVisibleConfirm}>
           <View style={styles.viewContainerModalOrder}>
             <View style={styles.viewContainerConfirm}>
               <Text style={styles.TextConfirmOrder}>
@@ -1405,7 +1391,7 @@ const Goong = () => {
           setModalVisibleConfirm(!modalVisibleCancelOrder);
         }}>
         <View style={styles.viewContainerModalOrder}>
-          <View style={[styles.centeredView, { backgroundColor: '#F6F8FA' }]}>
+          <View style={[styles.centeredView, {backgroundColor: '#F6F8FA'}]}>
             <TouchableOpacity
               onPress={() => {
                 setModalVisibleCancelOrder(false);
@@ -1443,13 +1429,13 @@ const Goong = () => {
             );
           }}>
           <View style={styles.viewContainerModalOrder}>
-            <View style={[styles.centeredView, { backgroundColor: '#F6F8FA' }]}>
+            <View style={[styles.centeredView, {backgroundColor: '#F6F8FA'}]}>
               <Text style={styles.textReasonForCancellation}>
                 Nhà hàng đã hết món
               </Text>
               <TouchableOpacity
                 onPress={handleConfirmCancelOrder}
-                style={[styles.buttonReceiveCancelOrder, { marginBottom: 10 }]}>
+                style={[styles.buttonReceiveCancelOrder, {marginBottom: 10}]}>
                 <Text style={styles.textReceiveCancelOrder}>Xác nhận</Text>
               </TouchableOpacity>
             </View>

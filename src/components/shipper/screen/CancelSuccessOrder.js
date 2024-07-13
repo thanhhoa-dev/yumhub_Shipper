@@ -37,8 +37,8 @@ const CancelSuccessOrder = () => {
         </Text>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Trang chủ');
-          }}
+            navigation.goBack()}
+          }
           style={styles.buttonIconHome}>
           <Feather name={'home'} size={30} color={'#19D6E5'} />
         </TouchableOpacity>
@@ -79,7 +79,7 @@ const CancelSuccessOrder = () => {
       </Text>
       <TouchableOpacity
         onPress={() => {
-          navigation.navigate('SubmitReview', {order: order});
+          navigation.replace('SubmitReview', {order: order});
         }}
         style={styles.buttonReviewOrder}>
         <Text style={styles.textReviewOrder}>Đánh giá</Text>

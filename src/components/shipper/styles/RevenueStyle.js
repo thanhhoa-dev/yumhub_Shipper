@@ -1,5 +1,5 @@
 import {Dimensions, StyleSheet, Text, View} from 'react-native';
-import {Color, Size, FontWeight, FontFamily} from '../../../constants/theme';
+import {Color, Size, FontFamily} from '../../../constants/theme';
 
 export const styles = StyleSheet.create({
   viewContainerShowCalender: {
@@ -11,12 +11,12 @@ export const styles = StyleSheet.create({
   viewLine: {
     borderBottomWidth: 2,
     borderBottomColor: '#DFDFDF',
-    marginVertical: 20,
+    marginTop: 20,
   },
   textDateOptions: {
     color: Color.white,
     fontSize: Size.S16,
-    fontWeight: FontWeight.FW400,
+    fontFamily: FontFamily.FF4,
   },
   buttonDateOptions: {
     backgroundColor: Color.primary2,
@@ -32,12 +32,12 @@ export const styles = StyleSheet.create({
   textNumberStatistical: {
     color: Color.neutral500,
     fontSize: 12,
-    fontWeight: FontWeight.FW500,
+    fontFamily: FontFamily.FF5,
   },
   textNameStatistical: {
     color: Color.neutral300,
     fontSize: 12,
-    fontWeight: FontWeight.FW400,
+    fontFamily: FontFamily.FF4,
   },
   viewItemStatistical: {
     flexDirection: 'row',
@@ -51,7 +51,7 @@ export const styles = StyleSheet.create({
   textShowDateRevenue: {
     color: Color.neutral500,
     fontSize: 16,
-    fontWeight: FontWeight.FW600,
+    fontFamily: FontFamily.FF6,
     marginStart: 10,
   },
   iconCoins: {
@@ -75,7 +75,7 @@ export const styles = StyleSheet.create({
   textShowDate: {
     color: Color.textBlack,
     fontSize: 12,
-    fontWeight: FontWeight.FW400,
+    fontFamily: FontFamily.FF4,
   },
   viewHeaderDate: {
     backgroundColor: '#F8F8F8',

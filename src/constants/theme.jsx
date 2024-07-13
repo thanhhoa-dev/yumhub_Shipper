@@ -38,10 +38,11 @@ export const FontWeight = {
 }
 
 export const FontFamily = {
-    poppins:'Poppins-Medium',
+    FF8:'Sen-ExtraBold',
+    FF7:'Sen-Bold',
+    FF6:'Sen-SemiBold',
+    FF5:'Sen-Medium',
+    FF4:'Sen-Regular',
 }
 
-export const FontStyle = {
-
-}
 

@@ -63,7 +63,7 @@ const SubmitReview = () => {
         if (ratingMerchant !== 0) {
           await CreateReivew(merchantReviewData);
         }
-        navigation.navigate('Trang chủ');
+        navigation.goBack();
         ToastAndroid.show('Gửi đánh giá thành công', ToastAndroid.SHORT);
       } catch (error) {
         console.log('Error creating review:', error);
@@ -106,7 +106,6 @@ const SubmitReview = () => {
   }, []);
 
   const openCamera = useCallback(() => {
-    console.log('ahihi');
     const options = {
       mediaType: 'photo',
       quality: 1,
@@ -132,7 +131,7 @@ const SubmitReview = () => {
         <Text style={styles.textTitleHeader}>Đánh giá của bạn</Text>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate('Trang chủ');
+            navigation.goBack();
           }}
           style={styles.buttonHeaderHome}>
           <Feather name={'home'} size={30} color={'#19D6E5'} />

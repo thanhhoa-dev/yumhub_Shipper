@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
+import {FontFamily} from '../../../constants/theme';
 
 const data = [
   {label: 'Theo Ngày', value: 1},
@@ -23,8 +24,13 @@ const DropdownComponent = ({index, setIndex}) => {
         valueField="value"
         value={index}
         onChange={item => {
-          setIndex(item.value)
+          setIndex(item.value);
         }}
+        renderItem={item => (
+          <View style={styles.item}>
+            <Text style={styles.itemText}>{item.label}</Text>
+          </View>
+        )}
       />
     </View>
   );
@@ -33,6 +39,13 @@ const DropdownComponent = ({index, setIndex}) => {
 export default DropdownComponent;
 
 const styles = StyleSheet.create({
+  item: {
+    padding: 10,
+  },
+  itemText: {
+    fontFamily: FontFamily.FF4,
+    fontSize: 16,
+  },
   dropdown: {
     height: 40,
     width: 150,
@@ -46,6 +59,7 @@ const styles = StyleSheet.create({
   selectedTextStyle: {
     fontSize: 16,
     color: 'white',
+    fontFamily: FontFamily.FF4,
   },
   iconStyle: {
     width: 20,

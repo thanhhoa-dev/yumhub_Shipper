@@ -1,6 +1,7 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {revenueShipperTimeTwoTime} from '../ShipperHTTP';
+import { styles } from '../styles/DetailRevenueStyles';
 
 const DetailRevenue = ({
   ID,
@@ -86,8 +87,8 @@ const DetailRevenue = ({
 
   if (loading || revenue === null) {
     return (
-      <View style={{justifyContent: 'center', alignItems: 'center'}}>
-        <Text>Loading...</Text>
+      <View style={styles.viewLoading}>
+        <Text style={styles.textNameStatistical}>Loading...</Text>
       </View>
     );
   }
@@ -150,30 +151,4 @@ const DetailRevenue = ({
 
 export default DetailRevenue;
 
-const styles = StyleSheet.create({
-  textNumberStatistical: {
-    color: '#232323',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  textNameStatistical: {
-    color: '#6C6C6C',
-    fontSize: 12,
-    fontWeight: '400',
-  },
-  viewItemStatistical: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  viewContainerStatisticalRevenue: {
-    marginTop: 20,
-  },
-  viewContainer: {
-    flex: 1,
-    backgroundColor: '#F5FEFF',
-    paddingHorizontal: 20,
-    paddingTop: 19,
-  },
-});
+

@@ -18,7 +18,7 @@ export const login = async (phoneNumber, password) => {
 export const changePass = async (id, passNew, passOld) => {
   try {
     const axiosInstance = await AxiosInstance();
-    const url = '/shippers/changePass/:id';
+    const url = 'shippers/changePass/:id';
     const body = {
       id: id,
       passOld: passOld,
@@ -33,7 +33,7 @@ export const changePass = async (id, passNew, passOld) => {
 export const resetpass = async (email, password) => {
   try {
     const axiosInstance = await AxiosInstance();
-    const url = '/shippers/resetPass/';
+    const url = 'shippers/resetPass/';
     const body = {
       password: password,
       email: email,
@@ -46,7 +46,7 @@ export const resetpass = async (email, password) => {
 export const forgotPass = async (email) => {
   try {
       const axiosInstance = await AxiosInstance();
-      const url = '/shippers/forgetPassByEmail'
+      const url = 'shippers/forgetPassByEmail'
       const body = {
           email: email
       }
@@ -60,7 +60,7 @@ export const forgotPass = async (email) => {
 export const checkotp = async (email, otp) => {
   try {
       const axiosInstance = await AxiosInstance();
-      const url = '/shippers/checkOTP'
+      const url = 'shippers/checkOTP'
       const body = {
           email: email,
           otp: otp,
