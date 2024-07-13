@@ -131,7 +131,7 @@ const TopUpPaymentMethod = () => {
     /// visa/mastercard
 
     const handlePaymentCard = async () => {
-        const amount = Number(numericValue)/25000;
+        const amount = Number(numericValue);
         const response = await axios.post('https://duantotnghiep-api-a32664265dc1.herokuapp.com/stripe/create-payment-intent', { amount: amount });
         navigation.navigate("PaymentCard", {clientSecret : response.data.clientSecret, amount : amount, idShipper : user.checkAccount._id})
     }

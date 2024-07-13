@@ -29,9 +29,9 @@ const StripeApp = () => {
         const currentDate = new Date();
         const formattedDate = formatDate(currentDate);
         const des = "nạp tiền lúc: " + formattedDate;
-        const updateBalance = await topUp(idShipper, { amountTransantion: amount*25000, description: des });
+        const updateBalance = await topUp(idShipper, { amountTransantion: amount, description: des });
         if (updateBalance.result) {
-            user.checkAccount.balance += (amount*25000)
+            user.checkAccount.balance += amount
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'ShipperTabNavigation' }],
@@ -56,6 +56,7 @@ const StripeApp = () => {
         const { error } = await initPaymentSheet({
           paymentIntentClientSecret: clientSecret,
           merchantDisplayName: 'YumHub',
+          googlePay: true,
         });
     
         if (!error) {
