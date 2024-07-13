@@ -2474,6 +2474,11 @@
   resolved "https://registry.npmjs.org/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
 
+"@stripe/stripe-react-native@^0.38.1":
+  version "0.38.1"
+  resolved "https://registry.npmjs.org/@stripe/stripe-react-native/-/stripe-react-native-0.38.1.tgz"
+  integrity sha512-FpwoazLMooJMoMTJiICdoW8SZY5PeJsqbRKCO+yjbMkYfbCOQfXHPzsaPSA3AAPo9cVa1Z7dzoUDILndE6Y7Kg==
+
 "@types/babel__core@^7.1.14":
   version "7.20.5"
   resolved "https://registry.npmjs.org/@types/babel__core/-/babel__core-7.20.5.tgz"
@@ -4868,7 +4873,7 @@ expo-modules-core@1.11.13:
   dependencies:
     invariant "^2.2.4"
 
-expo@*, expo@>=47.0.0:
+expo@*, expo@>=46.0.9, expo@>=47.0.0:
   version "50.0.17"
   resolved "https://registry.npmjs.org/expo/-/expo-50.0.17.tgz"
   integrity sha512-eD8Nh10BgVwecU7EVyogx7X314ajxVpJdFwkXhi341AD61S2WPX31NMHW82XGXas6dbDjdbgtaOMo5H/vylB7Q==

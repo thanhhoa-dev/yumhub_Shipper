@@ -122,7 +122,8 @@ export const styles = StyleSheet.create({
   },
   icItemPayment : {
     width : 30,
-    height : 30
+    height : 30,
+    objectFit : 'scale-down'
   },
   infoPaymentMethod : {
     width : '68%'

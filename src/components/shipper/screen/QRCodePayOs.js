@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useContext } from 'react';
 import { View, TouchableOpacity, Text, Alert, PermissionsAndroid, BackHandler, Image, ScrollView } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useRoute } from '@react-navigation/native';
@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import { FontWeight } from '../../../constants/theme';
 import { styles } from '../styles/TopUpPaymentMethodStyle';
+import { UserContext } from '../../user/UserContext';
 
 
 const formatCurrency2 = (amount) => {
@@ -23,6 +24,7 @@ const QRCodePayOs = () => {
     const { paymentLinkRes, data } = route.params;
     const viewShotRef = useRef(null);
     const [isChecking, setIsChecking] = useState(false);
+    const { user } = useContext(UserContext);
 
     const cancelPayment = async () => {
         const payOS = new PayOS("d595ed43-ecf6-4f2a-9c9b-c3a0a00aeb5d", "8e8f0123-db64-468d-92cc-68d990a9bd11", "58dbb967ca269e3b2b9f51c3e85a79a1251027b8004910b05ad2b460a7a12bd1");
@@ -125,7 +127,7 @@ const QRCodePayOs = () => {
                 break;
             case "CANCELLED":
                 Alert.alert("giao dịch này đã bị hủy");
-                // navigation.goBack()
+                navigation.goBack()
                 break;
 
             default:
@@ -146,18 +148,19 @@ const QRCodePayOs = () => {
             const currentDate = new Date();
             const formattedDate = formatDate(currentDate);
             const des = "nạp tiền lúc: " + formattedDate;
-            const updateBalance = await topUp(data.items[0].idmerchant, { amountTransantion: data.amount, description: des });
+            const updateBalance = await topUp(data.items[0].idshipper, { amountTransantion: data.amount, description: des });
             if (updateBalance.result) {
+                user.checkAccount.balance += (data.amount)
                 navigation.reset({
                     index: 0,
-                    routes: [{ name: 'MerchantTabNavigation' }],
+                    routes: [{ name: 'ShipperTabNavigation' }],
                 });
                 setTimeout(() => {
                     navigation.navigate('Tài khoản');
                 }, 100);
             }
         } catch (error) {
-            Alert.alert("Vui lòng liên hệ YumHub yêu cầu nhân viên kiểm tra giao dịch ", paymentLinkRes.orderCode);
+            Alert.alert("Vui lòng liên hệ YumHub", "yêu cầu nhân viên kiểm tra giao dịch "+ paymentLinkRes.orderCode);
         }
     }
     useEffect(() => {
@@ -272,6 +275,11 @@ const QRCodePayOs = () => {
                 onPress={captureQRCode}
             >
                 <Text style={styles.txtConfirm}>Lưu QR Code</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.bntConfirm, { marginTop: 28, marginBottom: 80 }]}
+                onPress={paymentSuccess}
+            >
+                <Text style={styles.txtConfirm}>test success</Text>
             </TouchableOpacity>
         </ScrollView>
     );

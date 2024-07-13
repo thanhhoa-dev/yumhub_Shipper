@@ -84,6 +84,17 @@ const TopUpPaymentMethod = () => {
             Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
     }
 
+    const methodCard = () => {
+        if (numericValue == '' || numericValue == 0)
+            Alert.alert("Nhập số tiền muốn nạp")
+        else if (numericValue > 999 && numericValue < 50000000) {
+            setmethodSelect('Card')
+            setconfirm(!confirm)
+            Keyboard.dismiss();
+        } else
+            Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
+    }
+
     /// PayOs 
 
     const handlePaymentQRCode = async () => {
@@ -98,7 +109,7 @@ const TopUpPaymentMethod = () => {
                 amount: amount,
                 description: 'Nộp tiền vào tài khoản',
                 items: [{
-                    idmerchant: user.checkAccount._id,
+                    idshipper: user.checkAccount._id,
                     name: user.checkAccount.fullName,
                     quantity: 1,
                     price: amount
@@ -115,6 +126,14 @@ const TopUpPaymentMethod = () => {
             Alert.alert("đã có lỗi xảy ra, thử lại sau!")
             console.log(error);
         }
+    }
+
+    /// visa/mastercard
+
+    const handlePaymentCard = async () => {
+        const amount = Number(numericValue);
+        const response = await axios.post('https://duantotnghiep-api-a32664265dc1.herokuapp.com/stripe/create-payment-intent', { amount: amount });
+        navigation.navigate("PaymentCard", {clientSecret : response.data.clientSecret, amount : amount, idShipper : user.checkAccount._id})
     }
 
     /// zalopay
@@ -212,6 +231,9 @@ const TopUpPaymentMethod = () => {
             default:
             case "QRCode":
                 handlePaymentQRCode()
+                break;
+            case "Card":
+                handlePaymentCard()
                 break;
         }
     }
@@ -325,6 +347,14 @@ const TopUpPaymentMethod = () => {
                             <Image source={require('../../../assets/icqrcode.png')} style={styles.icItemPayment} />
                             <View style={styles.infoPaymentMethod}>
                                 <Text style={styles.nameZalo}>Nạp bằng app ngân hàng</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={methodCard}
+                            style={styles.itemPaymentMethod}>
+                            <Image source={require('../../../assets/card.png')} style={styles.icItemPayment} />
+                            <View style={styles.infoPaymentMethod}>
+                                <Text style={styles.nameZalo}>Nạp bằng Thẻ Visa/MasterCard</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
