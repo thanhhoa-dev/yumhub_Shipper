@@ -40,7 +40,7 @@ const Menu = ({ navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => {
-                            navigation.navigate('Widthaw')
+                            navigation.navigate('WithdrawPaymentMethod')
                         }}
                         style={styles.viewButton}
                     >
