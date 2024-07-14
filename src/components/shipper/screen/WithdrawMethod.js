@@ -8,7 +8,7 @@ import React, { useEffect, useState, useRef, useContext } from 'react'
 import { styles } from '../styles/TopUpPaymentMethodStyle'
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import { Color, Size, FontWeight, FontFamily } from '../../../constants/theme';
-import { ShowDetail, getReviewOfOrder } from '../ShipperHTTP';
+import { ShowDetail, getReviewOfOrder, Withdraw } from '../ShipperHTTP';
 import { useRoute } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/native';
 import { Keyboard } from 'react-native';
@@ -28,6 +28,15 @@ function generateRandomNumber(length) {
         result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
     return result;
+}
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
 const WithdrawPaymentMethod = () => {
@@ -93,9 +102,43 @@ const WithdrawPaymentMethod = () => {
             Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
     }
     const getNameBank = () => {
-        const bank = listBank.find(bank => bank.value === methodSelect);
-        return bank ? bank.name : 'banking';
-      };
+        if (listBank) {
+            const bank = listBank.find(bank => bank.value === methodSelect);
+            return bank ? bank.name : 'banking';
+        }
+        else return 'banking'
+    };
+
+    const confirmWithdraw = async () => {
+        try {
+            const currentDate = new Date();
+            const formattedDate = formatDate(currentDate);
+            const des = "rút tiền lúc: " + formattedDate;
+            const updateBalance = await Withdraw(user.checkAccount._id,
+                {
+                    amountTransantion: numericValue,
+                    description: des,
+                    infoBank: {
+                        bank: getNameBank(),
+                        numberBank: numberBank,
+                        name: name
+                    }
+                });
+            console.log(updateBalance);
+            if (updateBalance.result) {
+                user.checkAccount.balance -= numericValue
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'ShipperTabNavigation' }],
+                });
+                setTimeout(() => {
+                    navigation.navigate('Tài khoản');
+                }, 100);
+            }
+        } catch (error) {
+            Alert.alert("Vui lòng liên hệ YumHub", "yêu cầu nhân viên kiểm tra giao dịch");
+        }
+    }
 
     return (
         <TouchableWithoutFeedback onPress={() => {
@@ -307,7 +350,7 @@ const WithdrawPaymentMethod = () => {
                         </View>
                     </View>
                     <TouchableOpacity style={styles.bntConfirm}
-                        onPress={() => { }}
+                        onPress={() => { confirmWithdraw(); }}
                     >
                         <Text style={styles.txtConfirm}>Xác nhận</Text>
                     </TouchableOpacity>
