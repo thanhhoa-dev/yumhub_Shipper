@@ -59,7 +59,9 @@ const Menu = ({ navigation }) => {
                         </View>
                         <Icon name="chevron-right" size={20} color="#005987" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.viewItem}>
+                    <TouchableOpacity
+                    onPress={() => navigation.navigate('HistoryTransaction')}
+                    style={styles.viewItem}>
                         <View>
                             <Feather name={'settings'} size={30} color="#005987" />
                         </View>

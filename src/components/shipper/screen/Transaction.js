@@ -11,23 +11,24 @@ const earn = (totalDeliveryFee) => {
 }
 
 
-const updateBalance = async (totalDeliveryFee, type) => {
+export const updateBalance = async (totalDeliveryFee, type) => {
     const { user } = useContext(UserContext);
     try {
         const currentDate = new Date();
         const formattedDate = formatDate(currentDate);
         const des = "hoàn thành đơn lúc: " + formattedDate;
-        if (type == "cash"){
+        if (type == 3){
             const updateBalance = await Withdraw(user.checkAccount._id,
                 {
                     amountTransantion: fee(totalDeliveryFee),
-                    description: des
+                    description: des,
+                    status: 4
                 });
             if (updateBalance.result) {
                 user.checkAccount.balance -= fee(totalDeliveryFee)
             }
-        }else if(type == "card"){
-            const updateBalance = await topUp(user.checkAccount._id, { amountTransantion: earn(totalDeliveryFee), description: des });
+        }else{
+            const updateBalance = await topUp(user.checkAccount._id, { amountTransantion: earn(totalDeliveryFee), description: des, status : 4 });
             if (updateBalance.result) {
                 user.checkAccount.balance += earn(totalDeliveryFee)
             }
