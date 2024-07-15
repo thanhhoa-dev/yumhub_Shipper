@@ -138,7 +138,7 @@ export const styles = StyleSheet.create({
     fontWeight : '400',
     color : '#646982'
   },
-  bntContinue : {
+  btnContinue : {
     width : '100%',
     height : 62,
     backgroundColor : Color.primary2,

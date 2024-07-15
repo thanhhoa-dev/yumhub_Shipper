@@ -1,34 +1,20 @@
 import {
     View, Text, ScrollView,
-    TouchableOpacity, FlatList, Image,
+    TouchableOpacity, Image,
     TextInput,
     Alert, TouchableWithoutFeedback
 } from 'react-native'
-import React, { useEffect, useState, useRef, useContext } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { styles } from '../styles/TopUpPaymentMethodStyle'
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import { Color, Size, FontWeight, FontFamily } from '../../../constants/theme';
-import { ShowDetail, getReviewOfOrder, Withdraw } from '../ShipperHTTP';
-import { useRoute } from '@react-navigation/native'
+import { FontWeight } from '../../../constants/theme';
+import { Withdraw } from '../ShipperHTTP';
 import { useNavigation } from '@react-navigation/native';
 import { Keyboard } from 'react-native';
-const PayOS = require("@payos/node");
 import { UserContext } from '../../user/UserContext';
-import { NativeModules, NativeEventEmitter } from 'react-native';
-import moment from 'moment';
-import CryptoJS from 'crypto-js'
-import axios from 'axios';
 import { VietQR } from 'vietqr';
 import { Dropdown } from 'react-native-element-dropdown';
 
-function generateRandomNumber(length) {
-    let result = '';
-    const characters = '0123456789';
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-}
 function formatDate(date) {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -118,13 +104,11 @@ const WithdrawPaymentMethod = () => {
                 {
                     amountTransantion: numericValue,
                     description: des,
-                    infoBank: {
-                        bank: getNameBank(),
-                        numberBank: numberBank,
-                        name: name
-                    }
+                    bank: getNameBank(),
+                    numberBank: numberBank,
+                    name: name,
+                    status: 1
                 });
-            console.log(updateBalance);
             if (updateBalance.result) {
                 user.checkAccount.balance -= numericValue
                 navigation.reset({
@@ -239,7 +223,6 @@ const WithdrawPaymentMethod = () => {
                         //         bin: methodSelect,
                         //         accountNumber: numberBank
                         //     });
-                        //     console.log(data);
                         //     var config = {
                         //         method: 'post',
                         //         url: 'https://api.vietqr.io/v2/lookup',
@@ -250,10 +233,8 @@ const WithdrawPaymentMethod = () => {
                         //         },
                         //         data: data
                         //     };
-                        //     console.log(data);
                         //     axios(config)
                         //         .then(function (response) {
-                        //             console.log(response.data);
                         //             setname(response.data.data.accountName)
                         //         })
                         //         .catch(function (error) {
@@ -312,7 +293,7 @@ const WithdrawPaymentMethod = () => {
                                 </View>
                             </View>
                             {name && (
-                                <TouchableOpacity style={styles.bntContinue}
+                                <TouchableOpacity style={styles.btnContinue}
                                     onPress={step2}
                                 >
                                     <Text style={styles.txtConfirm}>Tiếp tục</Text>

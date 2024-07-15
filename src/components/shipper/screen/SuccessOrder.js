@@ -5,6 +5,7 @@ import {styles} from '../styles/SuccessOrderStyle';
 import {UpdateShipperInformation} from '../ShipperHTTP';
 import {UserContext} from '../../user/UserContext';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import { updateBalance } from './Transaction';
 
 const SuccessOrder = () => {
   const navigation = useNavigation();
@@ -18,6 +19,7 @@ const SuccessOrder = () => {
     const fetchData = async () => {
       try {
         await UpdateShipperInformation(id, 3);
+        await updateBalance(order.deliveryCost, order.paymentMethod);
         setTimeout(() => {
           navigation.replace('SubmitReview', {order: order});
         }, 5000);

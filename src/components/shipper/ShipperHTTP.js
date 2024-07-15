@@ -224,3 +224,14 @@ export const Withdraw = async (id, data) =>{
       throw error;
   }
 }
+export const getHistoryTransaction = async (id) => {
+  try {
+    const axiosInstance = AxiosInstance();
+    const url = 'shippers/transactionHistory';
+    const params = {id: id};
+    return await axiosInstance.get(url, {params});
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
