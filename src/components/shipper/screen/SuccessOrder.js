@@ -19,7 +19,7 @@ const SuccessOrder = () => {
     const fetchData = async () => {
       try {
         await UpdateShipperInformation(id, 3);
-        await updateBalance(order.deliveryCost, order.paymentMethod);
+        await updateBalance(user, order.deliveryCost, order.paymentMethod);
         setTimeout(() => {
           navigation.replace('SubmitReview', {order: order});
         }, 5000);

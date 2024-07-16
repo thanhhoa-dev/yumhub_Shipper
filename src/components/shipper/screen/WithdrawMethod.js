@@ -4,16 +4,18 @@ import {
     TextInput,
     Alert, TouchableWithoutFeedback
 } from 'react-native'
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState, useContext, useRef } from 'react'
 import { styles } from '../styles/TopUpPaymentMethodStyle'
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import { FontWeight } from '../../../constants/theme';
 import { Withdraw } from '../ShipperHTTP';
+import { forgotPass, checkotp } from '../../user/UserHTTP';
 import { useNavigation } from '@react-navigation/native';
 import { Keyboard } from 'react-native';
 import { UserContext } from '../../user/UserContext';
 import { VietQR } from 'vietqr';
 import { Dropdown } from 'react-native-element-dropdown';
+import { withdrawShipper } from './Transaction';
 
 function formatDate(date) {
     const year = date.getFullYear();
@@ -31,11 +33,30 @@ const WithdrawPaymentMethod = () => {
     const { user } = useContext(UserContext);
     const [formattedValue, setFormattedValue] = useState('');
     const [numericValue, setNumericValue] = useState('');
-    const [confirm, setconfirm] = useState(false)
+    const [confirm, setconfirm] = useState(1)
     const [methodSelect, setmethodSelect] = useState(null)
     const [listBank, setlistBank] = useState(null)
     const [numberBank, setnumberBank] = useState('')
     const [name, setname] = useState('DOAN THANH HOA')
+
+    const [otp_1, setOTP1] = useState('');
+    const [otp_2, setOTP2] = useState('');
+    const [otp_3, setOTP3] = useState('');
+    const [otp_4, setOTP4] = useState('');
+
+    const otp1Ref = useRef(null);
+    const otp2Ref = useRef(null);
+    const otp3Ref = useRef(null);
+    const otp4Ref = useRef(null);
+
+    const [countDownTime, setcountDownTime] = useState(0)
+
+    useEffect(() => {
+        if (countDownTime > 0) {
+          const timer = setTimeout(() => setcountDownTime(countDownTime - 1), 1000);
+          return () => clearTimeout(timer);
+        }
+      }, [countDownTime]);
 
     useEffect(() => {
         let vietQR = new VietQR({
@@ -81,12 +102,17 @@ const WithdrawPaymentMethod = () => {
     const step2 = () => {
         if (numericValue == '' || numericValue == 0)
             Alert.alert("Nhập số tiền muốn nạp")
+        else if (user.checkAccount.balance - numericValue < 200000){
+            Alert.alert("số dư còn lại tối thiểu 200000");
+        } 
         else if (numericValue > 999 && numericValue < 50000000) {
-            setconfirm(!confirm)
+            setconfirm(2)
             Keyboard.dismiss();
-        } else
+        
+        }else
             Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
     }
+
     const getNameBank = () => {
         if (listBank) {
             const bank = listBank.find(bank => bank.value === methodSelect);
@@ -95,34 +121,58 @@ const WithdrawPaymentMethod = () => {
         else return 'banking'
     };
 
-    const confirmWithdraw = async () => {
+
+
+    const sendOTP = async () => {
+        setconfirm(3)
         try {
-            const currentDate = new Date();
-            const formattedDate = formatDate(currentDate);
-            const des = "rút tiền lúc: " + formattedDate;
-            const updateBalance = await Withdraw(user.checkAccount._id,
-                {
-                    amountTransantion: numericValue,
-                    description: des,
-                    bank: getNameBank(),
-                    numberBank: numberBank,
-                    name: name,
-                    status: 1
-                });
-            if (updateBalance.result) {
-                user.checkAccount.balance -= numericValue
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'ShipperTabNavigation' }],
-                });
-                setTimeout(() => {
-                    navigation.navigate('Tài khoản');
-                }, 100);
+               const sendOTPEmail = await forgotPass("hoangkun610@gmail.com");
+            if (sendOTPEmail.result) {
+                Alert.alert(sendOTPEmail.message);
+                setcountDownTime(60);
             }
         } catch (error) {
-            Alert.alert("Vui lòng liên hệ YumHub", "yêu cầu nhân viên kiểm tra giao dịch");
+            console.log(error);
+            Alert.alert("Lỗi", "thử lại sau");
         }
     }
+    const sendOTPAgain = async () => {
+        if (countDownTime == 0) {
+            try {
+                   const sendOTPEmail = await forgotPass(user.checkAccount.email);
+                if (sendOTPEmail.result) {
+                    Alert.alert(sendOTPEmail.message);
+                    setcountDownTime(60);
+                }
+            } catch (error) {
+                console.log(error);
+                Alert.alert("Lỗi", "thử lại sau");
+            }
+        } else {
+            Alert.alert("Lỗi", "Thao tác quá nhanh");
+        }
+    }
+    const checkOTP = async () => {
+        try {
+            let otp = otp_1 + otp_2 + otp_3 + otp_4;
+            const checkOTP = await checkotp("hoangkun610@gmail.com", otp);
+            if (checkOTP.result) {
+                withdrawShipper(user, navigation, Number(numericValue), getNameBank(), numberBank, name);
+            } else {
+                Alert.alert("Lỗi", "Sai OTP");
+            }
+        } catch (error) {
+            console.log(error);
+            Alert.alert("Lỗi", "thử lại sau");
+        }
+    }
+
+    const handleOTPChange = (otp, setOTP, nextRef) => {
+        setOTP(otp);
+        if (otp && nextRef) {
+            nextRef.current.focus();
+        }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={() => {
@@ -132,7 +182,8 @@ const WithdrawPaymentMethod = () => {
                 <View style={styles.viewBack}>
                     <TouchableOpacity style={styles.viewICBack}
                         onPress={() => {
-                            if (confirm) setconfirm(!confirm)
+                            if (confirm == 2) setconfirm(1)
+                            else if (confirm == 3) setconfirm(2)
                             else navigation.goBack()
                         }}
                     >
@@ -143,9 +194,9 @@ const WithdrawPaymentMethod = () => {
                             FontWeight={FontWeight.FW700}
                         />
                     </TouchableOpacity>
-                    <Text style={styles.textHeader}>{confirm ? "Xác nhận giao dịch" : "Rút tiền"}</Text>
+                    <Text style={styles.textHeader}>{confirm != 1 ? "Xác nhận giao dịch" : "Rút tiền"}</Text>
                 </View>
-                <View style={confirm ? { display: 'none' } : null}>
+                <View style={confirm != 1 ? { display: 'none' } : null}>
                     <View style={styles.rowQuickAmount}>
                         <TouchableOpacity
                             style={[styles.itemQuickAmount, numericValue == 200000 ? { backgroundColor: '#FFF9E6' } : { backgroundColor: '#F0F5FA' }]}
@@ -304,7 +355,7 @@ const WithdrawPaymentMethod = () => {
 
 
                 </View>
-                <View style={!confirm ? { display: 'none' } : null}>
+                <View style={confirm != 2 ? { display: 'none' } : null}>
                     <View style={styles.rowConfirmAmount}>
                         <Image source={require('../../../assets/iccash.png')} style={styles.icCash} />
                         <View style={styles.confirmAmount}>
@@ -330,12 +381,75 @@ const WithdrawPaymentMethod = () => {
                             <Text style={styles.txtDetail}>miễn phí</Text>
                         </View>
                     </View>
-                    <TouchableOpacity style={styles.bntConfirm}
-                        onPress={() => { confirmWithdraw(); }}
-                    >
-                        <Text style={styles.txtConfirm}>Xác nhận</Text>
-                    </TouchableOpacity>
+
                 </View>
+                <View style={confirm != 3 ? { display: 'none' } : null}>
+                    <View style={styles.viewBody}>
+                        <View style={styles.viewHeader}>
+                            <Text style={styles.viewTextHeader}>vui lòng nhập Mã OTP</Text>
+                            <TouchableOpacity
+                                onPress={sendOTPAgain}
+                                style={styles.viewSendAgain}
+                            >
+                                <Text style={styles.txtSendAgain}>Gửi lại</Text>
+                                <Text style={styles.txtCountDown}>{countDownTime > 0 ? countDownTime + "s" : null}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.viewTextInputOTP}>
+                            <TextInput
+                                ref={otp1Ref}
+                                value={otp_1}
+                                onChangeText={(otp) => handleOTPChange(otp, setOTP1, otp2Ref)}
+                                maxLength={1}
+                                style={styles.txtOTP}
+                                keyboardType="numeric"
+                            />
+                            <TextInput
+                                ref={otp2Ref}
+                                value={otp_2}
+                                onChangeText={(otp) => handleOTPChange(otp, setOTP2, otp3Ref)}
+                                maxLength={1}
+                                style={styles.txtOTP}
+                                keyboardType="numeric"
+                            />
+                            <TextInput
+                                ref={otp3Ref}
+                                value={otp_3}
+                                onChangeText={(otp) => handleOTPChange(otp, setOTP3, otp4Ref)}
+                                maxLength={1}
+                                style={styles.txtOTP}
+                                keyboardType="numeric"
+                            />
+                            <TextInput
+                                ref={otp4Ref}
+                                value={otp_4}
+                                onChangeText={(otp) => handleOTPChange(otp, setOTP4, null)}
+                                maxLength={1}
+                                style={styles.txtOTP}
+                                keyboardType="numeric"
+                            />
+                        </View>
+
+                    </View>
+                </View>
+                {
+                    confirm == 2 && (
+                        <TouchableOpacity style={[styles.bntConfirm, { marginTop: '35%' }]}
+                            onPress={sendOTP}
+                        >
+                            <Text style={styles.txtConfirm}>Xác nhận</Text>
+                        </TouchableOpacity>
+                    )
+                }
+                {
+                    confirm == 3 && (
+                        <TouchableOpacity onPress={checkOTP} style={[styles.bntConfirm, { marginTop: '100%' }]}>
+                            <Text style={styles.txtConfirm}>XÁC THỰC</Text>
+                        </TouchableOpacity>
+                    )
+                }
+
+
             </ScrollView>
         </TouchableWithoutFeedback>
     )

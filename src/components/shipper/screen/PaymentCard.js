@@ -5,6 +5,7 @@ import { useRoute } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/native';
 import { topUp } from '../ShipperHTTP'
 import { UserContext } from '../../user/UserContext';
+import { topUpShipper } from './Transaction';
 
 function formatDate(date) {
     const year = date.getFullYear();
@@ -66,7 +67,7 @@ const StripeApp = () => {
             navigation.goBack();
           } else {
             Alert.alert('Thành công', 'Giao dịch của bạn đã được xác nhận!');
-            paymentSuccess()
+            topUpShipper(user, navigation, amount);
           }
         } else {
           Alert.alert(`Error initializing payment sheet: ${error.code}`, error.message);
