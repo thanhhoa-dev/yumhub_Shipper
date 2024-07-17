@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import { FontWeight } from '../../../constants/theme';
 import { styles } from '../styles/TopUpPaymentMethodStyle';
 import { UserContext } from '../../user/UserContext';
+import { topUpShipper } from './Transaction';
 
 
 const formatCurrency2 = (amount) => {
@@ -122,7 +123,7 @@ const QRCodePayOs = () => {
             case "PENDING":
                 break;
             case "PAID":
-                paymentSuccess()
+                await topUpShipper(user, navigation, data.amount)
                 Alert.alert("giao dịch thành công");
                 break;
             case "CANCELLED":
@@ -142,26 +143,6 @@ const QRCodePayOs = () => {
         const minutes = date.getMinutes().toString().padStart(2, '0');
 
         return `${year}-${month}-${day} ${hours}:${minutes}`;
-    }
-    const paymentSuccess = async () => {
-        try {
-            const currentDate = new Date();
-            const formattedDate = formatDate(currentDate);
-            const des = "nạp tiền lúc: " + formattedDate;
-            const updateBalance = await topUp(data.items[0].idshipper, { amountTransantion: data.amount, description: des });
-            if (updateBalance.result) {
-                user.checkAccount.balance += (data.amount)
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'ShipperTabNavigation' }],
-                });
-                setTimeout(() => {
-                    navigation.navigate('Tài khoản');
-                }, 100);
-            }
-        } catch (error) {
-            Alert.alert("Vui lòng liên hệ YumHub", "yêu cầu nhân viên kiểm tra giao dịch "+ paymentLinkRes.orderCode);
-        }
     }
     useEffect(() => {
         // Hàm xử lý khi nhấn nút back
@@ -277,7 +258,7 @@ const QRCodePayOs = () => {
                 <Text style={styles.txtConfirm}>Lưu QR Code</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.bntConfirm, { marginTop: 28, marginBottom: 80 }]}
-                onPress={paymentSuccess}
+                onPress={()=> topUpShipper(user, navigation, data.amount)}
             >
                 <Text style={styles.txtConfirm}>test success</Text>
             </TouchableOpacity>

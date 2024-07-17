@@ -213,3 +213,25 @@ export const topUp = async (id, data) =>{
       throw error;
   }
 }
+export const Withdraw = async (id, data) =>{
+  try {
+      const axiosInstance = AxiosInstance();
+      const url ='shippers/cashOut';
+      const params = {id: id}
+      return await axiosInstance.post(url,data,{params})
+  } catch (error) {
+      console.log(error);
+      throw error;
+  }
+}
+export const getHistoryTransaction = async (id) => {
+  try {
+    const axiosInstance = AxiosInstance();
+    const url = 'shippers/transactionHistory';
+    const params = {id: id};
+    return await axiosInstance.get(url, {params});
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

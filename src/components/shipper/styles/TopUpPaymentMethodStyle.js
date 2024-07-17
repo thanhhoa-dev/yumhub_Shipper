@@ -1,6 +1,7 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, Dimensions} from 'react-native';
 import {Color, Size, FontWeight, FontFamily} from '../../../constants/theme';
 
+const { width, height } = Dimensions.get('window');
 export const styles = StyleSheet.create({
   container : {
     flex: 1,
@@ -9,7 +10,8 @@ export const styles = StyleSheet.create({
     marginTop : 0,
     paddingStart : 25,
     paddingTop : 25,
-    paddingEnd : 25
+    paddingEnd : 25,
+    height : height
   },
   viewBack : {
     flexDirection : 'row',
@@ -63,7 +65,7 @@ export const styles = StyleSheet.create({
     height : 62,
     backgroundColor : '#F0F5FA',
     borderRadius : 10,
-    paddingStart : 30,
+    paddingStart : 10,
     marginTop : 16,
     borderWidth : 1,
     borderColor : '#005987',
@@ -138,7 +140,7 @@ export const styles = StyleSheet.create({
     fontWeight : '400',
     color : '#646982'
   },
-  bntContinue : {
+  btnContinue : {
     width : '100%',
     height : 62,
     backgroundColor : Color.primary2,
@@ -152,9 +154,9 @@ export const styles = StyleSheet.create({
     height : 62,
     backgroundColor : Color.primary2,
     borderRadius : 10,
-    alignSelf : 'center',
     justifyContent : 'center',
-    marginTop : '36%'
+    alignSelf : 'flex-end',
+    marginTop : 30
   },
   txtConfirm : {
     textAlign : 'center',
@@ -222,5 +224,53 @@ export const styles = StyleSheet.create({
     fontSize : 12,
     fontWeight : '400',
     color : 'black'
+  },
+  viewBody : {
+    marginTop : 35.5
+  },
+  viewHeader : {
+    flexDirection : 'row',
+    width : '100%',
+    justifyContent : 'space-between'
+  },
+  viewTextHeader : {
+    fontSize : 13,
+    fontWeight : '400',
+    color : 'black'
+  },
+  viewSendAgain : {
+    flexDirection : 'row',
+    marginEnd : 3
+  },
+  txtSendAgain : {
+    fontSize : 14,
+    fontWeight : '700',
+    color : '#005987',
+    textDecorationLine: 'underline',
+    marginEnd : 3
+  },
+  txtCountDown : {
+    fontSize : 14,
+    fontWeight : '400',
+    color : '#005987'
+  },
+  viewTextInputOTP : {
+    width : '100%',
+    height : 62,
+    flexDirection : 'row',
+    justifyContent : 'space-between',
+    marginTop : 8.5
+  },
+  txtOTP : {
+    backgroundColor : '#F2F2F2',
+    width : 62,
+    height : 62,
+    borderRadius : 10,
+    borderWidth : 1,
+    borderColor : '#005987',
+    textAlign : 'center',
+    color : '#005987',
+    fontSize : 16,
+    fontWeight : '700'
   }
 })

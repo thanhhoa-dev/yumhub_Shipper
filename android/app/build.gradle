@@ -102,6 +102,11 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    tasks.whenTaskAdded { task ->
+        if (task.name == 'lintAnalyzeDebug') {
+            task.dependsOn 'copyReactNativeVectorIconFonts'
+        }
+    }
 }
 
 dependencies {
@@ -111,10 +116,12 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.1.1')
     implementation 'com.google.firebase:firebase-messaging:23.0.0'
     implementation 'com.google.firebase:firebase-analytics'
-
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
     // icon
     implementation project(':react-native-vector-icons')
-
+    implementation("com.squareup.okhttp3:okhttp:4.6.0")
+    implementation("commons-codec:commons-codec:1.14")
+    implementation(name:'zpdk-release-v3.1', ext:'aar')
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {
