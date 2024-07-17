@@ -63,7 +63,10 @@ const Goong = () => {
   const [destination, setDestination] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeCoordinatesCustomer, setRouteCoordinatesCustomer] = useState([]);
-  const [locateCurrent, setLocateCurrent] = useState(null);
+  const [locateCurrent, setLocateCurrent] = useState({
+    latitude: 10.835826,
+    longitude: 106.667867,
+  });
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [distanceCustomer, setDistanceCustomer] = useState(null);
