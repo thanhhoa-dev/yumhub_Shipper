@@ -103,7 +103,7 @@ const Goong = () => {
         switch (message.command) {
           case 'placeOrder':
             setOrder(message);
-            if (message.command === 'placeOrder' && statusShipper) {
+            if (message.command === 'placeOrder') {
               id = message.order._id;
               await UpdateShipperInformation(idUser, 8);
               setModalVisible(true);

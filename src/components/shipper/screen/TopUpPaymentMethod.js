@@ -1,15 +1,14 @@
 import {
-    View, Text, ScrollView,
-    TouchableOpacity, FlatList, Image,
+    View, Text,
+    TouchableOpacity, Image,
     TextInput,
     Alert, TouchableWithoutFeedback
 } from 'react-native'
 import React, { useEffect, useState, useRef, useContext } from 'react'
 import { styles } from '../styles/TopUpPaymentMethodStyle'
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import { Color, Size, FontWeight, FontFamily } from '../../../constants/theme';
-import { ShowDetail, getReviewOfOrder } from '../ShipperHTTP';
-import { useRoute } from '@react-navigation/native'
+import { FontWeight } from '../../../constants/theme';
+import { topUp } from '../ShipperHTTP';
 import { useNavigation } from '@react-navigation/native';
 import { Keyboard } from 'react-native';
 const PayOS = require("@payos/node");
@@ -18,6 +17,7 @@ import { NativeModules, NativeEventEmitter } from 'react-native';
 import moment from 'moment';
 import CryptoJS from 'crypto-js'
 import axios from 'axios';
+import { topUpShipper } from './Transaction';
 
 function generateRandomNumber(length) {
     let result = '';
@@ -27,6 +27,7 @@ function generateRandomNumber(length) {
     }
     return result;
 }
+
 
 const TopUpPaymentMethod = () => {
 
@@ -84,6 +85,17 @@ const TopUpPaymentMethod = () => {
             Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
     }
 
+    const methodCard = () => {
+        if (numericValue == '' || numericValue == 0)
+            Alert.alert("Nhập số tiền muốn nạp")
+        else if (numericValue > 999 && numericValue < 50000000) {
+            setmethodSelect('Card')
+            setconfirm(!confirm)
+            Keyboard.dismiss();
+        } else
+            Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
+    }
+
     /// PayOs 
 
     const handlePaymentQRCode = async () => {
@@ -98,7 +110,7 @@ const TopUpPaymentMethod = () => {
                 amount: amount,
                 description: 'Nộp tiền vào tài khoản',
                 items: [{
-                    idmerchant: user.checkAccount._id,
+                    idshipper: user.checkAccount._id,
                     name: user.checkAccount.fullName,
                     quantity: 1,
                     price: amount
@@ -117,6 +129,14 @@ const TopUpPaymentMethod = () => {
         }
     }
 
+    /// visa/mastercard
+
+    const handlePaymentCard = async () => {
+        const amount = Number(numericValue);
+        const response = await axios.post('https://duantotnghiep-api-a32664265dc1.herokuapp.com/stripe/create-payment-intent', { amount: amount });
+        navigation.navigate("PaymentCard", {clientSecret : response.data.clientSecret, amount : amount, idShipper : user.checkAccount._id})
+    }
+
     /// zalopay
 
     const { PayZaloBridge } = NativeModules;
@@ -126,81 +146,75 @@ const TopUpPaymentMethod = () => {
         key2: "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf",
         endpoint: "https://sb-openapi.zalopay.vn/v2/create"
     };
-    const embed_data = {};
     const createOrder = {
         app_id: config.app_id,
         app_trans_id: ``, // Translation missing: vi.docs.shared.sample_code.comments.app_trans_id
         app_user: "user123",
         app_time: Date.now(), // Milliseconds
         item: JSON.stringify([{}]),
-        embed_data: JSON.stringify(embed_data),
+        embed_data: JSON.stringify({}),
         amount: 5000,
         description: ``,
         bank_code: "zalopayapp",
         mac: ""
     };
 
-    const order = {
-        total: 50000,
-        listFood: [{}],
-        orderId: Math.floor(Math.random() * 1000000), // Thay bằng id của order trong database
-        userId: "user1234", // Thay bằng id người dùng
-    };
-    const convertToEmbed = (order) => {
-        const dummy_orderId = Math.floor(Math.random() * 1000000);
+
+    const convertToEmbed = () => {
+        const orderId = Math.floor(Math.random() * 1000000);
         createOrder.app_id = config.app_id;
-        createOrder.app_trans_id = `${moment().format('YYMMDD')}_${dummy_orderId}`;
-        createOrder.app_user = order.userId;
+        createOrder.app_trans_id = `${moment().format('YYMMDD')}_${orderId}`;
+        createOrder.app_user = user.checkAccount._id;
         createOrder.app_time = Date.now();
-        createOrder.item = JSON.stringify(order.listFood);
-        createOrder.embed_data = JSON.stringify(embed_data);
-        createOrder.amount = order.total;
-        createOrder.description = `Yumhub - Payment for the order #${order.orderId}`;
+        createOrder.item = JSON.stringify([{}]);
+        createOrder.embed_data = JSON.stringify({});
+        createOrder.amount = numericValue;
+        createOrder.description = `Yumhub - Payment for the order #${orderId}`;
         createOrder.bank_code = "zalopayapp";
-        const inputMac = config.app_id + "|" + createOrder.app_trans_id + "|" + order.userId + "|" + order.total + "|" + createOrder.app_time + "|" + createOrder.embed_data + "|" + createOrder.item;
+        const inputMac = config.app_id + "|" + createOrder.app_trans_id + "|" + user.checkAccount._id + "|" + numericValue + "|" + createOrder.app_time + "|" + createOrder.embed_data + "|" + createOrder.item;
         createOrder.mac = CryptoJS.HmacSHA256(inputMac, config.key1).toString();
     }
     async function handlePaymentZalo() {
-        convertToEmbed(order);
+        convertToEmbed();
         try {
             const response = await axios.post(config.endpoint, null, { params: createOrder });
             if (response.data.return_code === 1) {
                 const zpTransToken = response.data.zp_trans_token;
-                PayZaloBridge.payOrder(zpTransToken);
+                var payZP = PayZaloBridge;
+                payZP.payOrder(zpTransToken);
             }
         } catch (error) {
             console.log(error);
         }
     }
     useEffect(() => {
+        const OnPaymentZaloSuccess = () => {
+            topUpShipper(user, navigation, Number(numericValue));
+        };
+    
+        const OnPaymentZaloFail = () => {
+            Alert.alert("Lỗi", "thanh toán không thành công");
+        };
         if (methodSelect && methodSelect == "ZaloPay") {
             const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
             const subscription = payZaloBridgeEmitter.addListener(
                 'EventPayZalo',
                 (data) => {
-                    if (data.returnCode === 1) {
+                    if (data.returnCode == 1) {
                         OnPaymentZaloSuccess();
                     } else {
                         OnPaymentZaloFail();
                     }
                 }
             );
-            console.log("Listener for 'EventPayZalo' added");
             return () => {
-                console.log("Listener for 'EventPayZalo' removed");
                 subscription.remove();
 
             };
         }
     }, [methodSelect]);
 
-    const OnPaymentZaloSuccess = () => {
-        console.log("Thành công");
-    };
-
-    const OnPaymentZaloFail = () => {
-        console.log("Lỗi");
-    };
+    
 
     /// zalopay
 
@@ -212,6 +226,9 @@ const TopUpPaymentMethod = () => {
             default:
             case "QRCode":
                 handlePaymentQRCode()
+                break;
+            case "Card":
+                handlePaymentCard()
                 break;
         }
     }
@@ -325,6 +342,14 @@ const TopUpPaymentMethod = () => {
                             <Image source={require('../../../assets/icqrcode.png')} style={styles.icItemPayment} />
                             <View style={styles.infoPaymentMethod}>
                                 <Text style={styles.nameZalo}>Nạp bằng app ngân hàng</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={methodCard}
+                            style={styles.itemPaymentMethod}>
+                            <Image source={require('../../../assets/card.png')} style={styles.icItemPayment} />
+                            <View style={styles.infoPaymentMethod}>
+                                <Text style={styles.nameZalo}>Nạp bằng Thẻ Visa/MasterCard</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
