@@ -86,11 +86,12 @@ const Goong = () => {
   const {user, sendMessage, receiveMessage} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
-  var id = '6627e8b6bfd9baea698a1d4b';
-  // var id;
+  // var id = '6627e8b6bfd9baea698a1d4b';
+  var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
   const currentOrderImage = useRef('');
+  const currentLocationCustomer = useRef('');
   //websocket
 
   useEffect(() => {
@@ -118,10 +119,7 @@ const Goong = () => {
     } else {
       console.log('User is not set or receiveMessage is not defined');
     }
-  }, [
-    user,
-    receiveMessage,
-  ]);
+  }, [user, receiveMessage, statusShipper]);
 
   //websocket
 
@@ -140,7 +138,7 @@ const Goong = () => {
   //       throw error;
   //     }
   //   };
-  //   if (!order && statusShipper && index === 4) {
+  //   if (!order && statusShipper) {
   //     fetchOrder();
   //   }
   // }, [countdown, id, idUser, order, statusShipper]);
@@ -154,6 +152,10 @@ const Goong = () => {
   useEffect(() => {
     currentOrderImage.current = image;
   }, [image]);
+
+  useEffect(() => {
+    currentLocationCustomer.current = destinationCustomer;
+  }, [destinationCustomer]);
 
   const handleSendMessage = command => {
     sendMessage('shipper', command, currentOrder.current.order);
@@ -358,9 +360,8 @@ const Goong = () => {
       <View style={{alignItems: 'center'}}>
         <Image
           source={require('../../../assets/delivery-bike.png')}
-          style={{width: 20, height: 20}}
+          style={{width: 40, height: 40}}
         />
-        <Text>Vị trí tôi</Text>
       </View>
     );
   };
@@ -461,10 +462,64 @@ const Goong = () => {
     }
   };
 
+  const checkfetchRouteCustomer = async () => {
+    try {
+      const response = await axios.get(`https://rsapi.goong.io/Direction`, {
+        params: {
+          origin: `${locateCurrent.latitude},${locateCurrent.longitude}`,
+          destination: `${currentLocationCustomer.current.lat},${currentLocationCustomer.current.lng}`,
+          vehicle: 'bike',
+          api_key: GOONG_API_KEY,
+        },
+      });
+
+      const {routes} = response.data;
+
+      if (routes && routes.length > 0) {
+        const distanceText = routes[0].legs[0].distance.text;
+        const match = distanceText.match(/^(\d+(\.\d+)?)[ ]?(km|m)$/i);
+        if (!match) {
+          throw new Error('Invalid format');
+        }
+
+        const value = parseFloat(match[1]);
+        const unit = match[3].toLowerCase();
+
+        switch (unit) {
+          case 'km':
+            return value * 1000;
+          case 'm':
+            return value;
+          default:
+            throw new Error('Unsupported unit');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    return null; // Trả về null nếu không có dữ liệu
+  };
+
+  const checkDistance = async () => {
+    const distance = await checkfetchRouteCustomer();
+    if (distance !== null) {
+      if (distance > 500) {
+        setIndex(2);
+        Alert.alert('Bạn chưa đi tới nơi nhỏ hơn 500 m');
+      } else {
+        setIndex(3);
+      }
+    } else {
+      console.error('Unable to fetch distance');
+    }
+  };
+
   const handleUpdateIndex = order => {
     setIndex(prevIndex => {
       let newIndex;
-      if (prevIndex === 3) {
+      if (prevIndex === 2) {
+        checkDistance();
+      } else if (prevIndex === 3) {
         if (currentOrderImage.current) {
           newIndex = (prevIndex + 1) % (items.length + 1);
         } else {
@@ -652,6 +707,7 @@ const Goong = () => {
           }>
           {locateCurrent && (
             <Marker
+              title="Vị trí của tôi"
               coordinate={{
                 latitude: locateCurrent.latitude,
                 longitude: locateCurrent.longitude,
@@ -670,7 +726,7 @@ const Goong = () => {
               }}
             />
           )}
-          {destinationCustomer && order && (
+          {destinationCustomer && order && index <= 1 && (
             <Marker
               draggable
               title={`${order.order.customerID.fullName}`}
@@ -680,7 +736,7 @@ const Goong = () => {
               }}
             />
           )}
-          {order && routeCoordinates.length > 0 && (
+          {order && routeCoordinates.length > 0 && index <= 1 && (
             <Polyline
               coordinates={routeCoordinates}
               strokeWidth={4}
