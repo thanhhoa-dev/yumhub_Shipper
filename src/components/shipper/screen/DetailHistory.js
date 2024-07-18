@@ -17,6 +17,7 @@ const DetailHistory = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { order } = route.params;
+  const avatar = order.customerID.avatar != undefined ? order.customerID.avatar : "https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png"
   const handleRenderListFoods = ({ item }) => {
     return (
       <View style={styles.viewContainerItemFood}>
@@ -132,7 +133,7 @@ const DetailHistory = () => {
         </Text>
         <View style={styles.containerReview}>
           <View style={styles.rowInforReview}>
-            <Image style={styles.avatarInfoReivew} source={{ uri: order.customerID.avatar }} />
+            <Image style={styles.avatarInfoReivew} source={{ uri: avatar }} />
             <View style={styles.nameAndRating}>
               <Text style={styles.name}>
                 {order.customerID.fullName}
@@ -147,7 +148,7 @@ const DetailHistory = () => {
               </Text>
               <TouchableOpacity
                 onPress={() => {
-                  navigation.navigate("ReviewDetail", { item : createItemToReviewDetail() })
+                  navigation.navigate("ReviewDetail", { item : createItemToReviewDetail(item.typeOfReview.name) })
                 }}
               >
                 <View style={styles.viewMore}>
@@ -192,7 +193,7 @@ const DetailHistory = () => {
       <FlatList
         data={listFoods}
         renderItem={handleRenderListFoods}
-        keyExtractor={item => `food-${item._id}`}
+        keyExtractor={(item,index) => `food-${item._id}`+index}
         scrollEnabled={false}
       />
       <View style={styles.rowTotal}>

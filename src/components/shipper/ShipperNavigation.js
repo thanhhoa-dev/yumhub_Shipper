@@ -25,6 +25,7 @@ import ChatWithCustomer from './screen/ChatWithCustomer'
 import PaymentCard from './screen/PaymentCard'
 import WithdrawPaymentMethod from './screen/WithdrawMethod'
 import HistoryTransaction from './screen/HistoryTransaction';
+import ReviewDetail from './screen/ReviewDetail';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -199,6 +200,11 @@ const ShipperStackNavigation = () => {
         options={{headerShown: false}}
         name="HistoryTransaction"
         component={HistoryTransaction}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="ReviewDetail"
+        component={ReviewDetail}
       />
     </Stack.Navigator>
   );
