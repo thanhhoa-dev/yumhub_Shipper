@@ -23,6 +23,7 @@ import {
   Dimensions,
   ToastAndroid,
   PermissionsAndroid,
+  BackHandler,
 } from 'react-native';
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
@@ -44,11 +45,13 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {launchCamera} from 'react-native-image-picker';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useNavigationState} from '@react-navigation/native';
 import Loading from './Loading';
 import {styles} from '../styles/GoogStyle';
 import {GOONG_API_KEY} from '@env';
 import DropdownComponentGoong from './DropdownComponentGoong';
+import Slider from 'react-native-slide-to-unlock';
+import MapViewDirections from 'react-native-maps-directions';
 
 const Goong = () => {
   const navigation = useNavigation();
@@ -64,8 +67,8 @@ const Goong = () => {
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeCoordinatesCustomer, setRouteCoordinatesCustomer] = useState([]);
   const [locateCurrent, setLocateCurrent] = useState({
-    latitude: 10.835826,
-    longitude: 106.667867,
+    latitude: 10.835789,
+    longitude: 106.667878,
   });
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
@@ -86,65 +89,94 @@ const Goong = () => {
   const [countdown, setCountdown] = useState(60);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [valueCancelOrder, setValueCancelOrder] = useState(1);
+  const navigationState = useNavigationState(state => state);
   const {user, sendMessage, receiveMessage} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
-  // var id = '6627e8b6bfd9baea698a1d4b';
-  var id;
+  var id = '6627e8b6bfd9baea698a1d4b';
+  // var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
   const currentOrderImage = useRef('');
   const currentLocationCustomer = useRef('');
   //websocket
 
-  useEffect(() => {
-    if (user && receiveMessage) {
-      receiveMessage(async message => {
-        switch (message.command) {
-          case 'placeOrder':
-            setOrder(message);
-            if (message.command === 'placeOrder' && statusShipper) {
-              id = message.order._id;
-              await UpdateShipperInformation(idUser, 8);
-              setModalVisible(true);
-              setIsTimerRunning(true);
-            }
-            break;
-          case 'cancelled_from_merchant':
-            console.log('cancelled_from_merchant');
-            setModalVisibleCancelOrderFromMerchant(true);
-            break;
-          default:
-            console.log('Unknown command:', message.command);
-            break;
-        }
-      });
-    } else {
-      console.log('User is not set or receiveMessage is not defined');
-    }
-  }, [user, receiveMessage, statusShipper]);
+  // useEffect(() => {
+  //   if (user && receiveMessage) {
+  //     receiveMessage(async message => {
+  //       switch (message.command) {
+  //         case 'placeOrder':
+  //           setOrder(message);
+  //           if (message.command === 'placeOrder' && statusShipper) {
+  //             id = message.order._id;
+  //             await UpdateShipperInformation(idUser, 8);
+  //             setModalVisible(true);
+  //             setIsTimerRunning(true);
+  //           }
+  //           break;
+  //         case 'cancelled_from_merchant':
+  //           console.log('cancelled_from_merchant');
+  //           setModalVisibleCancelOrderFromMerchant(true);
+  //           break;
+  //         default:
+  //           console.log('Unknown command:', message.command);
+  //           break;
+  //       }
+  //     });
+  //   } else {
+  //     console.log('User is not set or receiveMessage is not defined');
+  //   }
+  // }, [user, receiveMessage, statusShipper]);
 
   //websocket
 
-  // useEffect(() => {
-  //   const fetchOrder = async () => {
-  //     try {
-  //       const result = await GetOrderByID(id);
-  //       setOrder(result);
-  //       if (result.result) {
-  //         await UpdateShipperInformation(idUser, 8);
-  //         setModalVisible(true);
-  //         setIsTimerRunning(true);
-  //       }
-  //     } catch (error) {
-  //       console.log('Error fetching order:', error);
-  //       throw error;
-  //     }
-  //   };
-  //   if (!order && statusShipper) {
-  //     fetchOrder();
-  //   }
-  // }, [countdown, id, idUser, order, statusShipper]);
+  useEffect(() => {
+    const backAction = () => {
+      if (navigationState.index === 0) {
+        Alert.alert(
+          'Thoát App',
+          'Bạn có chắc chắn muốn thoát khỏi ứng dụng không?',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => null,
+              style: 'cancel',
+            },
+            {text: 'YES', onPress: () => BackHandler.exitApp()},
+          ],
+        );
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigationState]);
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const result = await GetOrderByID(id);
+        setOrder(result);
+        if (result.result) {
+          await UpdateShipperInformation(idUser, 8);
+          setModalVisible(true);
+          setIsTimerRunning(true);
+        }
+      } catch (error) {
+        console.log('Error fetching order:', error);
+        throw error;
+      }
+    };
+    if (!order && statusShipper && index === 4) {
+      fetchOrder();
+    }
+  }, [countdown, id, idUser, order, statusShipper]);
 
   useEffect(() => {
     if (order) {
@@ -161,6 +193,7 @@ const Goong = () => {
   }, [destinationCustomer]);
 
   const handleSendMessage = command => {
+    console.log(command);
     sendMessage('shipper', command, currentOrder.current.order);
   };
 
@@ -358,11 +391,33 @@ const Goong = () => {
     }
   };
 
-  const CustomMarker = () => {
+  const ShipperMarker = () => {
     return (
       <View style={{alignItems: 'center'}}>
         <Image
           source={require('../../../assets/delivery-bike.png')}
+          style={{width: 40, height: 40}}
+        />
+      </View>
+    );
+  };
+
+  const MerchantMarker = () => {
+    return (
+      <View style={{alignItems: 'center'}}>
+        <Image
+          source={require('../../../assets/merchant.png')}
+          style={{width: 40, height: 40}}
+        />
+      </View>
+    );
+  };
+
+  const CustomMarker = () => {
+    return (
+      <View style={{alignItems: 'center'}}>
+        <Image
+          source={require('../../../assets/customer-service.png')}
           style={{width: 40, height: 40}}
         />
       </View>
@@ -500,13 +555,13 @@ const Goong = () => {
     } catch (error) {
       console.error(error);
     }
-    return null; // Trả về null nếu không có dữ liệu
+    return null;
   };
 
   const checkDistance = async () => {
     const distance = await checkfetchRouteCustomer();
     if (distance !== null) {
-      if (distance > 500) {
+      if (distance < 500) {
         setIndex(2);
         Alert.alert('Bạn chưa đi tới nơi nhỏ hơn 500 m');
       } else {
@@ -517,10 +572,38 @@ const Goong = () => {
     }
   };
 
-  const handleUpdateIndex = order => {
+  const fetchShipperToCustomer = async () => {
+    try {
+      const response = await axios.get(`https://rsapi.goong.io/Direction`, {
+        params: {
+          origin: `${locateCurrent.latitude},${locateCurrent.longitude}`,
+          destination: `${destinationCustomer.lat},${destinationCustomer.lng}`,
+          vehicle: 'bike',
+          api_key: GOONG_API_KEY,
+        },
+      });
+
+      const {routes} = response.data;
+
+      if (routes && routes.length > 0) {
+        const points = routes[0].overview_polyline.points;
+        const coordinates = decodePolyline(points);
+        setRouteCoordinatesCustomer(coordinates);
+        setDistanceCustomer(routes[0].legs[0].distance.text);
+        setDurationCustomer(routes[0].legs[0].duration.text);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleUpdateIndex = () => {
     setIndex(prevIndex => {
       let newIndex;
-      if (prevIndex === 2) {
+      if (prevIndex === 1) {
+        fetchShipperToCustomer();
+        newIndex = 2;
+      } else if (prevIndex === 2) {
         checkDistance();
       } else if (prevIndex === 3) {
         if (currentOrderImage.current) {
@@ -552,28 +635,6 @@ const Goong = () => {
       return newIndex;
     });
   };
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderMove: (evt, gestureState) => {
-        if (gestureState.dx >= 0 && gestureState.dx <= width * 0.7) {
-          translateX.setValue(gestureState.dx);
-        }
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-        if (gestureState.dx >= width * 0.7 && currentOrder.current) {
-          handleUpdateIndex(currentOrder.current);
-        }
-        Animated.timing(translateX, {
-          toValue: 0,
-          duration: 20, // Trở về vị trí ban đầu ngay lập tức
-          useNativeDriver: true,
-        }).start();
-      },
-    }),
-  ).current;
 
   /// xử lý hình ảnh
   const takePhoto = useCallback(async response => {
@@ -672,6 +733,14 @@ const Goong = () => {
     }
   };
 
+  const formatCurrency = amount => {
+    const formattedAmount = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
+    return formattedAmount.replace('₫', '') + ' ₫';
+  };
+
   if (!locateCurrent) {
     return <Loading />;
   }
@@ -716,28 +785,30 @@ const Goong = () => {
                 longitude: locateCurrent.longitude,
               }}
               anchor={{x: 0.5, y: 1}}>
-              <CustomMarker />
+              <ShipperMarker />
             </Marker>
           )}
-          {destination && order && (
+          {destination && order && index <= 1 && (
             <Marker
               draggable
               title={`${order.order.merchantID.name}`}
               coordinate={destination}
               onDragEnd={directions => {
                 setDestination(directions.nativeEvent.coordinate);
-              }}
-            />
+              }}>
+              <MerchantMarker />
+            </Marker>
           )}
-          {destinationCustomer && order && index <= 1 && (
+          {destinationCustomer && order && (
             <Marker
               draggable
               title={`${order.order.customerID.fullName}`}
               coordinate={{
                 latitude: destinationCustomer.lat,
                 longitude: destinationCustomer.lng,
-              }}
-            />
+              }}>
+              <CustomMarker />
+            </Marker>
           )}
           {order && routeCoordinates.length > 0 && index <= 1 && (
             <Polyline
@@ -1071,9 +1142,7 @@ const Goong = () => {
                         Giá tiền
                       </Text>
                       <Text style={styles.textItemSummaryBottmSheet}>
-                        {order.order.totalPaid
-                          .toString()
-                          .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+                        {formatCurrency(order.order.totalPaid)}
                       </Text>
                     </View>
                     <View style={styles.viewContainerSummaryBottomSheet}>
@@ -1081,16 +1150,16 @@ const Goong = () => {
                         Phí giao hàng
                       </Text>
                       <Text style={styles.textItemSummaryBottmSheet}>
-                        {order.order.deliveryCost
-                          .toString()
-                          .replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+                        {formatCurrency(order.order.deliveryCost)}
                       </Text>
                     </View>
                     <View style={styles.viewContainerSummaryBottomSheet}>
                       <Text style={styles.textItemSummaryBottmSheet}>
                         Thu hộ
                       </Text>
-                      <Text style={styles.textItemSummaryBottmSheet}>0</Text>
+                      <Text style={styles.textItemSummaryBottmSheet}>
+                        {formatCurrency(0)}
+                      </Text>
                     </View>
                     <View style={styles.viewContainerSummaryBottomSheet}>
                       <Text
@@ -1105,7 +1174,7 @@ const Goong = () => {
                           styles.textItemSummaryBottmSheet,
                           styles.textIncomeBottomSheet,
                         ]}>
-                        17.500
+                        {formatCurrency(17500)}
                       </Text>
                     </View>
                   </View>
@@ -1123,21 +1192,26 @@ const Goong = () => {
                   )}
                   <View style={styles.viewArriveRestaurantBottomSheet}>
                     <View style={styles.buttonArriveRestaurantBottomSheet}>
-                      <Animated.View
-                        style={[
-                          styles.iconContainer,
-                          {transform: [{translateX}]},
-                        ]}
-                        {...panResponder.panHandlers}>
-                        <FontAwesome6
-                          style={styles.iconRightBottomSheet}
-                          name={'angles-right'}
-                          size={30}
-                        />
-                      </Animated.View>
-                      <Text style={styles.textArriveRestaurantBottomSheet}>
-                        {items[index]}
-                      </Text>
+                      <Slider
+                        onEndReached={() => {
+                          handleUpdateIndex();
+                        }}
+                        containerStyle={styles.containerStyleSlider}
+                        sliderElement={
+                          <FontAwesome6
+                            style={styles.iconRightBottomSheet}
+                            name={'angles-right'}
+                            size={30}
+                          />
+                        }>
+                        <Text
+                          style={[
+                            styles.textArriveRestaurantBottomSheet,
+                            {marginStart: 50},
+                          ]}>
+                          {items[index]}
+                        </Text>
+                      </Slider>
                     </View>
                   </View>
                   {index >= 3 && (

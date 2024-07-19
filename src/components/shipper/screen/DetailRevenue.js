@@ -83,7 +83,7 @@ const DetailRevenue = ({
     };
 
     fetchData();
-  }, [date]);
+  }, [date, index]);
 
   if (loading || revenue === null) {
     return (
@@ -126,7 +126,7 @@ const DetailRevenue = ({
                 {formatCurrency(revenue.payByCash)}
               </Text>
             ) : (
-              <Text style={styles.textNumberStatistical}>0 đ</Text>
+              <Text style={styles.textNumberStatistical}>{formatCurrency(0)}</Text>
             )}
           </View>
           <View style={styles.viewItemStatistical}>
@@ -140,7 +140,7 @@ const DetailRevenue = ({
                 )}
               </Text>
             ) : (
-              <Text style={styles.textNumberStatistical}>0 đ</Text>
+              <Text style={styles.textNumberStatistical}>{formatCurrency(0)}</Text>
             )}
           </View>
         </View>

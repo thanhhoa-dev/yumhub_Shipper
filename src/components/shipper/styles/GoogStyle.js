@@ -1,6 +1,6 @@
 import {StyleSheet} from 'react-native';
 import {Size, Color, FontWeight, FontFamily} from '../../../constants/theme';
-import { rgbaArrayToRGBAColor } from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
+import {rgbaArrayToRGBAColor} from 'react-native-reanimated/lib/typescript/reanimated2/Colors';
 
 export const styles = StyleSheet.create({
   buttonPowerOffStatusShipper: {
@@ -30,7 +30,7 @@ export const styles = StyleSheet.create({
   },
   viewContainerBottomSheet: {
     flex: 1,
-    marginHorizontal:20,
+    marginHorizontal: 20,
   },
   textCustomerPhoneNumber: {
     color: Color.primary1,
@@ -51,10 +51,10 @@ export const styles = StyleSheet.create({
     height: 50,
     marginHorizontal: 40,
     marginVertical: 35,
-    borderWidth:1,
-    borderColor:Color.text,
-    justifyContent:'center',
-    alignItems:'center'
+    borderWidth: 1,
+    borderColor: Color.text,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   textInputCancelOrder: {
     color: Color.textBold,
@@ -72,7 +72,7 @@ export const styles = StyleSheet.create({
     fontSize: Size.S20,
     fontWeight: FontWeight.FW700,
     marginStart: Size.S20,
-    textAlign:'center'
+    textAlign: 'center',
   },
   textTakePhotoBottomSheet: {
     color: Color.white,
@@ -115,7 +115,7 @@ export const styles = StyleSheet.create({
     color: '#646982',
     fontWeight: '400',
     flexShrink: 1,
-    marginStart:10
+    marginStart: 10,
   },
   viewListItemInformationFoodBottomSheet: {
     marginTop: 30,
@@ -143,7 +143,7 @@ export const styles = StyleSheet.create({
   viewContainerIconBottomSheet: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent:'space-between'
+    justifyContent: 'space-between',
   },
   viewInformationUserBottomSheet: {
     flexDirection: 'row',
@@ -158,13 +158,13 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     marginHorizontal: 1,
     height: 116,
-    justifyContent:'center'
+    justifyContent: 'center',
   },
   textArriveRestaurantBottomSheet: {
     color: Color.white,
     fontSize: Size.S23,
     fontWeight: FontWeight.FW500,
-    textAlign: 'center',
+    // textAlign: 'center',
     flex: 1,
     zIndex: 1,
   },
@@ -176,6 +176,13 @@ export const styles = StyleSheet.create({
     zIndex: 2,
   },
   iconContainer: {zIndex: 2},
+  containerStyleSlider: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '95%',
+  },
   buttonArriveRestaurantBottomSheet: {
     backgroundColor: Color.primary1,
     borderRadius: 40,
@@ -209,10 +216,10 @@ export const styles = StyleSheet.create({
     fontWeight: FontWeight.FW600,
     paddingBottom: Size.S20,
   },
-  viewLine:{
-    borderBottomWidth:3,
-    borderBottomColor:'#DFDFDF',
-    marginVertical:20
+  viewLine: {
+    borderBottomWidth: 3,
+    borderBottomColor: '#DFDFDF',
+    marginVertical: 20,
   },
   viewSummaryBottomSheet: {
     // marginTop: Size.S20,
@@ -322,9 +329,8 @@ export const styles = StyleSheet.create({
   },
   buttonConfirmNo: {
     backgroundColor: '#E46929',
-    borderWidth:1,
-    borderColor:Color.text
-    
+    borderWidth: 1,
+    borderColor: Color.text,
   },
   buttonConfirmYes: {
     backgroundColor: Color.text,
@@ -351,7 +357,7 @@ export const styles = StyleSheet.create({
     backgroundColor: Color.bgInput,
     borderRadius: 10,
     padding: 15,
-    elevation:10,
+    elevation: 10,
   },
   textXClose: {
     fontSize: Size.S16,
@@ -384,7 +390,7 @@ export const styles = StyleSheet.create({
     marginTop: 30,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal:30
+    paddingHorizontal: 30,
   },
   textItemIncom: {
     color: Color.textBold,
@@ -394,7 +400,7 @@ export const styles = StyleSheet.create({
   viewItemIncom: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems:'center',
+    alignItems: 'center',
     paddingBottom: 16,
   },
   viewContainerInformationIncom: {
@@ -423,7 +429,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    backgroundColor:'rgba(0,0,0,0.5)'
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   viewButtonOrder: {
     flexDirection: 'row',
@@ -437,8 +443,8 @@ export const styles = StyleSheet.create({
     borderRadius: 35,
     paddingVertical: Size.S20,
     paddingHorizontal: 15,
-    borderWidth:1,
-    borderColor:'#29D8E4'
+    borderWidth: 1,
+    borderColor: '#29D8E4',
   },
   viewContainerGoong: {
     flex: 1,

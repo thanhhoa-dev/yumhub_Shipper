@@ -8282,6 +8282,13 @@ react-native-screens@^3.29.0, "react-native-screens@>= 3.0.0":
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
+react-native-slide-to-unlock@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.npmjs.org/react-native-slide-to-unlock/-/react-native-slide-to-unlock-0.1.6.tgz"
+  integrity sha512-6dywdbdgyRc3d0Ni+VKPrJW0DtA+38UuMjbewr+pGF6gLZal3dWn5RzILKwLYsynzCp3dljAXsKgFMSYFCdyQg==
+  dependencies:
+    prop-types "^15.7.2"
+
 react-native-sound-player@^0.14.3:
   version "0.14.3"
   resolved "https://registry.npmjs.org/react-native-sound-player/-/react-native-sound-player-0.14.3.tgz"

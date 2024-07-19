@@ -1,6 +1,7 @@
 import {
   FlatList,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,8 +15,8 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import {getShipperBeReview} from '../ShipperHTTP';
 import Loading from './Loading';
 import {styles} from '../styles/FeedbackStyle';
-import { UserContext } from '../../user/UserContext';
-import { useNavigation } from '@react-navigation/native';
+import {UserContext} from '../../user/UserContext';
+import {useNavigation} from '@react-navigation/native';
 
 const Feedback = () => {
   const navigation = useNavigation();
@@ -42,6 +43,7 @@ const Feedback = () => {
   }, []);
 
   useEffect(() => {
+    // console.log(reviews);
     if (reviews) {
       let totalRating = 0;
       if (reviews.length > 0) {
@@ -49,7 +51,7 @@ const Feedback = () => {
           totalRating += reviews[i].review.rating;
         }
         let total = totalRating / reviews.length;
-        setRatingAverageTotal(total);
+        setRatingAverageTotal(total.toFixed(1));
       } else {
         setRatingAverageTotal(0);
       }
@@ -116,7 +118,7 @@ const Feedback = () => {
           />
         ) : (
           <Image
-            source={require('../../../assets/ZaloPlay.png')}
+            source={require('../../../assets/NoAvatar.jpg')}
             style={{
               width: 50,
               height: 50,
@@ -133,9 +135,7 @@ const Feedback = () => {
               <Entypo name={'dots-three-horizontal'} size={20} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.textNameFeedback}>
-            {item.user.fullName}
-          </Text>
+          <Text style={styles.textNameFeedback}>{item.user.fullName}</Text>
           <View style={{width: 100, paddingVertical: 10}}>
             <StarRating
               starSize={22}
@@ -160,45 +160,56 @@ const Feedback = () => {
       <View style={styles.viewContainer}>
         <View style={styles.viewHeader}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Entypo name={'chevron-left'} size={30} color={'#32343E'} />
+            <Entypo style={styles.iconBack} name={'chevron-left'} size={30} color={'#32343E'} />
           </TouchableOpacity>
           <Text style={styles.titleHeader}>Phản hồi từ khách hàng</Text>
         </View>
-        <View style={styles.viewTotalStartRating}>
-          <View style={styles.viewContainerAverageTotalStartRating}>
-            <View style={styles.viewAverageTotalStartRating}>
-              <Text style={styles.textAverageTotal}>{ratingAverageTotal}</Text>
-              <StarRating
-                rating={1}
-                disabled={true}
-                maxStars={1}
-                color={'#19D6E5'}
-                starSize={45}
-                starStyle={{marginHorizontal: -2}}
-                onChange={() => {}}
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View
+            style={{
+              paddingHorizontal: 24,
+            }}>
+            <View style={styles.viewTotalStartRating}>
+              <View style={styles.viewContainerAverageTotalStartRating}>
+                <View style={styles.viewAverageTotalStartRating}>
+                  <Text style={styles.textAverageTotal}>
+                    {ratingAverageTotal}
+                  </Text>
+                  <StarRating
+                    rating={1}
+                    disabled={true}
+                    maxStars={1}
+                    color={'#E46929'}
+                    starSize={45}
+                    starStyle={{marginHorizontal: -2}}
+                    onChange={() => {}}
+                  />
+                </View>
+                {reviews !== null && (
+                  <Text style={styles.textReviews}>
+                    {reviews.length} reviews
+                  </Text>
+                )}
+              </View>
+              <FlatList
+                data={numberRating}
+                renderItem={renderNumberRating}
+                keyExtractor={(item, index) => index.toString()}
+                showsHorizontalScrollIndicator={false}
+                scrollEnabled={false}
               />
             </View>
-            {reviews == null ? (
-              <Text>0 reviews</Text>
-            ) : (
-              <Text>{reviews.length} reviews</Text>
-            )}
+            <View style={styles.viewContainerItemContentFeedback}>
+              <FlatList
+                data={reviews}
+                renderItem={renderItem}
+                keyExtractor={(item, index) => index.toString()}
+                showsVerticalScrollIndicator={false}
+                scrollEnabled={false}
+              />
+            </View>
           </View>
-          <FlatList
-            data={numberRating}
-            renderItem={renderNumberRating}
-            keyExtractor={(item, index) => index.toString()}
-            showsHorizontalScrollIndicator={false}
-          />
-        </View>
-        <View style={styles.viewContainerItemContentFeedback}>
-          <FlatList
-            data={reviews}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => index.toString()}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+        </ScrollView>
       </View>
     </View>
   );

@@ -5,16 +5,19 @@ import {
   Text,
   TouchableOpacity,
   Platform,
+  Alert,
 } from 'react-native';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import {PermissionsAndroid} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 const AccessLocation = () => {
   const navigation = useNavigation();
+  const [permissionDenied, setPermissionDenied] = useState(false);
+
   useEffect(() => {
-    const fechLocation = async () => {
+    const fetchLocation = async () => {
       try {
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -22,14 +25,14 @@ const AccessLocation = () => {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           navigation.replace('ShipperTabNavigation');
         } else {
-          console.log('Location permission denied');
+          setPermissionDenied(true);
         }
       } catch (err) {
         console.warn(err);
       }
     };
 
-    fechLocation();
+    fetchLocation();
   }, []);
 
   const handleEnableLocation = async () => {
@@ -48,13 +51,18 @@ const AccessLocation = () => {
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
           navigation.replace('ShipperTabNavigation');
         } else {
-          console.log('Location permission denied');
+          setPermissionDenied(true);
+          Alert.alert('Bạn cần cấp quyền truy cập vị trí mới có thể sử dụng chức năng app');
         }
       } catch (err) {
         console.warn(err);
       }
     }
   };
+
+  if (!permissionDenied) {
+    return null;
+  }
 
   return (
     <View style={styles.containerBackground}>
@@ -66,7 +74,7 @@ const AccessLocation = () => {
           onPress={handleEnableLocation}
           style={styles.buttonLocation}>
           <Text style={styles.textLocation}>Truy cập vị trí</Text>
-          <EvilIcons name={'location'} size={20} color={'#fff'} />
+          <EvilIcons style={styles.iconLocation} name={'location'} size={25} color={'#E46929'} />
         </TouchableOpacity>
         <Text style={styles.textContenLocation} numberOfLines={2}>
           YUMHUB SẼ TRUY CẬP VỊ TRÍ CỦA BẠN CHỈ KHI BẠN ĐANG SỬ DỤNG ỨNG DỤNG
@@ -79,6 +87,9 @@ const AccessLocation = () => {
 export default AccessLocation;
 
 const styles = StyleSheet.create({
+  iconLocation:{
+    position:'absolute', 
+    right: '18%'},
   textContenLocation: {
     textAlign: 'center',
     marginTop: 30,
@@ -88,9 +99,11 @@ const styles = StyleSheet.create({
     color: '#646982',
   },
   textLocation: {
-    color: '#fff',
+    color: '#333',
+    textAlign: 'center',
+    fontSize: 16,
     fontWeight: '700',
-    fontSize: 18,
+    textTransform: 'uppercase',
     paddingEnd: 20,
   },
   buttonLocation: {

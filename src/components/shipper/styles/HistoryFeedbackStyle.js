@@ -110,7 +110,7 @@ export const styles = StyleSheet.create({
     backgroundColor: Color.bgItem,
     padding: Size.S10,
     borderRadius: Size.S20,
-    marginTop: 30,
+    marginBottom: 30,
   },
   textHistoryFeedback: {
     marginStart: Size.S10,
@@ -120,7 +120,7 @@ export const styles = StyleSheet.create({
   },
   viewHeader: {
     flexDirection: 'row',
-    marginTop: 20,
+    marginVertical: 15,
     alignItems: 'center',
   },
   viewContainer: {

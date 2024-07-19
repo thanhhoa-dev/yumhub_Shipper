@@ -4,36 +4,7 @@ import { Alert, BackHandler, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
 const Loading = () => {
-  const navigationState = useNavigationState(state => state);
-
-  useEffect(() => {
-    const backAction = () => {
-      if (navigationState.index === 0) {
-        Alert.alert(
-          'Thoát App',
-          'Bạn có chắc chắn muốn thoát khỏi ứng dụng không?',
-          [
-            {
-              text: 'Cancel',
-              onPress: () => null,
-              style: 'cancel',
-            },
-            {text: 'YES', onPress: () => BackHandler.exitApp()},
-          ],
-        );
-        return true;
-      }
-      return false; // Để mặc định hành vi quay lại màn hình trước đó nếu có
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-
-    return () => backHandler.remove();
-  }, [navigationState]);
-
+  
   return (
     <View style={styles.viewContainer}>
       <FastImage

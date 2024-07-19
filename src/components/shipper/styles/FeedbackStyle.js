@@ -46,11 +46,16 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  textReviews: {
+    color: '#646982',
+    fontSize: 12,
+    fontWeight: '700',
+  },
   textAverageTotal: {
-    fontWeight: 'bold',
-    fontSize: 30,
+    fontWeight: '700',
+    fontSize: 35,
     color: Color.textBold,
-    paddingEnd: 10,
+    paddingEnd: 8,
   },
   viewContainerAverageTotalStartRating: {
     justifyContent: 'center',
@@ -63,13 +68,13 @@ export const styles = StyleSheet.create({
   },
   viewTotalStartRating: {
     flexDirection: 'row',
-    marginTop: 20,
+    marginTop:13,
     backgroundColor: Color.background1,
     borderRadius: 20,
     paddingStart: 20,
     paddingEnd: 10,
     elevation: 15,
-    paddingVertical:8
+    paddingVertical: 8,
   },
   titleHeader: {
     marginStart: 20,
@@ -77,14 +82,19 @@ export const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '400',
   },
+  iconBack: {
+    backgroundColor: '#F0F5FA',
+    padding: 5,
+    borderRadius: 50,
+  },
   viewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    marginVertical: 15,
+    paddingHorizontal: 24,
   },
   viewContainer: {
     flex: 1,
-    marginHorizontal: 24,
   },
   viewContainerBackgroundColor: {
     backgroundColor: Color.white,
