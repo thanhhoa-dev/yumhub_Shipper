@@ -41,12 +41,13 @@ const ChatWithCustomer = () => {
     const route = useRoute();
     const flatListRef = useRef(null);
     const { order } = route.params;
+    console.log(order);
     const [dataMessage, setdataMessage] = useState(null)
     const { user, sendMessageChat, receiveMessageChat } = useContext(UserContext);
     const [message, setmessage] = useState("")
 
     const takePhoto = useCallback(async response => {
-        
+
         if (response.didCancel) return;
         if (response.errorCode) {
             console.error('ImagePicker Error: ', response.errorCode);
@@ -101,50 +102,13 @@ const ChatWithCustomer = () => {
     }, []);
 
     const openCamera = useCallback(async () => {
-        async function requestCameraPermission() {
-            try {
-                const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA);
-                if (hasPermission) 
-                    return true;
-                else {
-                    const granted = await PermissionsAndroid.request(
-                        PermissionsAndroid.PERMISSIONS.CAMERA,
-                        {
-                            title: "Cấp quyền!",
-                            message: "Cho phép truy cập Camera",
-                            buttonNeutral: "Để lần sau",
-                            buttonNegative: "Từ chối",
-                            buttonPositive: "Đồng Ý"
-                        }
-                    );
-                    return (granted === PermissionsAndroid.RESULTS.GRANTED);
-                }
-            } catch (err) {
-                console.warn(err);
-                return false;
-            }
-        }
-        const permissionGranted = await requestCameraPermission();
-        if (permissionGranted) {
-            const options = {
-                mediaType: 'photo',
-                quality: 1,
-                saveToPhotos: true,
-            };
-            launchCamera(options, takePhoto);
-        } else {
-            const options = {
-                title: 'Có lỗi xảy ra',
-                message: 'Bạn từ chối cho phép truy cập camera',
-                titleColor: '#E46929',
-                icon: {
-                    uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmWru8q17zpOzzzT1s475ZS_8fOL1GS0teSw&s',
-                    size: 24,
-                },
-            };
-    
-            toast(options);
-        }
+
+        const options = {
+            mediaType: 'photo',
+            quality: 1,
+            saveToPhotos: true,
+        };
+        launchCamera(options, takePhoto);
     }, [takePhoto]);
 
     //hiển thị thư viện
@@ -158,7 +122,7 @@ const ChatWithCustomer = () => {
     }, []);
 
     const handleSendMessage = (message, typeMessage) => {
-        sendMessageChat('shipper', 'chat', order, message, typeMessage);
+        sendMessageChat('shipper', 'chat', order.order, message, typeMessage);
     };
 
     useEffect(() => {
@@ -173,9 +137,10 @@ const ChatWithCustomer = () => {
             fetchData();
         if (user && receiveMessageChat) {
             receiveMessageChat(async message => {
+                console.log(message);
                 switch (message.command) {
                     case 'chat':
-                        if (message.order.orderID == order._id) {
+                        if (message.order.orderID == order.order._id) {
                             setdataMessage(message.order.fullChat)
                             flatListRef.current.scrollToEnd({ animated: true });
                         }
@@ -195,7 +160,7 @@ const ChatWithCustomer = () => {
         return (
             <View style={[item.typeUser == 'shipper' ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }, styles.viewContent]}>
                 {
-                    (item.typeUser == 'shipper') ? null : <Image style={styles.icAvatarCustomer} source={{ uri: order.shipperID.avatar ? order.shipperID.avatar : 'https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png' }} />
+                    (item.typeUser == 'shipper') ? null : <Image style={styles.icAvatarCustomer} source={{ uri: order.order.shipperID.avatar ? order.order.shipperID.avatar : 'https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png' }} />
                 }
                 <View style={styles.content}>
                     {
@@ -274,9 +239,9 @@ const ChatWithCustomer = () => {
                     >
                         <View>
                             <Icon
-                            name="paper-plane"
-                            size={22}
-                            color="#005987"
+                                name="paper-plane"
+                                size={22}
+                                color="#005987"
                             />
                         </View>
                     </TouchableOpacity>
