@@ -3,19 +3,37 @@ import {Color, Size, FontFamily} from '../../../constants/theme';
 const {height} = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
+  imageReviewDetail: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  satisfactionRating: {
+    color: '#E46929',
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  satisfactionLevel: {
+    color: '#000',
+    fontSize: 14,
+    fontWeight: '400',
+    marginBottom: 10,
+    marginStart: 22,
+    marginTop: 30,
+  },
   titleHeader: {
     color: '#fff',
     fontSize: 17,
     fontFamily: FontFamily.FF4,
     marginStart: 16,
-    textAlign:'center'
+    textAlign: 'center',
   },
   viewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
-    height:50,
-    backgroundColor:'#005987'
+    height: 50,
+    backgroundColor: '#005987',
   },
   centeredViewModal: {
     flex: 1,
@@ -54,8 +72,7 @@ export const styles = StyleSheet.create({
     fontFamily: FontFamily.FF4,
   },
   viewContenDetailHistory: {
-    marginTop: 40,
-    marginHorizontal: 20,
+    marginTop: 30,
   },
   buttonIcon: {
     width: 45,

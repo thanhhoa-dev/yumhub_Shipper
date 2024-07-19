@@ -25,8 +25,8 @@ const Revenue = () => {
     },
   });
   const [rangeSelected, setRangeSelected] = useState(false);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const {user} = useContext(UserContext);
   const formattedDate = date.toLocaleDateString();
   const ID = user.checkAccount._id;
@@ -259,7 +259,7 @@ const Revenue = () => {
               />
             )}
           </View>
-          <View style={styles.viewLine} />
+          <View style={[styles.viewLine, {marginTop:5}]} />
           <View style={styles.viewContainerTotalRevenue}>
             <View style={styles.viewTotalRevenue}>
               <FontAwesome6

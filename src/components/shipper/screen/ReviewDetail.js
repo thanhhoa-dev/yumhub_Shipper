@@ -31,6 +31,21 @@ const ReviewDetail = () => {
     return `${day}/${month}/${year}`;
   }
 
+  const numberStarRating = number => {
+    switch (number) {
+      case 1:
+      case 2:
+        return 'Tệ';
+      case 3:
+      case 4:
+        return 'Tốt';
+      case 5:
+        return 'Tuyệt vời';
+      default:
+        break;
+    }
+  };
+
   return (
     <View style={styles.centeredViewModal}>
       <View style={styles.viewHeader}>
@@ -56,11 +71,10 @@ const ReviewDetail = () => {
             </Text>
           ) : null}
         </View>
+        <Text style={styles.satisfactionLevel}>Mức dộ hài lòng</Text>
         <View
           style={{
-            justifyContent: 'space-between',
             alignItems: 'center',
-            marginTop: 40,
           }}>
           <StarRating
             rating={item.review.rating}
@@ -68,10 +82,21 @@ const ReviewDetail = () => {
             maxStars={5}
             color={'#FC6E2A'}
             starSize={50}
-            starStyle={{marginHorizontal: 10}}
+            starStyle={{justifyContent: 'center', flex: 1, marginBottom: 15}}
             onChange={() => {}}
           />
+          <Text style={styles.satisfactionRating}>
+            {numberStarRating(item.review.rating)}
+          </Text>
         </View>
+        {item.user.avatar && (
+          <View style={styles.viewContainerImage}>
+            <Image
+              style={styles.imageReviewDetail}
+              source={{uri: `${item.user.avatar}`}}
+            />
+          </View>
+        )}
 
         <View style={styles.viewContenDetailHistory}>
           <TextInput
@@ -81,14 +106,6 @@ const ReviewDetail = () => {
             style={styles.textInputDescription}
           />
         </View>
-        {item.user.avatar && (
-          <View style={styles.viewContainerImage}>
-            <Image
-              style={{width: '100%', height: '100%', resizeMode: 'cover'}}
-              source={{uri: `${item.user.avatar}`}}
-            />
-          </View>
-        )}
       </View>
     </View>
   );
