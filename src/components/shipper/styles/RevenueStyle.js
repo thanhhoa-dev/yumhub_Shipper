@@ -3,7 +3,6 @@ import {Color, Size, FontFamily} from '../../../constants/theme';
 
 export const styles = StyleSheet.create({
   viewContainerShowCalender: {
-    marginTop: Size.S10,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     overflow: 'hidden',
@@ -26,7 +25,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   viewButtonDateOptions: {
-    marginTop: 15,
+    marginVertical: 15,
     flexDirection: 'row',
   },
   textNumberStatistical: {

@@ -84,7 +84,7 @@ export const styles = StyleSheet.create({
   centeredView: {
     backgroundColor: Color.background1,
     width: '100%',
-    height: height * 0.95,
+    height: height * 0.92,
     position: 'absolute',
     bottom: 0,
     borderTopEndRadius: Size.S24,

@@ -101,32 +101,32 @@ const Goong = () => {
   const currentLocationCustomer = useRef('');
   //websocket
 
-  // useEffect(() => {
-  //   if (user && receiveMessage) {
-  //     receiveMessage(async message => {
-  //       switch (message.command) {
-  //         case 'placeOrder':
-  //           setOrder(message);
-  //           if (message.command === 'placeOrder' && statusShipper) {
-  //             id = message.order._id;
-  //             await UpdateShipperInformation(idUser, 8);
-  //             setModalVisible(true);
-  //             setIsTimerRunning(true);
-  //           }
-  //           break;
-  //         case 'cancelled_from_merchant':
-  //           console.log('cancelled_from_merchant');
-  //           setModalVisibleCancelOrderFromMerchant(true);
-  //           break;
-  //         default:
-  //           console.log('Unknown command:', message.command);
-  //           break;
-  //       }
-  //     });
-  //   } else {
-  //     console.log('User is not set or receiveMessage is not defined');
-  //   }
-  // }, [user, receiveMessage, statusShipper]);
+  useEffect(() => {
+    if (user && receiveMessage) {
+      receiveMessage(async message => {
+        switch (message.command) {
+          case 'placeOrder':
+            setOrder(message);
+            if (message.command === 'placeOrder' && statusShipper) {
+              id = message.order._id;
+              await UpdateShipperInformation(idUser, 8);
+              setModalVisible(true);
+              setIsTimerRunning(true);
+            }
+            break;
+          case 'cancelled_from_merchant':
+            console.log('cancelled_from_merchant');
+            setModalVisibleCancelOrderFromMerchant(true);
+            break;
+          default:
+            console.log('Unknown command:', message.command);
+            break;
+        }
+      });
+    } else {
+      console.log('User is not set or receiveMessage is not defined');
+    }
+  }, [user, receiveMessage, statusShipper]);
 
   //websocket
 
@@ -158,25 +158,25 @@ const Goong = () => {
     return () => backHandler.remove();
   }, [navigationState]);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const result = await GetOrderByID(id);
-        setOrder(result);
-        if (result.result) {
-          await UpdateShipperInformation(idUser, 8);
-          setModalVisible(true);
-          setIsTimerRunning(true);
-        }
-      } catch (error) {
-        console.log('Error fetching order:', error);
-        throw error;
-      }
-    };
-    if (!order && statusShipper && index === 4) {
-      fetchOrder();
-    }
-  }, [countdown, id, idUser, order, statusShipper]);
+  // useEffect(() => {
+  //   const fetchOrder = async () => {
+  //     try {
+  //       const result = await GetOrderByID(id);
+  //       setOrder(result);
+  //       if (result.result) {
+  //         await UpdateShipperInformation(idUser, 8);
+  //         setModalVisible(true);
+  //         setIsTimerRunning(true);
+  //       }
+  //     } catch (error) {
+  //       console.log('Error fetching order:', error);
+  //       throw error;
+  //     }
+  //   };
+  //   if (!order && statusShipper && index === 4) {
+  //     fetchOrder();
+  //   }
+  // }, [countdown, id, idUser, order, statusShipper]);
 
   useEffect(() => {
     if (order) {
