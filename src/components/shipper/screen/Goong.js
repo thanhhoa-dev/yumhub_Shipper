@@ -101,32 +101,34 @@ const Goong = () => {
   const currentLocationCustomer = useRef('');
   //websocket
 
-  useEffect(() => {
-    if (user && receiveMessage) {
-      receiveMessage(async message => {
-        switch (message.command) {
-          case 'placeOrder':
-            setOrder(message);
-            if (message.command === 'placeOrder' && statusShipper) {
-              id = message.order._id;
-              await UpdateShipperInformation(idUser, 8);
-              setModalVisible(true);
-              setIsTimerRunning(true);
-            }
-            break;
-          case 'cancelled_from_merchant':
-            console.log('cancelled_from_merchant');
-            setModalVisibleCancelOrderFromMerchant(true);
-            break;
-          default:
-            console.log('Unknown command:', message.command);
-            break;
-        }
-      });
-    } else {
-      console.log('User is not set or receiveMessage is not defined');
-    }
-  }, [user, receiveMessage, statusShipper]);
+  // console.log(order);
+  // useEffect(() => {
+  //   if (user && receiveMessage) {
+  //     receiveMessage(async message => {
+  //       console.log(message.command);
+  //       switch (message.command) {
+  //         case 'placeOrder':
+  //           setOrder(message);
+  //           if (message.command === 'placeOrder' && statusShipper) {
+  //             id = message.order._id;
+  //             await UpdateShipperInformation(idUser, 8);
+  //             setModalVisible(true);
+  //             setIsTimerRunning(true);
+  //           }
+  //           break;
+  //         case 'cancelled_from_merchant':
+  //           console.log('cancelled_from_merchant');
+  //           setModalVisibleCancelOrderFromMerchant(true);
+  //           break;
+  //         default:
+  //           console.log('Unknown command:', message.command);
+  //           break;
+  //       }
+  //     });
+  //   } else {
+  //     console.log('User is not set or receiveMessage is not defined');
+  //   }
+  // }, [user, receiveMessage, statusShipper]);
 
   //websocket
 
@@ -158,25 +160,25 @@ const Goong = () => {
     return () => backHandler.remove();
   }, [navigationState]);
 
-  // useEffect(() => {
-  //   const fetchOrder = async () => {
-  //     try {
-  //       const result = await GetOrderByID(id);
-  //       setOrder(result);
-  //       if (result.result) {
-  //         await UpdateShipperInformation(idUser, 8);
-  //         setModalVisible(true);
-  //         setIsTimerRunning(true);
-  //       }
-  //     } catch (error) {
-  //       console.log('Error fetching order:', error);
-  //       throw error;
-  //     }
-  //   };
-  //   if (!order && statusShipper && index === 4) {
-  //     fetchOrder();
-  //   }
-  // }, [countdown, id, idUser, order, statusShipper]);
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const result = await GetOrderByID(id);
+        setOrder(result);
+        if (result.result) {
+          await UpdateShipperInformation(idUser, 8);
+          setModalVisible(true);
+          setIsTimerRunning(true);
+        }
+      } catch (error) {
+        console.log('Error fetching order:', error);
+        throw error;
+      }
+    };
+    if (!order && statusShipper) {
+      fetchOrder();
+    }
+  }, [countdown, id, idUser, order, statusShipper]);
 
   useEffect(() => {
     if (order) {
@@ -504,15 +506,27 @@ const Goong = () => {
     'Giao hoàn tất',
   ];
 
-  const handleConfirmCancelOrder = async () => {
+  const handleConfirmCancelOrder = async index => {
+    const data =
+      index === 1
+        ? {
+            status: 6,
+          }
+        : {
+            status: 9,
+          };
     try {
+      await UpdateOrder(order.order._id, data);
       setModalVisibleCancelOrder(false);
       setModalVisibleCancelOrderFromMerchant(false);
       handleClosePress();
       setIndex(0);
       handleSendMessage('cancelled_from_shipper');
       translateX.setValue(0);
-      navigation.navigate('CancelSuccessOrder', {order: currentOrder.current});
+      navigation.navigate('CancelSuccessOrder', {
+        order: currentOrder.current,
+        index: index,
+      });
       setOrder(null);
     } catch (error) {
       console.log(error);
@@ -1216,18 +1230,34 @@ const Goong = () => {
                   </View>
                   {index >= 3 && (
                     <View style={[styles.viewContainerIconBottomSheet]}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setModalVisibleCancelOrder(true);
-                        }}
-                        style={[
-                          styles.buttonTakePhotoBottomSheet,
-                          {backgroundColor: '#E04444', flex: 1},
-                        ]}>
-                        <Text style={styles.textTakePhotoBottomSheet}>
-                          Hủy đơn
-                        </Text>
-                      </TouchableOpacity>
+                      {order.paymentMethod === 3 ? (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setModalVisibleCancelOrder(true);
+                          }}
+                          style={[
+                            styles.buttonTakePhotoBottomSheet,
+                            {backgroundColor: '#E04444', flex: 1},
+                          ]}>
+                          <Text style={styles.textTakePhotoBottomSheet}>
+                            Hủy đơn
+                          </Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setModalVisibleCancelOrder(true);
+                          }}
+                          style={[
+                            styles.buttonTakePhotoBottomSheet,
+                            {backgroundColor: '#E04444', flex: 1},
+                          ]}>
+                          <Text style={styles.textTakePhotoBottomSheet}>
+                            Hủy đơn
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+
                       <TouchableOpacity
                         onPress={openCamera}
                         style={[
@@ -1542,7 +1572,9 @@ const Goong = () => {
               />
             </View>
             <TouchableOpacity
-              onPress={handleConfirmCancelOrder}
+              onPress={() => {
+                handleConfirmCancelOrder(index);
+              }}
               style={styles.buttonReceiveCancelOrder}>
               <Text style={styles.textReceiveCancelOrder}>Xác nhận hủy</Text>
             </TouchableOpacity>
@@ -1567,7 +1599,9 @@ const Goong = () => {
                 Nhà hàng đã hết món
               </Text>
               <TouchableOpacity
-                onPress={handleConfirmCancelOrder}
+                onPress={() => {
+                  handleConfirmCancelOrder(index);
+                }}
                 style={[styles.buttonReceiveCancelOrder, {marginBottom: 10}]}>
                 <Text style={styles.textReceiveCancelOrder}>Xác nhận</Text>
               </TouchableOpacity>
