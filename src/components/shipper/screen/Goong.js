@@ -51,7 +51,7 @@ import {styles} from '../styles/GoogStyle';
 import {GOONG_API_KEY} from '@env';
 import DropdownComponentGoong from './DropdownComponentGoong';
 import Slider from 'react-native-slide-to-unlock';
-import MapViewDirections from 'react-native-maps-directions';
+import ModalPaymentMethod from './ModalPaymentMethod';
 
 const Goong = () => {
   const navigation = useNavigation();
@@ -87,6 +87,9 @@ const Goong = () => {
   const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
   const [statusShipper, setStatusShipper] = useState(false);
   const [countdown, setCountdown] = useState(60);
+  const [countdownPaymentMethod, setCountdownPaymentMethod] = useState(false);
+  const [countdownTimePaymentMethod, setCountdownTimePaymentMethod] =
+    useState(900);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [valueCancelOrder, setValueCancelOrder] = useState(1);
   const navigationState = useNavigationState(state => state);
@@ -533,6 +536,17 @@ const Goong = () => {
       throw error;
     }
   };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (countdownTimePaymentMethod > 0 && order && !order.paymentMethod === 3) {
+        console.log('fasdfasdfasdf');
+        setCountdownTimePaymentMethod(prevCountdown => prevCountdown - 1);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdownTimePaymentMethod]);
 
   const checkfetchRouteCustomer = async () => {
     try {
@@ -1246,15 +1260,26 @@ const Goong = () => {
                       ) : (
                         <TouchableOpacity
                           onPress={() => {
-                            setModalVisibleCancelOrder(true);
+                            countdownTimePaymentMethod <= 0
+                              ? setCountdownPaymentMethod(true)
+                              : null;
                           }}
                           style={[
                             styles.buttonTakePhotoBottomSheet,
                             {backgroundColor: '#E04444', flex: 1},
                           ]}>
-                          <Text style={styles.textTakePhotoBottomSheet}>
-                            Hủy đơn
-                          </Text>
+                          {countdownTimePaymentMethod <= 0 ? (
+                            <Text style={styles.textTakePhotoBottomSheet}>
+                              Huỷ đơn
+                            </Text>
+                          ) : (
+                            <Text style={styles.textTakePhotoBottomSheet}>
+                              Chờ{' '}
+                              <Text style={{fontWeight: '400', fontSize: 16}}>
+                                {formatTime(countdownTimePaymentMethod)}
+                              </Text>
+                            </Text>
+                          )}
                         </TouchableOpacity>
                       )}
 
@@ -1609,6 +1634,7 @@ const Goong = () => {
           </View>
         </Modal>
       )}
+      
     </View>
   );
 };
