@@ -13,15 +13,12 @@ const CancelSuccessOrder = () => {
 
   const route = useRoute();
   const {order} = route.params;
+  const {index} = route.params;
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = {
-        status: 6,
-      };
       try {
         await UpdateShipperInformation(id, 3);
-        await UpdateOrder(order.order._id, data);
       } catch (error) {
         throw error;
       }
@@ -37,8 +34,8 @@ const CancelSuccessOrder = () => {
         </Text>
         <TouchableOpacity
           onPress={() => {
-            navigation.goBack()}
-          }
+            navigation.goBack();
+          }}
           style={styles.buttonIconHome}>
           <Feather name={'home'} size={30} color={'#19D6E5'} />
         </TouchableOpacity>
@@ -77,13 +74,15 @@ const CancelSuccessOrder = () => {
           tại đây
         </Text>
       </Text>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.replace('SubmitReview', {order: order});
-        }}
-        style={styles.buttonReviewOrder}>
-        <Text style={styles.textReviewOrder}>Đánh giá</Text>
-      </TouchableOpacity>
+      {index === 3 ? (
+        <TouchableOpacity
+          onPress={() => {
+            navigation.replace('SubmitReview', {order: order});
+          }}
+          style={styles.buttonReviewOrder}>
+          <Text style={styles.textReviewOrder}>Đánh giá</Text>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 };

@@ -10,7 +10,6 @@ const App = () => {
       <UserProvider>
         <AppNavigation />
       </UserProvider>
-      {/* <HistoryTransaction/> */}
     </SafeAreaView>
   );
 };
