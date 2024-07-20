@@ -92,4 +92,41 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flex: 1,
   },
+  txtOver : {
+    fontSize : 12,
+    fontWeight : '500',
+    color : '#646982',
+    alignSelf : 'center',
+    marginTop : 20,
+    marginBottom : 157
+  },
+  viewBtnBack : {
+    backgroundColor : 'blue',
+    width: '90%',
+    alignSelf : 'center',
+    height : 45,
+    backgroundColor : '#19D6E5',
+    borderRadius: 10,
+    marginBottom: 250
+  },
+
+  btn : {
+    width : '100%',
+    height : '100%',
+    borderRadius : 10,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  txtBtn : {
+    color : 'black',
+    fontSize : 20,
+    fontWeight : '700',
+    lineHeight: 45
+  },
+  txtPTTT : {
+    fontSize : 13,
+    fontWeight : '400',
+    color : 'black',
+    marginEnd : 17
+  }
 });

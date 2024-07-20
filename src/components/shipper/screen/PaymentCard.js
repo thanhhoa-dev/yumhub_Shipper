@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Alert, ActivityIndicator } from 'react-native';
+import { Modal, View, Alert, ActivityIndicator } from 'react-native';
 import { useStripe, StripeProvider } from '@stripe/stripe-react-native';
 import { useRoute } from '@react-navigation/native'
 import { useNavigation } from '@react-navigation/native';
-import { topUp } from '../ShipperHTTP'
 import { UserContext } from '../../user/UserContext';
 import { topUpShipper } from './Transaction';
+import AlertCustom from '../../../constants/AlertCustom';
 
 function formatDate(date) {
     const year = date.getFullYear();
@@ -22,29 +22,57 @@ const StripeApp = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const route = useRoute();
-  const { clientSecret, amount, idShipper } = route.params;
+  const { clientSecret, amount } = route.params;
   const {user} = useContext(UserContext);
+  const [isShowAlert, setisShowAlert] = useState(false)
+  const [optionAlert, setoptionAlert] = useState({})
 
   const paymentSuccess = async () => {
     try {
-        const currentDate = new Date();
-        const formattedDate = formatDate(currentDate);
-        const des = "nạp tiền lúc: " + formattedDate;
-        const updateBalance = await topUp(idShipper, { amountTransantion: amount, description: des });
-        if (updateBalance.result) {
-            user.checkAccount.balance += amount
+      const updateBalance = await topUpShipper(user, "Visa/Mastercard", amount);
+      
+      if (updateBalance) {
+        setisShowAlert(true)
+        setoptionAlert({
+          title: "Thành công",
+          message: "Thanh toán thành công",
+          type: 1,
+          otherFunction: () => {
             navigation.reset({
-                index: 0,
-                routes: [{ name: 'ShipperTabNavigation' }],
+              index: 0,
+              routes: [{ name: 'ShipperTabNavigation' }],
             });
             setTimeout(() => {
-                navigation.navigate('Tài khoản');
+              navigation.navigate('Tài khoản');
             }, 100);
-        }
+          }
+        })
+
+
+      } else {
+        setoptionAlert({
+          title: "Lỗi",
+          message: "Thanh toán không thành công",
+          type: 3,
+          otherFunction: () => {
+            navigation.goBack()
+          }
+        })
+        setisShowAlert(true)
+      }
     } catch (error) {
-        Alert.alert("Vui lòng liên hệ YumHub yêu cầu nhân viên kiểm tra giao dịch ", paymentLinkRes.orderCode);
+      setoptionAlert({
+        title: "Lỗi",
+        message: "Thanh toán không thành công",
+        type: 3,
+        otherFunction: () => {
+          navigation.goBack()
+        }
+      })
+      setisShowAlert(true)
+      console.log(error);
     }
-}
+  }
 
   useEffect(() => {
     const openPaymentSheet = async () => {
@@ -67,7 +95,7 @@ const StripeApp = () => {
             navigation.goBack();
           } else {
             Alert.alert('Thành công', 'Giao dịch của bạn đã được xác nhận!');
-            topUpShipper(user, navigation, amount);
+            paymentSuccess()
           }
         } else {
           Alert.alert(`Error initializing payment sheet: ${error.code}`, error.message);
@@ -80,6 +108,14 @@ const StripeApp = () => {
 
   return (
     <View>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isShowAlert}
+        onRequestClose={setisShowAlert}
+      >
+        <AlertCustom closeModal={setisShowAlert} option={optionAlert} />
+      </Modal>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (

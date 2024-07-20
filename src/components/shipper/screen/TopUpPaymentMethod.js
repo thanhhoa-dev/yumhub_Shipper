@@ -1,7 +1,7 @@
 import {
     View, Text,
     TouchableOpacity, Image,
-    TextInput,
+    TextInput, Modal,
     Alert, TouchableWithoutFeedback
 } from 'react-native'
 import React, { useEffect, useState, useRef, useContext } from 'react'
@@ -18,6 +18,7 @@ import moment from 'moment';
 import CryptoJS from 'crypto-js'
 import axios from 'axios';
 import { topUpShipper } from './Transaction';
+import AlertCustom from '../../../constants/AlertCustom';
 
 function generateRandomNumber(length) {
     let result = '';
@@ -37,6 +38,8 @@ const TopUpPaymentMethod = () => {
     const [numericValue, setNumericValue] = useState('');
     const [confirm, setconfirm] = useState(false)
     const [methodSelect, setmethodSelect] = useState(null)
+    const [isShowAlert, setisShowAlert] = useState(false)
+    const [optionAlert, setoptionAlert] = useState({})
 
     const formatCurrency = (numericValue) => {
         // Định dạng theo kiểu tiền tệ VNĐ
@@ -188,12 +191,43 @@ const TopUpPaymentMethod = () => {
         }
     }
     useEffect(() => {
-        const OnPaymentZaloSuccess = () => {
-            topUpShipper(user, navigation, Number(numericValue));
+        const OnPaymentZaloSuccess = async () => {
+            const topUp = await topUpShipper(user, "Zalopay", Number(numericValue));
+            if (topUp) {
+                setisShowAlert(true)
+                setoptionAlert({
+                    title: "Thành công",
+                    message: "Thanh toán thành công",
+                    type: 1,
+                    otherFunction: () => {
+                        navigation.reset({
+                            index: 0,
+                            routes: [{ name: 'ShipperTabNavigation' }],
+                        });
+                        setTimeout(() => {
+                            navigation.navigate('Tài khoản');
+                        }, 100);
+                    }
+                })
+
+
+            } else {
+                setoptionAlert({
+                    title: "Lỗi",
+                    message: "Thanh toán không thành công",
+                    type: 3
+                })
+                setisShowAlert(true)
+            }
         };
     
         const OnPaymentZaloFail = () => {
-            Alert.alert("Lỗi", "thanh toán không thành công");
+            setoptionAlert({
+                title: "Lỗi",
+                message: "Thanh toán không thành công",
+                type: 3
+            })
+            setisShowAlert(true)
         };
         if (methodSelect && methodSelect == "ZaloPay") {
             const payZaloBridgeEmitter = new NativeEventEmitter(PayZaloBridge);
@@ -386,6 +420,14 @@ const TopUpPaymentMethod = () => {
                         <Text style={styles.txtConfirm}>Xác nhận</Text>
                     </TouchableOpacity>
                 </View>
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={isShowAlert}
+                    onRequestClose={setisShowAlert}
+                >
+                    <AlertCustom closeModal={setisShowAlert} option={optionAlert} />
+                </Modal>
             </View>
         </TouchableWithoutFeedback>
     )

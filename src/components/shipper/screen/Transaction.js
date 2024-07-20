@@ -46,53 +46,37 @@ function formatDate(date) {
     return `${year}-${month}-${day} ${hours}:${minutes}`;
 }
 
-export const topUpShipper = async (user, navigation, amountTopUp) => {
+
+export const topUpShipper = async (user, method, amountTopUp) => {
     try {
-        const currentDate = new Date();
-        const formattedDate = formatDate(currentDate);
-        const des = "nạp tiền lúc: " + formattedDate;
-        const updateBalance = await topUp(user.checkAccount._id, { amountTransantion: amountTopUp, description: des });
+        const updateBalance = await topUp(user.checkAccount._id, { amountTransantion: amountTopUp, description: method });
         if (updateBalance.result) {
-            
-            user.checkAccount.balance += amountTopUp
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'ShipperTabNavigation' }],
-            });
-            setTimeout(() => {
-                navigation.navigate('Tài khoản');
-            }, 100);
+            user.checkAccount.balance += amountTopUp;
+            return true
         }
+        return false
     } catch (error) {
-        console.log(error);
-        Alert.alert("liên hệ YumHub", "yêu cầu nhân viên kiểm tra giao dịch");
+        return false
     }
 }
-export const withdrawShipper = async (user, navigation, amountWithdraw, nameBank, numberBank, nameHolder) => {
+
+export const withdrawShipper = async (user, method, amountWithdraw, nameBank, numberBank, nameHolder) => {
     try {
-        const currentDate = new Date();
-        const formattedDate = formatDate(currentDate);
-        const des = "rút tiền lúc: " + formattedDate;
         const updateBalance = await Withdraw(user.checkAccount._id,
             {
                 amountTransantion: amountWithdraw,
-                description: des,
-                bank: nameBank,
+                description: method,
+                nameBank: nameBank,
                 numberBank: numberBank,
-                name: nameHolder,
+                accountHolder: nameHolder,
                 status: 1
             });
         if (updateBalance.result) {
             user.checkAccount.balance -= amountWithdraw
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'ShipperTabNavigation' }],
-            });
-            setTimeout(() => {
-                navigation.navigate('Tài khoản');
-            }, 100);
+            return true
         }
+        return false
     } catch (error) {
-        Alert.alert("Vui lòng liên hệ YumHub", "yêu cầu nhân viên kiểm tra giao dịch");
+        return false
     }
 }
