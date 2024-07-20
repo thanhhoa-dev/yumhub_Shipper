@@ -2,7 +2,8 @@ import {
     View, Text, ScrollView,
     TouchableOpacity, Image,
     TextInput,
-    Alert, TouchableWithoutFeedback
+    Alert, TouchableWithoutFeedback,
+    Modal
 } from 'react-native'
 import React, { useEffect, useState, useContext, useRef } from 'react'
 import { styles } from '../styles/TopUpPaymentMethodStyle'
@@ -16,16 +17,7 @@ import { UserContext } from '../../user/UserContext';
 import { VietQR } from 'vietqr';
 import { Dropdown } from 'react-native-element-dropdown';
 import { withdrawShipper } from './Transaction';
-
-function formatDate(date) {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
-}
+import AlertCustom from '../../../constants/AlertCustom';
 
 const WithdrawPaymentMethod = () => {
 
@@ -38,6 +30,8 @@ const WithdrawPaymentMethod = () => {
     const [listBank, setlistBank] = useState(null)
     const [numberBank, setnumberBank] = useState('')
     const [name, setname] = useState('DOAN THANH HOA')
+    const [isShowAlert, setisShowAlert] = useState(false)
+    const [optionAlert, setoptionAlert] = useState({})
 
     const [otp_1, setOTP1] = useState('');
     const [otp_2, setOTP2] = useState('');
@@ -53,10 +47,10 @@ const WithdrawPaymentMethod = () => {
 
     useEffect(() => {
         if (countDownTime > 0) {
-          const timer = setTimeout(() => setcountDownTime(countDownTime - 1), 1000);
-          return () => clearTimeout(timer);
+            const timer = setTimeout(() => setcountDownTime(countDownTime - 1), 1000);
+            return () => clearTimeout(timer);
         }
-      }, [countDownTime]);
+    }, [countDownTime]);
 
     useEffect(() => {
         let vietQR = new VietQR({
@@ -69,6 +63,7 @@ const WithdrawPaymentMethod = () => {
             const formattedBanks = banks.data.map(bank => ({
                 label: "(" + bank.code + ") " + bank.shortName,
                 name: bank.shortName,
+                logo: bank.logo,
                 value: bank.bin,
             }));
             setlistBank(formattedBanks);
@@ -102,21 +97,21 @@ const WithdrawPaymentMethod = () => {
     const step2 = () => {
         if (numericValue == '' || numericValue == 0)
             Alert.alert("Nhập số tiền muốn nạp")
-        else if (user.checkAccount.balance - numericValue < 200000){
+        else if (user.checkAccount.balance - numericValue < 200000) {
             Alert.alert("số dư còn lại tối thiểu 200000");
-        } 
+        }
         else if (numericValue > 999 && numericValue < 50000000) {
             setconfirm(2)
             Keyboard.dismiss();
-        
-        }else
+
+        } else
             Alert.alert("Nạp tối thiểu 50.000 và không quá 50 triệu")
     }
 
     const getNameBank = () => {
         if (listBank) {
             const bank = listBank.find(bank => bank.value === methodSelect);
-            return bank ? bank.name : 'banking';
+            return bank ? bank.name + " " + bank.logo : 'banking';
         }
         else return 'banking'
     };
@@ -126,7 +121,8 @@ const WithdrawPaymentMethod = () => {
     const sendOTP = async () => {
         setconfirm(3)
         try {
-               const sendOTPEmail = await forgotPass("hoangkun610@gmail.com");
+            const sendOTPEmail = await forgotPass("pr0h0afccf@gmail.com");
+            //    const sendOTPEmail = await forgotPass(user.checkAccount.email);
             if (sendOTPEmail.result) {
                 Alert.alert(sendOTPEmail.message);
                 setcountDownTime(60);
@@ -139,7 +135,8 @@ const WithdrawPaymentMethod = () => {
     const sendOTPAgain = async () => {
         if (countDownTime == 0) {
             try {
-                   const sendOTPEmail = await forgotPass(user.checkAccount.email);
+                //    const sendOTPEmail = await forgotPass(user.checkAccount.email);
+                const sendOTPEmail = await forgotPass("pr0h0afccf@gmail.com");
                 if (sendOTPEmail.result) {
                     Alert.alert(sendOTPEmail.message);
                     setcountDownTime(60);
@@ -155,15 +152,41 @@ const WithdrawPaymentMethod = () => {
     const checkOTP = async () => {
         try {
             let otp = otp_1 + otp_2 + otp_3 + otp_4;
-            const checkOTP = await checkotp("hoangkun610@gmail.com", otp);
+            const checkOTP = await checkotp("pr0h0afccf@gmail.com", otp);
             if (checkOTP.result) {
-                withdrawShipper(user, navigation, Number(numericValue), getNameBank(), numberBank, name);
+                const withdraw = await withdrawShipper(user, "bank", Number(numericValue), getNameBank(), numberBank, name);
+                if (withdraw) {
+                    setisShowAlert(true)
+                    setoptionAlert({
+                        title: "Thành công",
+                        message: "Thanh toán thành công",
+                        type: 1,
+                        otherFunction: () => {
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'ShipperTabNavigation' }],
+                            });
+                            setTimeout(() => {
+                                navigation.navigate('Tài khoản');
+                            }, 200);
+                        }
+                    })
+                }
             } else {
-                Alert.alert("Lỗi", "Sai OTP");
+                setoptionAlert({
+                    title: "Lỗi",
+                    message: "Sai OTP",
+                    type: 3
+                })
+                setisShowAlert(true)
             }
         } catch (error) {
-            console.log(error);
-            Alert.alert("Lỗi", "thử lại sau");
+            setoptionAlert({
+                title: "Lỗi",
+                message: "thử lại sau",
+                type: 3
+            })
+            setisShowAlert(true)
         }
     }
 
@@ -374,7 +397,7 @@ const WithdrawPaymentMethod = () => {
                         </View>
                         <View style={styles.rowDetail}>
                             <Text style={styles.txtDetail}>Hình thức TT</Text>
-                            <Text style={styles.txtDetail}>{getNameBank()}</Text>
+                            <Text style={styles.txtDetail}>{getNameBank().split(' ')[0]}</Text>
                         </View>
                         <View style={styles.rowDetail}>
                             <Text style={styles.txtDetail}>Phí giao dịch</Text>
@@ -449,7 +472,14 @@ const WithdrawPaymentMethod = () => {
                     )
                 }
 
-
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={isShowAlert}
+                    onRequestClose={setisShowAlert}
+                >
+                    <AlertCustom closeModal={setisShowAlert} option={optionAlert} />
+                </Modal>
             </ScrollView>
         </TouchableWithoutFeedback>
     )

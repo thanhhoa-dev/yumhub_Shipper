@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useContext } from 'react';
-import { View, TouchableOpacity, Text, Alert, PermissionsAndroid, BackHandler, Image, ScrollView } from 'react-native';
+import { View, TouchableOpacity, Text, Alert, PermissionsAndroid,
+    BackHandler, Image, ScrollView, Modal } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useRoute } from '@react-navigation/native';
 import ViewShot from 'react-native-view-shot';
@@ -12,6 +13,7 @@ import { FontWeight } from '../../../constants/theme';
 import { styles } from '../styles/TopUpPaymentMethodStyle';
 import { UserContext } from '../../user/UserContext';
 import { topUpShipper } from './Transaction';
+import AlertCustom from '../../../constants/AlertCustom';
 
 
 const formatCurrency2 = (amount) => {
@@ -26,6 +28,8 @@ const QRCodePayOs = () => {
     const viewShotRef = useRef(null);
     const [isChecking, setIsChecking] = useState(false);
     const { user } = useContext(UserContext);
+    const [isShowAlert, setisShowAlert] = useState(false)
+    const [optionAlert, setoptionAlert] = useState({})
 
     const cancelPayment = async () => {
         const payOS = new PayOS("d595ed43-ecf6-4f2a-9c9b-c3a0a00aeb5d", "8e8f0123-db64-468d-92cc-68d990a9bd11", "58dbb967ca269e3b2b9f51c3e85a79a1251027b8004910b05ad2b460a7a12bd1");
@@ -111,11 +115,39 @@ const QRCodePayOs = () => {
                 console.error('Download error:', error);
                 Alert.alert('Lỗi', 'Không thể lưu file');
             }
-        }else{
+        } else {
             Alert.alert("Chưa cấp quyền truy cập bộ nhớ")
         }
     }
+    const paymentSuccess = async () => {
+        const topUp = await topUpShipper(user, "QRCode", Number(data.amount));
+        if (topUp) {
+            setisShowAlert(true)
+            setoptionAlert({
+                title: "Thành công",
+                message: "Thanh toán thành công",
+                type: 1,
+                otherFunction: () => {
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'ShipperTabNavigation' }],
+                    });
+                    setTimeout(() => {
+                        navigation.navigate('Tài khoản');
+                    }, 100);
+                }
+            })
 
+
+        } else {
+            setoptionAlert({
+                title: "Lỗi",
+                message: "Thanh toán không thành công",
+                type: 3
+            })
+            setisShowAlert(true)
+        }
+    }
     const checkPayment = async () => {
         const payOS = new PayOS("d595ed43-ecf6-4f2a-9c9b-c3a0a00aeb5d", "8e8f0123-db64-468d-92cc-68d990a9bd11", "58dbb967ca269e3b2b9f51c3e85a79a1251027b8004910b05ad2b460a7a12bd1");
         const paymentLink = await payOS.getPaymentLinkInformation(paymentLinkRes.orderCode);
@@ -123,7 +155,7 @@ const QRCodePayOs = () => {
             case "PENDING":
                 break;
             case "PAID":
-                await topUpShipper(user, navigation, data.amount)
+                await paymentSuccess()
                 Alert.alert("giao dịch thành công");
                 break;
             case "CANCELLED":
@@ -258,10 +290,18 @@ const QRCodePayOs = () => {
                 <Text style={styles.txtConfirm}>Lưu QR Code</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.bntConfirm, { marginTop: 28, marginBottom: 80 }]}
-                onPress={()=> topUpShipper(user, navigation, data.amount)}
+                onPress={() => paymentSuccess()}
             >
                 <Text style={styles.txtConfirm}>test success</Text>
             </TouchableOpacity>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isShowAlert}
+                onRequestClose={setisShowAlert}
+            >
+                <AlertCustom closeModal={setisShowAlert} option={optionAlert} />
+            </Modal>
         </ScrollView>
     );
 };
