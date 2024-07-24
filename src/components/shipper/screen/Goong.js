@@ -51,7 +51,7 @@ import {styles} from '../styles/GoogStyle';
 import {GOONG_API_KEY} from '@env';
 import DropdownComponentGoong from './DropdownComponentGoong';
 import Slider from 'react-native-slide-to-unlock';
-import MapViewDirections from 'react-native-maps-directions';
+import ModalPaymentMethod from './ModalPaymentMethod';
 
 const Goong = () => {
   const navigation = useNavigation();
@@ -87,6 +87,8 @@ const Goong = () => {
   const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
   const [statusShipper, setStatusShipper] = useState(false);
   const [countdown, setCountdown] = useState(60);
+  const [countdownTimePaymentMethod, setCountdownTimePaymentMethod] =
+    useState(20);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [valueCancelOrder, setValueCancelOrder] = useState(1);
   const navigationState = useNavigationState(state => state);
@@ -371,7 +373,6 @@ const Goong = () => {
           setIsTimerRunning(false);
           setCountdown(60);
           handlePresentPress();
-
           await updateOrderStatus(id, 8);
           await UpdateShipperInformation(idUser, 5);
           handleSendMessage('accept');
@@ -516,7 +517,8 @@ const Goong = () => {
             status: 9,
           };
     try {
-      await UpdateOrder(order.order._id, data);
+      const long520 = await UpdateOrder(order.order._id, data);
+      console.log("520", long520);
       setModalVisibleCancelOrder(false);
       setModalVisibleCancelOrderFromMerchant(false);
       handleClosePress();
@@ -533,6 +535,16 @@ const Goong = () => {
       throw error;
     }
   };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (countdownTimePaymentMethod > 0 && index === 3 && order.paymentMethod !== 3) {
+        setCountdownTimePaymentMethod(prevCountdown => prevCountdown - 1);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdownTimePaymentMethod, index]);
 
   const checkfetchRouteCustomer = async () => {
     try {
@@ -748,7 +760,7 @@ const Goong = () => {
   };
 
   const formatCurrency = amount => {
-    const formattedAmount = new Intl.NumberFormat('vi-VN', {
+    const formattedAmount = new Intl.NumberFormat('vi-VN', { 
       style: 'currency',
       currency: 'VND',
     }).format(amount);
@@ -1246,15 +1258,26 @@ const Goong = () => {
                       ) : (
                         <TouchableOpacity
                           onPress={() => {
-                            setModalVisibleCancelOrder(true);
+                            countdownTimePaymentMethod <= 0
+                              ? setModalVisibleCancelOrder(true)
+                              : null;
                           }}
                           style={[
                             styles.buttonTakePhotoBottomSheet,
                             {backgroundColor: '#E04444', flex: 1},
                           ]}>
-                          <Text style={styles.textTakePhotoBottomSheet}>
-                            Hủy đơn
-                          </Text>
+                          {countdownTimePaymentMethod <= 0 ? (
+                            <Text style={styles.textTakePhotoBottomSheet}>
+                              Huỷ đơn
+                            </Text>
+                          ) : (
+                            <Text style={styles.textTakePhotoBottomSheet}>
+                              Chờ{' '}
+                              <Text style={{fontWeight: '400', fontSize: 16}}>
+                                {formatTime(countdownTimePaymentMethod)}
+                              </Text>
+                            </Text>
+                          )}
                         </TouchableOpacity>
                       )}
 
@@ -1467,7 +1490,7 @@ const Goong = () => {
                       styles.textItemIncom,
                       {color: '#005987', fontSize: 16, fontWeight: '800'},
                     ]}>
-                    {order.order.totalDistance} km
+                    {order.order.totalDistance}
                   </Text>
                 </View>
                 <View style={styles.viewItemIncom}>

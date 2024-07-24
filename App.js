@@ -4,12 +4,14 @@ import {UserProvider} from './src/components/user/UserContext';
 import AppNavigation from './src/components/navigations/AppNavigation';
 import {useNavigationState} from '@react-navigation/native';
 import HistoryTransaction from './src/components/shipper/screen/HistoryTransaction';
+import ModalPaymentMethod from './src/components/shipper/screen/ModalPaymentMethod';
 const App = () => {
   return (
     <SafeAreaView style={{flex: 1}}>
       <UserProvider>
         <AppNavigation />
       </UserProvider>
+      {/* <ModalPaymentMethod/> */}
     </SafeAreaView>
   );
 };
