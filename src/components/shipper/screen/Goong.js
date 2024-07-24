@@ -87,9 +87,8 @@ const Goong = () => {
   const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
   const [statusShipper, setStatusShipper] = useState(false);
   const [countdown, setCountdown] = useState(60);
-  const [countdownPaymentMethod, setCountdownPaymentMethod] = useState(false);
   const [countdownTimePaymentMethod, setCountdownTimePaymentMethod] =
-    useState(900);
+    useState(20);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [valueCancelOrder, setValueCancelOrder] = useState(1);
   const navigationState = useNavigationState(state => state);
@@ -374,7 +373,6 @@ const Goong = () => {
           setIsTimerRunning(false);
           setCountdown(60);
           handlePresentPress();
-
           await updateOrderStatus(id, 8);
           await UpdateShipperInformation(idUser, 5);
           handleSendMessage('accept');
@@ -519,7 +517,8 @@ const Goong = () => {
             status: 9,
           };
     try {
-      await UpdateOrder(order.order._id, data);
+      const long520 = await UpdateOrder(order.order._id, data);
+      console.log("520", long520);
       setModalVisibleCancelOrder(false);
       setModalVisibleCancelOrderFromMerchant(false);
       handleClosePress();
@@ -539,14 +538,13 @@ const Goong = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (countdownTimePaymentMethod > 0 && order && !order.paymentMethod === 3) {
-        console.log('fasdfasdfasdf');
+      if (countdownTimePaymentMethod > 0 && index === 3 && order.paymentMethod !== 3) {
         setCountdownTimePaymentMethod(prevCountdown => prevCountdown - 1);
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [countdownTimePaymentMethod]);
+  }, [countdownTimePaymentMethod, index]);
 
   const checkfetchRouteCustomer = async () => {
     try {
@@ -762,7 +760,7 @@ const Goong = () => {
   };
 
   const formatCurrency = amount => {
-    const formattedAmount = new Intl.NumberFormat('vi-VN', {
+    const formattedAmount = new Intl.NumberFormat('vi-VN', { 
       style: 'currency',
       currency: 'VND',
     }).format(amount);
@@ -1261,7 +1259,7 @@ const Goong = () => {
                         <TouchableOpacity
                           onPress={() => {
                             countdownTimePaymentMethod <= 0
-                              ? setCountdownPaymentMethod(true)
+                              ? setModalVisibleCancelOrder(true)
                               : null;
                           }}
                           style={[
@@ -1492,7 +1490,7 @@ const Goong = () => {
                       styles.textItemIncom,
                       {color: '#005987', fontSize: 16, fontWeight: '800'},
                     ]}>
-                    {order.order.totalDistance} km
+                    {order.order.totalDistance}
                   </Text>
                 </View>
                 <View style={styles.viewItemIncom}>
@@ -1634,7 +1632,6 @@ const Goong = () => {
           </View>
         </Modal>
       )}
-      
     </View>
   );
 };
