@@ -179,20 +179,39 @@ const ChatWithCustomer = () => {
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={styles.container}>
                 <View style={styles.viewBack}>
-                    <TouchableOpacity style={styles.viewICBack}
+                    <View style={styles.leftBar}>
+                        <TouchableOpacity style={styles.viewICBack}
+                            onPress={() => {
+                                if (confirm) setconfirm(!confirm)
+                                else navigation.goBack()
+                            }}
+                        >
+                            <Icon
+                                name="chevron-left"
+                                size={12}
+                                color="#005987"
+                                FontWeight={FontWeight.FW700}
+                            />
+                        </TouchableOpacity>
+                        <Image style={styles.avatarHeader} source={uri = order.customerID.avatar} />
+                        <View>
+                            <Text style={styles.nameHeader}>{order.customerID.fullName}</Text>
+                            <Text style={styles.type}>Khách hàng</Text>
+                        </View>
+                    </View>
+                    <TouchableOpacity style={styles.viewICMore}
                         onPress={() => {
                             if (confirm) setconfirm(!confirm)
                             else navigation.goBack()
                         }}
                     >
                         <Icon
-                            name="chevron-left"
+                            name="ellipsis-vertical"
                             size={12}
                             color="#005987"
                             FontWeight={FontWeight.FW700}
                         />
                     </TouchableOpacity>
-                    <Text style={styles.textHeader}>Chat với khách hàng</Text>
                 </View>
                 <FlatList style={styles.containerMessage}
                     data={dataMessage}
