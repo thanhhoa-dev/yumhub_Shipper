@@ -21,6 +21,13 @@ const Menu = ({ navigation }) => {
         setVisible(false);
         setUser(null);
     };
+    const formatCurrency = amount => {
+        const formattedAmount = new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND',
+        }).format(amount);
+        return formattedAmount.replace('₫', '') + ' ₫';
+      };
     return (
 
         <ScrollView>
@@ -29,7 +36,7 @@ const Menu = ({ navigation }) => {
                     <Text style={{ color: "white", fontSize: 16, fontWeight: '400' }}>Số dư của bạn</Text>
                 </View>
                 <View style={{ marginTop: 20, alignSelf: 'center', marginTop: 1 }}>
-                    <Text style={{ color: "white", fontSize: 40, fontWeight: '700' }}>{user.checkAccount.balance} đ</Text>
+                    <Text style={{ color: "white", fontSize: 40, fontWeight: '700' }}>{formatCurrency(user.checkAccount.balance)} đ</Text>
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginStart: 20, marginEnd: 20, marginTop: 15 }}>
                     <TouchableOpacity
