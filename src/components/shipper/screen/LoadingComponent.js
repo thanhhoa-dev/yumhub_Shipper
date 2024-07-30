@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { Alert, BackHandler, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
-const LoadingComponent = () => {
-  
+const LoadingComponent = ({backgroundColorStyle}) => {
+  const backgroundColor = backgroundColorStyle || '#FFF';
   return (
-    <View style={styles.viewContainer}>
+    <View style={[styles.viewContainer, {backgroundColor}]}>
       <FastImage
         style={styles.image}
         source={require('../../../assets/LoadingComponent-unscreen.gif')}
@@ -33,7 +33,6 @@ const styles = StyleSheet.create({
   },
   viewContainer: {
     flex: 1,
-    backgroundColor: '#FFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
