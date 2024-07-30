@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { View, TextInput, StyleSheet, Image, Text, TouchableOpacity,ToastAndroid, ScrollView} from 'react-native';
+import { changePass } from '../../user/UserHTTP';
 import { UserContext } from '../../user/UserContext';
-import { changePass } from '../ShipperHTTP';
 
 
 const ChangePass = ({ navigation }) => {
@@ -13,7 +13,7 @@ const ChangePass = ({ navigation }) => {
     const {setUser} = useContext(UserContext);
     const idUser = user.checkAccount._id;
     // console.log(idUser);
-    const handleChange = async() => {
+    const handleChange = async () => {
         if (passNew !== passConfirm) {
             ToastAndroid.show('Mật khẩu mới không khớp', ToastAndroid.SHORT);
             return;
@@ -21,8 +21,12 @@ const ChangePass = ({ navigation }) => {
         try {
             const result = await changePass(passOld, passNew, idUser);
             console.log(result);
-            ToastAndroid.show('Đổi mật khẩu thành công', ToastAndroid.SHORT);
-            setUser(null);
+            if (result.result) {
+                ToastAndroid.show('Đổi mật khẩu thành công', ToastAndroid.SHORT);
+                setUser(null);
+            } else {
+                ToastAndroid.show(result.message || 'Thay đổi mật khẩu thất bại', ToastAndroid.SHORT);
+            }
         } catch (e) {
             ToastAndroid.show('Thay đổi mật khẩu thất bại', ToastAndroid.SHORT);
         }

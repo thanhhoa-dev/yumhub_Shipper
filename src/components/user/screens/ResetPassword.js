@@ -1,69 +1,116 @@
 import React, { useState } from 'react';
-import { View, TextInput,  StyleSheet, Image, Text, TouchableOpacity, ToastAndroid } from 'react-native';
-import { resetpass } from '../UserHTTP';
-
-
+import { View, TextInput, StyleSheet, Image, Text, TouchableOpacity, Dimensions, Modal, ScrollView } from 'react-native';
+import { resetpass,  } from '../UserHTTP';
+import AlertCustom from '../../../constants/AlertCustom';
+import { ScreenStack } from 'react-native-screens';
 
 const ResetPassword = (props) => {
+    const {width, height} = Dimensions.get('window');
     const { route: { params: { email } } } = props;
     const navigation = props.navigation;
     const [password, setPassWord] = useState('');
     const [passConfirm, setPassWordConfirm] = useState('');
+    const [isShowAlert, setisShowAlert] = useState(false);
+    const [optionAlert, setoptionAlert] = useState({});
+
+    
+    const validate = () => {
+        if (password != passConfirm) {
+            setoptionAlert({
+                title : "Lỗi",
+                message : "Mật khẩu không trùng nhau",
+                type: 3
+            })
+            setisShowAlert(true)
+            return false;
+        }
+       
+        if (passConfirm.length < 6) {
+            setoptionAlert({
+                title : "Lỗi",
+                message : "Mật khẩu tổi thiểu 6 ký tự",
+                type: 3
+            })
+            setisShowAlert(true)
+            return false;
+        }
+        return true;
+    }
     const handleNext = async () => {
+        const checkValidate = validate();
         try {
-            if (password === passConfirm) {
-                const result = await resetpass( password,email);
-                console.log(result);
+            if (checkValidate) {
+                const result = await resetpass(email, password);
                 if (result.result) {
-                    ToastAndroid.show('Đổi mật khẩu thành công', ToastAndroid.SHORT);
-                    navigation.navigate('Login');
+                    setoptionAlert({
+                        title: "Thành công",
+                        message: result.message,
+                        type: 1,
+                        otherFunction: () => navigation.navigate('Login')
+                    })
+                    setisShowAlert(true)
                 }
-            } else {
-                ToastAndroid.show('Mật khẩu không trùng', ToastAndroid.SHORT);
             }
+
         } catch (error) {
-            console.log('......dong 21', error);
-            ToastAndroid.show('login failed', ToastAndroid.SHORT);
+            setoptionAlert({
+                title: "Lỗi",
+                message: result.message,
+                type: 3
+            })
+            setisShowAlert(true)
         }
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#005987' }}>
-        <View style={styles.viewContainer}>
-            <View>
-                <Image style={{ height: 117, width: 117, marginEnd: 30 }} source={require("../../../assets/iconAsset.png")}></Image>
-                <Text style={styles.viewText}>Đổi mật khẩu</Text>
+        <ScrollView>
+            <View style={{ flex: 1, backgroundColor: '#005987', width: width, height: height }}>
+                <View style={styles.viewContainer}>
+                    <View>
+                        <Image style={{ height: 117, width: 117, marginEnd: 30 }} source={require("../../../assets/iconAsset.png")}></Image>
+                        <Text style={styles.viewText}>Đổi mật khẩu</Text>
 
+                    </View>
+                </View>
+                <View style={styles.viewBody}>
+                    <View style={styles.viewEmail}>
+                        <Text style={styles.viewTextEmail}>Mật khẩu mới</Text>
+                    </View>
+                    <View style={styles.viewTextInputPassword}>
+                        <TextInput
+                            value={password}
+                            onChangeText={setPassWord}
+                            placeholder=""
+                            style={styles.viewTextInputEmail}
+                            paddingStart={20}
+                        />
+                    </View>
+                    <View style={styles.viewEmail}>
+                        <Text style={styles.viewTextEmail}> Nhập lại mật khẩu mới</Text>
+                    </View>
+                    <View style={styles.viewTextInputPassword}>
+                        <TextInput
+                            value={passConfirm}
+                            onChangeText={setPassWordConfirm}
+                            placeholder=""
+                            style={styles.viewTextInputEmail}
+                            paddingStart={20}
+                        />
+                    </View>
+                    <TouchableOpacity onPress={handleNext} style={styles.viewLogin}>
+                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>Xác nhận</Text>
+                    </TouchableOpacity>
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={isShowAlert}
+                        onRequestClose={setisShowAlert}
+                    >
+                        <AlertCustom closeModal={setisShowAlert} option={optionAlert} />
+                    </Modal>
+                </View>
             </View>
-        </View>
-        <View style={styles.viewBody}>
-            <View style={styles.viewEmail}>
-                <Text style={styles.viewTextEmail}>Mật khẩu mới</Text>
-            </View>
-            <View style={styles.viewTextInputPassword}>
-                <TextInput
-                    value={password}
-                    onChangeText={setPassWord}
-                    style={styles.viewTextInputEmail}
-                    paddingStart={20}
-                />
-            </View>
-            <View style={styles.viewEmail}>
-                <Text style={styles.viewTextEmail}> Nhập lại mật khẩu mới</Text>
-            </View>
-            <View style={styles.viewTextInputPassword}>
-                <TextInput
-                    value={passConfirm}
-                    onChangeText={setPassWordConfirm}
-                    style={styles.viewTextInputEmail}
-                    paddingStart={20}
-                />
-            </View>
-            <TouchableOpacity onPress={handleNext} style={styles.viewLogin}>
-                <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>Xác nhận</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
+        </ScrollView>
     )
 };
 
@@ -91,7 +138,8 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         marginTop: 8,
         borderRadius: 8,
-
+        borderWidth: 1,
+        borderColor: '#333',
     },
     viewTextEmail: {
         fontSize: 13,
