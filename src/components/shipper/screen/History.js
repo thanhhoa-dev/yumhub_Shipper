@@ -154,7 +154,8 @@ const History = ({ startDate, endDate }) => {
             </View>
             {
                 (isLoading &&
-                    <LoadingComponent />)
+                    <LoadingComponent 
+                    backgroundColorStyle={'#F5FEFF'}/>)
             }
             {filteredList.length > 0 ? (
                 <FlatList

@@ -27,9 +27,7 @@ const Login = ({navigation}) => {
       setUser(result.data);
       await AsyncStorage.setItem('userPhone', phoneNumber);
       await AsyncStorage.setItem('userPassword', password);
-      Alert.alert('Thông tin đã được lưu thành công');
     } catch (e) {
-      Alert.alert('Lỗi khi lưu thông tin');
       throw e;
     }
   };
