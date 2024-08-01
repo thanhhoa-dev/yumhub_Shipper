@@ -33,7 +33,7 @@ const CheckOTP = (props) => {
                     title: "Thành công",
                     message: result.message,
                     type: 1,
-                    otherFunction: () => navigation.navigate('ResetPass', { email: email, otp: total })
+                    otherFunction: () => navigation.navigate('ResetPassword', { email: email, otp: total })
                 })
                 setisShowAlert(true)
 

@@ -181,8 +181,7 @@ const ChatWithCustomer = () => {
                 <View style={styles.viewBack}>
                     <TouchableOpacity style={styles.viewICBack}
                         onPress={() => {
-                            if (confirm) setconfirm(!confirm)
-                            else navigation.goBack()
+                            navigation.goBack()
                         }}
                     >
                         <Icon

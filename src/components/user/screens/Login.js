@@ -53,7 +53,7 @@ const Login = (props) => {
                 const storedPassword = await AsyncStorage.getItem('Password');
                 // Kiểm tra xem có giá trị hay không trước khi cập nhật
                 if (storedUsername !== null) {
-                    setPhone(storedUsername);
+                    setPhoneNumber(storedUsername);
                 }
 
                 if (storedPassword !== null) {

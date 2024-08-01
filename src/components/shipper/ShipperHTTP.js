@@ -132,6 +132,7 @@ export const uploadImage = async form => {
 };
 
 export const UpdateOrder = async (id, data) => {
+  console.log(data);
   try {
     const axiosInstance = AxiosInstance();
     const url = 'orders/updateOrder';
@@ -233,5 +234,24 @@ export const getHistoryTransaction = async (id) => {
   } catch (error) {
     console.log(error);
     throw error;
+  }
+};
+
+export const UpdateProfile = async (id, data) => {
+  try {
+    const axiosInstance = AxiosInstance();
+    const url = 'shippers/updateShipper';
+    const params = {id: id};
+    const body = {
+      phoneNumber: data.phoneNumber,
+      email: data.email,
+      fullName: data.fullName,
+      sex: data.gender,
+      birthDay: data.birthDay
+    };
+    return await axiosInstance.patch(url, body, {params});
+  } catch (error) {
+    console.log('>>>>>change pass: 76', error);
+    ToastAndroid.show('error', ToastAndroid.SHORT);
   }
 };
