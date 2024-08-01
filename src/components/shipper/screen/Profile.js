@@ -11,13 +11,14 @@ import {
   ScrollView,
 } from 'react-native';
 import React, {useState, useEffect, useContext} from 'react';
-import {getAll} from '../ShipperHTTP';
+import {getAll, UpdateProfile} from '../ShipperHTTP';
 import {UserContext} from '../../user/UserContext';
 import {Dropdown} from 'react-native-element-dropdown';
+import AlertCustom from '../../../constants/AlertCustom';
 
 const data = [
-  {label: 'Nam', value: '1'},
-  {label: 'Nữ', value: '2'},
+  {label: 'Nam', value: 'Male'},
+  {label: 'Nữ', value: 'Female'},
 ];
 
 const Profile = ({navigation}) => {
@@ -27,6 +28,13 @@ const Profile = ({navigation}) => {
   const {user} = useContext(UserContext);
   const {setUser} = useContext(UserContext);
   const idUser = user.checkAccount._id;
+  const [fullName, setFullName] = useState(user.checkAccount.fullName);
+  const [email, setemail] = useState(user.checkAccount.email);
+  const [phoneNumber, setPhoneNumber] = useState(user.checkAccount.phoneNumber);
+  const [gender, setGender] = useState(user.checkAccount.sex);
+  const [birthDay, setBirthDay] = useState(user.checkAccount.birthDay);
+  const [isShowAlert, setIsShowAlert] = useState(false);
+  const [optionAlert, setOptionAlert] = useState({});
   // console.log(user);
 
   const renderLabel = () => {
@@ -75,8 +83,9 @@ const Profile = ({navigation}) => {
               <Text style={styles.textContent}>Họ tên</Text>
               <TextInput
                 style={styles.viewInput}
-                value={user.checkAccount.fullName}
+                value={fullName}
                 paddingStart={20}
+                onChangeText={text => setFullName(text)}
               />
             </View>
 
@@ -84,7 +93,8 @@ const Profile = ({navigation}) => {
               <Text style={styles.textContent}>Email</Text>
               <TextInput
                 style={styles.viewInput}
-                value={user.checkAccount.email}
+                value={email}
+                onChangeText={text => setemail(text)}
                 paddingStart={20}
               />
             </View>
@@ -93,7 +103,8 @@ const Profile = ({navigation}) => {
               <Text style={styles.textContent}>Số điện thoại</Text>
               <TextInput
                 style={styles.viewInput}
-                value={user.checkAccount.phoneNumber}
+                value={phoneNumber}
+                onChangeText={text => setPhoneNumber(text)}
                 keyboardType="numeric"
                 paddingStart={20}
               />
@@ -112,12 +123,12 @@ const Profile = ({navigation}) => {
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
-                placeholder={user.checkAccount.sex === 1 ? 'Nam' : 'Nữ'}
+                placeholder={gender === 'Male' ? 'Nam' : 'Nữ'}
                 value={value}
                 onFocus={() => setIsFocus(true)}
                 onBlur={() => setIsFocus(false)}
                 onChange={item => {
-                  setValue(item.value);
+                  setGender(item.value);
                   setIsFocus(false);
                 }}
               />
@@ -127,7 +138,8 @@ const Profile = ({navigation}) => {
               <Text style={styles.textContent}>Ngày sinh</Text>
               <TextInput
                 style={styles.viewInput}
-                value={user.checkAccount.birthDay}
+                value={birthDay}
+                onChangeText={text => setBirthDay(text)}
                 paddingStart={20}
               />
             </View>
@@ -138,6 +150,7 @@ const Profile = ({navigation}) => {
                 style={styles.viewInput}
                 value={user.checkAccount.modeCode}
                 paddingStart={20}
+                editable={false}
               />
             </View>
 
@@ -145,18 +158,51 @@ const Profile = ({navigation}) => {
               <Text style={styles.textContent}>Biển số xe</Text>
               <TextInput
                 style={styles.viewInput}
-                value={user.checkAccount.brandBike}
+                value={user.checkAccount.idBike}
                 paddingStart={20}
+                editable={false}
               />
             </View>
           </View>
         </View>
       </ScrollView>
-      <TouchableOpacity style={styles.viewLogin}>
+      <TouchableOpacity
+        style={styles.viewLogin}
+        onPress={async () => {
+          const handleUpdateProfile = await UpdateProfile(idUser, {
+            fullName: fullName,
+            email: email,
+            phoneNumber: phoneNumber,
+            gender: gender,
+            birthDay: birthDay,
+          });
+          if (handleUpdateProfile.result) {
+            setOptionAlert({
+              title: 'Thành công',
+              message: 'Cập nhật thông tin thành công',
+              type: 1,
+            });
+            setIsShowAlert(true);
+          } else {
+            setOptionAlert({
+              title: 'Lỗi kết nối',
+              message: 'kiểm tra mạng của bạn',
+              type: 3,
+            });
+            setIsShowAlert(true);
+          }
+        }}>
         <Text style={{color: '#FFF', fontSize: 14, fontWeight: '700'}}>
           Cập nhật
         </Text>
       </TouchableOpacity>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isShowAlert}
+        onRequestClose={setIsShowAlert}>
+        <AlertCustom closeModal={setIsShowAlert} option={optionAlert} />
+      </Modal>
     </View>
   );
 };

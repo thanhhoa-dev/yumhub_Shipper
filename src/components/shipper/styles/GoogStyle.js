@@ -4,13 +4,14 @@ import {rgbaArrayToRGBAColor} from 'react-native-reanimated/lib/typescript/reani
 
 export const styles = StyleSheet.create({
   buttonPowerOffStatusShipper: {
-    marginStart: 30,
-    backgroundColor: 'white',
+    marginStart: 50,
+    backgroundColor: "red",
     padding: 8,
     borderRadius: 50,
   },
   textStatusShipper: {
-    backgroundColor: 'white',
+    width:165,
+    backgroundColor: "#D3D3D3",
     paddingVertical: Size.S12,
     paddingHorizontal: Size.S20,
     borderRadius: 50,
@@ -21,6 +22,7 @@ export const styles = StyleSheet.create({
   viewStatusShipper: {
     position: 'absolute',
     top: 40,
+    left:20,
     backgroundColor: 'rgba(0, 0, 0, 0)',
     zIndex: 0,
     flexDirection: 'row',

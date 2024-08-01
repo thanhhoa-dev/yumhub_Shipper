@@ -52,6 +52,7 @@ import {GOONG_API_KEY} from '@env';
 import DropdownComponentGoong from './DropdownComponentGoong';
 import BottomSheetComponent from './BottomSheetComponent';
 import LoadImage from './LoadImage';
+import { updateBalanceMerchant } from './Transaction';
 
 const Goong = () => {
   const navigation = useNavigation();
@@ -66,10 +67,7 @@ const Goong = () => {
   const [destination, setDestination] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeCoordinatesCustomer, setRouteCoordinatesCustomer] = useState([]);
-  const [locateCurrent, setLocateCurrent] = useState({
-    latitude: 10.853617, 
-    longitude: 106.627446
-  });
+  const [locateCurrent, setLocateCurrent] = useState();
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [distanceCustomer, setDistanceCustomer] = useState(null);
@@ -95,7 +93,7 @@ const Goong = () => {
   const {user, sendMessage, receiveMessage} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
-  var id = '6627e8b6bfd9baea698a1d4b';
+  var id = '663ccda31387830b4e4a788a';
   // var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
@@ -120,7 +118,7 @@ const Goong = () => {
   //           break;
   //         case 'cancelled_from_merchant':
   //           console.log('cancelled_from_merchant');
-  //           setModalVisibleCancelOrderFromMerchant(true);
+  //           handleCancelToMerchant(6);
   //           break;
   //         default:
   //           console.log('Unknown command:', message.command);
@@ -134,33 +132,33 @@ const Goong = () => {
 
   //websocket
 
-  // useEffect(() => {
-  //   const backAction = () => {
-  //     if (navigationState.index === 0) {
-  //       Alert.alert(
-  //         'Thoát App',
-  //         'Bạn có chắc chắn muốn thoát khỏi ứng dụng không?',
-  //         [
-  //           {
-  //             text: 'Cancel',
-  //             onPress: () => null,
-  //             style: 'cancel',
-  //           },
-  //           {text: 'YES', onPress: () => BackHandler.exitApp()},
-  //         ],
-  //       );
-  //       return true;
-  //     }
-  //     return false;
-  //   };
+  useEffect(() => {
+    const backAction = () => {
+      if (navigationState.index === 0) {
+        Alert.alert(
+          'Thoát App',
+          'Bạn có chắc chắn muốn thoát khỏi ứng dụng không?',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => null,
+              style: 'cancel',
+            },
+            {text: 'YES', onPress: () => BackHandler.exitApp()},
+          ],
+        );
+        return true;
+      }
+      return false;
+    };
 
-  //   const backHandler = BackHandler.addEventListener(
-  //     'hardwareBackPress',
-  //     backAction,
-  //   );
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
 
-  //   return () => backHandler.remove();
-  // }, [navigationState]);
+    return () => backHandler.remove();
+  }, [navigationState]);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -485,7 +483,6 @@ const Goong = () => {
   };
 
   const handleFlatlistFood = ({item}) => {
-    console.log(item);
     return (
       <View style={styles.viewContainerItemInformationFoodBottomSheet}>
         <View style={styles.viewItemInformationFoodBottomSheet}>
@@ -528,13 +525,28 @@ const Goong = () => {
             status: 9,
           };
     try {
-      const long520 = await UpdateOrder(order.order._id, data);
-      console.log('520', long520);
+      await UpdateOrder(order.order._id, data);
       setModalVisibleCancelOrder(false);
       setModalVisibleCancelOrderFromMerchant(false);
       handleClosePress();
       setIndex(0);
       handleSendMessage('cancelled_from_shipper');
+      translateX.setValue(0);
+      navigation.navigate('CancelSuccessOrder', {
+        order: currentOrder.current,
+        index: index,
+      });
+      setOrder(null);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const handleCancelToMerchant = (index) => {
+    try {
+      handleClosePress();
+      setIndex(0);
       translateX.setValue(0);
       navigation.navigate('CancelSuccessOrder', {
         order: currentOrder.current,
@@ -602,17 +614,17 @@ const Goong = () => {
   const checkDistance = async () => {
     const distance = await checkfetchRouteCustomer();
     if (distance !== null) {
-      if (distance > 500) {
+      if (distance < 500) {
         setIndex(2);
         Alert.alert('Bạn chưa đi tới nơi nhỏ hơn 500 m');
       } else {
+        handleSendMessage('arrived');
         setIndex(3);
       }
     } else {
       console.error('Unable to fetch distance');
     }
   };
-
   const fetchShipperToCustomer = async () => {
     try {
       const response = await axios.get(`https://rsapi.goong.io/Direction`, {
@@ -664,10 +676,14 @@ const Goong = () => {
           handleSendMessage('waiting');
           break;
         case 2:
+          // thanh hoa
+          const updateMerchant = async () => {
+            await updateBalanceMerchant(currentOrder.current.order.merchantID, currentOrder.current.order.priceFood, currentOrder.current.order.paymentMethod )
+          }
+          updateMerchant()
           handleSendMessage('delivering');
           break;
         case 3:
-          handleSendMessage('arrived');
           break;
         case 4:
           handleConfirmCancel();
@@ -793,8 +809,8 @@ const Goong = () => {
       <GestureHandlerRootView style={{flex: 1, position: 'relative'}}>
         <View style={styles.viewStatusShipper}>
           {statusShipper ? (
-            <Text style={[styles.textStatusShipper, {color: '#005987'}]}>
-              Đang hoạt động
+            <Text style={[styles.textStatusShipper, {color: '#005987',backgroundColor:"#A7F9FF"}]}>
+              Đang hoạt động 
             </Text>
           ) : (
             <Text style={styles.textStatusShipper}>Không hoạt động</Text>
@@ -804,7 +820,7 @@ const Goong = () => {
               handleSetStatusShipper();
             }}
             style={styles.buttonPowerOffStatusShipper}>
-            <FontAwesome6 name={'power-off'} size={25} color={'#19D6E5'} />
+            <FontAwesome6 name={'power-off'} size={25} color={'#fff'} />
           </TouchableOpacity>
         </View>
         <MapView
@@ -1079,7 +1095,7 @@ const Goong = () => {
         </View>
       </Modal>
 
-      {order && modalVisibleCancelOrderFromMerchant && (
+      {/* {order && modalVisibleCancelOrderFromMerchant && (
         <Modal
           animationType="slide"
           transparent={true}
@@ -1105,7 +1121,7 @@ const Goong = () => {
             </View>
           </View>
         </Modal>
-      )}
+      )} */}
     </View>
   );
 };

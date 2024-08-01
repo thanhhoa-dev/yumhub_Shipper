@@ -18,6 +18,8 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Slider from 'react-native-slide-to-unlock';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+
 
 const BottomSheetComponent = ({
   order,
@@ -42,6 +44,7 @@ const BottomSheetComponent = ({
   setShowNumberPhone,
   handleCall
 }) => {
+  const navigation = useNavigation();
   return (
     order &&
     destination &&
