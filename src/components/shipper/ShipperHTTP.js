@@ -132,7 +132,7 @@ export const uploadImage = async form => {
 };
 
 export const UpdateOrder = async (id, data) => {
-  console.log(data);
+  console.log(id);
   try {
     const axiosInstance = AxiosInstance();
     const url = 'orders/updateOrder';

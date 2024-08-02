@@ -16,6 +16,7 @@ import { toast } from '@baronha/ting';
 import { PermissionsAndroid } from 'react-native';
 import { Color, FontFamily, FontWeight, Size } from '../../../constants/theme'
 import ImageChat from './ImageChat';
+import LoadImage from './LoadImage';
 
 function convertToHHMM(isoString) {
     const date = new Date(isoString);
@@ -41,7 +42,8 @@ const ChatWithCustomer = () => {
     const route = useRoute();
     const flatListRef = useRef(null);
     const { order } = route.params;
-    console.log(order);
+    // console.log(order);
+    // console.log(order);
     const [dataMessage, setdataMessage] = useState(null)
     const { user, sendMessageChat, receiveMessageChat } = useContext(UserContext);
     const [message, setmessage] = useState("")
@@ -140,7 +142,7 @@ const ChatWithCustomer = () => {
                 console.log(message);
                 switch (message.command) {
                     case 'chat':
-                        if (message.order.orderID == order.order._id) {
+                        if (message.order.orderID == order._id) {
                             setdataMessage(message.order.fullChat)
                             flatListRef.current.scrollToEnd({ animated: true });
                         }
@@ -160,7 +162,7 @@ const ChatWithCustomer = () => {
         return (
             <View style={[item.typeUser == 'shipper' ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' }, styles.viewContent]}>
                 {
-                    (item.typeUser == 'shipper') ? null : <Image style={styles.icAvatarCustomer} source={{ uri: order.order.shipperID.avatar ? order.order.shipperID.avatar : 'https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png' }} />
+                    (item.typeUser == 'shipper') ? null : <Image style={styles.icAvatarCustomer} source={{ uri: order.shipperID.avatar ? order.shipperID.avatar : 'https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png' }} />
                 }
                 <View style={styles.content}>
                     {
@@ -182,8 +184,7 @@ const ChatWithCustomer = () => {
                     <View style={styles.leftBar}>
                         <TouchableOpacity style={styles.viewICBack}
                             onPress={() => {
-                                if (confirm) setconfirm(!confirm)
-                                else navigation.goBack()
+                                navigation.goBack()
                             }}
                         >
                             <Icon
@@ -193,7 +194,7 @@ const ChatWithCustomer = () => {
                                 FontWeight={FontWeight.FW700}
                             />
                         </TouchableOpacity>
-                        <Image style={styles.avatarHeader} source={uri = order.customerID.avatar} />
+                        <LoadImage style={styles.avatarHeader} uri = {order.customerID.avatar} />
                         <View>
                             <Text style={styles.nameHeader}>{order.customerID.fullName}</Text>
                             <Text style={styles.type}>Khách hàng</Text>
