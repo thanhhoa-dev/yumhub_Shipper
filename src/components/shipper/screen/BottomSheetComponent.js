@@ -526,7 +526,7 @@ const BottomSheetComponent = ({
                     )}
                     <View style={styles.viewContainerInformationCustomer}>
                       <Text style={styles.textUserBottomSheet}>
-                        {order.order.customerID.fullName}
+                        {order.order.deliveryFullName || order.order.customerID.fullName}
                       </Text>
                       <View style={[styles.viewContainerRating, {marginTop:6}]}>
                         <StarRating
@@ -575,11 +575,11 @@ const BottomSheetComponent = ({
               {showNumberPhone && (
                 <View style={styles.viewContainerIconBottomSheet}>
                   <Text style={styles.textCustomerPhoneNumber}>
-                    {order.order.customerID.phoneNumber}
+                    {order.order.deliveryPhonenumber || order.order.customerID.phoneNumber}
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
-                      handleCall(order.order.customerID.phoneNumber);
+                      handleCall(order.order.deliveryPhonenumber || order.order.customerID.phoneNumber);
                     }}>
                     <Ionicons
                       style={styles.iconCallBottomSheet}
