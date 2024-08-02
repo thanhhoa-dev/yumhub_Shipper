@@ -2,7 +2,7 @@ import {
     View, Text, TouchableWithoutFeedback,
     FlatList, TextInput,
     TouchableOpacity,
-    Image
+    Image, Dimensions, 
 } from 'react-native'
 import React, { useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { UserContext } from '../../user/UserContext'
@@ -10,12 +10,12 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from '../styles/ChatWithCustomerStyle';
 import { Keyboard } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import { FontWeight } from '../../../constants/theme';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { uploadImage } from '../ShipperHTTP';
 import { toast } from '@baronha/ting';
 import { PermissionsAndroid } from 'react-native';
-
+import { Color, FontFamily, FontWeight, Size } from '../../../constants/theme'
+import ImageChat from './ImageChat';
 
 function convertToHHMM(isoString) {
     const date = new Date(isoString);
