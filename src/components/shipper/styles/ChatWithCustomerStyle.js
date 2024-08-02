@@ -9,14 +9,20 @@ export const styles = StyleSheet.create({
   },
   viewBack: {
     flexDirection: 'row',
-    height: 45,
-    alignItems: 'center'
+    height: 96,
+    alignItems: 'center',
+    borderBottomColor : '#005987',
+    borderBottomWidth : 1,
+    justifyContent : 'space-between',
+    paddingHorizontal : 16,
+    backgroundColor : '#F6F8FA'
+  },
+  barLeft : {
+    flexDirection : 'row'
   },
   viewICBack: {
-    width: 45,
-    height: 45,
-    backgroundColor: '#F6F8FA',
-    borderRadius: 22.5,
+    width: 50,
+    height: 50,
     justifyContent: 'center',
     alignItems: 'center'
   },

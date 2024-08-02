@@ -2,7 +2,7 @@ import {
     View, Text, TouchableWithoutFeedback,
     FlatList, TextInput,
     TouchableOpacity,
-    Image
+    Image, Dimensions, 
 } from 'react-native'
 import React, { useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { UserContext } from '../../user/UserContext'
@@ -10,12 +10,12 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from '../styles/ChatWithCustomerStyle';
 import { Keyboard } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import { FontWeight } from '../../../constants/theme';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { uploadImage } from '../ShipperHTTP';
 import { toast } from '@baronha/ting';
 import { PermissionsAndroid } from 'react-native';
-
+import { Color, FontFamily, FontWeight, Size } from '../../../constants/theme'
+import ImageChat from './ImageChat';
 
 function convertToHHMM(isoString) {
     const date = new Date(isoString);
@@ -179,19 +179,38 @@ const ChatWithCustomer = () => {
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             <View style={styles.container}>
                 <View style={styles.viewBack}>
-                    <TouchableOpacity style={styles.viewICBack}
+                    <View style={styles.leftBar}>
+                        <TouchableOpacity style={styles.viewICBack}
+                            onPress={() => {
+                                if (confirm) setconfirm(!confirm)
+                                else navigation.goBack()
+                            }}
+                        >
+                            <Icon
+                                name="chevron-left"
+                                size={12}
+                                color="#005987"
+                                FontWeight={FontWeight.FW700}
+                            />
+                        </TouchableOpacity>
+                        <Image style={styles.avatarHeader} source={uri = order.customerID.avatar} />
+                        <View>
+                            <Text style={styles.nameHeader}>{order.customerID.fullName}</Text>
+                            <Text style={styles.type}>Khách hàng</Text>
+                        </View>
+                    </View>
+                    <TouchableOpacity style={styles.viewICMore}
                         onPress={() => {
                             navigation.goBack()
                         }}
                     >
                         <Icon
-                            name="chevron-left"
+                            name="ellipsis-vertical"
                             size={12}
                             color="#005987"
                             FontWeight={FontWeight.FW700}
                         />
                     </TouchableOpacity>
-                    <Text style={styles.textHeader}>Chat với khách hàng</Text>
                 </View>
                 <FlatList style={styles.containerMessage}
                     data={dataMessage}
