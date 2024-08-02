@@ -67,7 +67,10 @@ const Goong = () => {
   const [destination, setDestination] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeCoordinatesCustomer, setRouteCoordinatesCustomer] = useState([]);
-  const [locateCurrent, setLocateCurrent] = useState();
+  const [locateCurrent, setLocateCurrent] = useState({
+    longitude: 106.624832,
+    latitude: 10.8545074
+  });
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [distanceCustomer, setDistanceCustomer] = useState(null);
@@ -93,8 +96,8 @@ const Goong = () => {
   const {user, sendMessage, receiveMessage} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
-  var id = '663ccda31387830b4e4a788a';
-  // var id;
+  // var id = '663ccda31387830b4e4a788a';
+  var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
   const currentOrderImage = useRef('');
@@ -102,33 +105,33 @@ const Goong = () => {
   const currentLocationShipper = useRef('');
   //websocket
 
-  // useEffect(() => {
-  //   if (user && receiveMessage) {
-  //     receiveMessage(async message => {
-  //       console.log(message.command);
-  //       switch (message.command) {
-  //         case 'placeOrder':
-  //           if (message.command === 'placeOrder' && statusShipper) {
-  //             setOrder(message);
-  //             id = message.order._id;
-  //             await UpdateShipperInformation(idUser, 8);
-  //             setModalVisible(true);
-  //             setIsTimerRunning(true);
-  //           }
-  //           break;
-  //         case 'cancelled_from_merchant':
-  //           console.log('cancelled_from_merchant');
-  //           handleCancelToMerchant(6);
-  //           break;
-  //         default:
-  //           console.log('Unknown command:', message.command);
-  //           break;
-  //       }
-  //     });
-  //   } else {
-  //     console.log('User is not set or receiveMessage is not defined');
-  //   }
-  // }, [user, receiveMessage, statusShipper]);
+  useEffect(() => {
+    if (user && receiveMessage) {
+      receiveMessage(async message => {
+        console.log(message.command);
+        switch (message.command) {
+          case 'placeOrder':
+            if (message.command === 'placeOrder' && statusShipper) {
+              setOrder(message);
+              id = message.order._id;
+              await UpdateShipperInformation(idUser, 8);
+              setModalVisible(true);
+              setIsTimerRunning(true);
+            }
+            break;
+          case 'cancelled_from_merchant':
+            console.log('cancelled_from_merchant');
+            handleCancelToMerchant(6);
+            break;
+          default:
+            console.log('Unknown command:', message.command);
+            break;
+        }
+      });
+    } else {
+      console.log('User is not set or receiveMessage is not defined');
+    }
+  }, [user, receiveMessage, statusShipper]);
 
   //websocket
 
@@ -160,25 +163,25 @@ const Goong = () => {
     return () => backHandler.remove();
   }, [navigationState]);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const result = await GetOrderByID(id);
-        setOrder(result);
-        if (result.result) {
-          await UpdateShipperInformation(idUser, 8);
-          setModalVisible(true);
-          setIsTimerRunning(true);
-        }
-      } catch (error) {
-        console.log('Error fetching order:', error);
-        throw error;
-      }
-    };
-    if (!order && statusShipper) {
-      fetchOrder();
-    }
-  }, [countdown, id, idUser, order, statusShipper]);
+  // useEffect(() => {
+  //   const fetchOrder = async () => {
+  //     try {
+  //       const result = await GetOrderByID(id);
+  //       setOrder(result);
+  //       if (result.result) {
+  //         await UpdateShipperInformation(idUser, 8);
+  //         setModalVisible(true);
+  //         setIsTimerRunning(true);
+  //       }
+  //     } catch (error) {
+  //       console.log('Error fetching order:', error);
+  //       throw error;
+  //     }
+  //   };
+  //   if (!order && statusShipper) {
+  //     fetchOrder();
+  //   }
+  // }, [countdown, id, idUser, order, statusShipper]);
 
   const handleLocateCurrent = () => {
     Geolocation.getCurrentPosition(
@@ -771,16 +774,18 @@ const Goong = () => {
     const formattedSeconds = String(remainingSeconds).padStart(2, '0');
     return `${formattedMinutes}:${formattedSeconds}`;
   };
-
+//  console.log(currentOrder.current.order._id);
   const handleConfirmCancel = async () => {
     const data = {
       imageGiveFood: currentOrderImage.current,
+      status: 5,
     };
     try {
       setIndex(0);
       handleClosePress();
-      await updateOrderStatus(id, 5);
-      await UpdateOrder(id, data);
+      // await updateOrderStatus(id, 5);
+      const result = await UpdateOrder(currentOrder.current.order._id, data);
+      console.log(result);
       translateX.setValue(0);
       handleSendMessage('success');
       setImage('');

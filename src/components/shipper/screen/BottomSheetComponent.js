@@ -559,7 +559,7 @@ const BottomSheetComponent = ({
                     <TouchableOpacity
                       onPress={() => {
                         navigation.navigate('ChatWithCustomer', {
-                          order: order,
+                          order: order.order,
                         });
                       }}>
                       <FontAwesome6
