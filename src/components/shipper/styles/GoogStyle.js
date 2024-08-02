@@ -4,13 +4,14 @@ import {rgbaArrayToRGBAColor} from 'react-native-reanimated/lib/typescript/reani
 
 export const styles = StyleSheet.create({
   buttonPowerOffStatusShipper: {
-    marginStart: 30,
-    backgroundColor: 'white',
+    marginStart: 50,
+    backgroundColor: "red",
     padding: 8,
     borderRadius: 50,
   },
   textStatusShipper: {
-    backgroundColor: 'white',
+    width:165,
+    backgroundColor: "#D3D3D3",
     paddingVertical: Size.S12,
     paddingHorizontal: Size.S20,
     borderRadius: 50,
@@ -21,6 +22,7 @@ export const styles = StyleSheet.create({
   viewStatusShipper: {
     position: 'absolute',
     top: 40,
+    left:20,
     backgroundColor: 'rgba(0, 0, 0, 0)',
     zIndex: 0,
     flexDirection: 'row',
@@ -39,6 +41,12 @@ export const styles = StyleSheet.create({
   },
   viewContainerInformationCustomer: {
     marginStart: 10,
+  },
+  avatarCustomerBottomSheet: {
+    height: 70,
+    width: 70,
+    borderRadius: 50,
+    resizeMode: 'cover',
   },
   textReceiveCancelOrder: {
     color: Color.textBold,
@@ -181,7 +189,7 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '95%',
+    width: '100%',
   },
   buttonArriveRestaurantBottomSheet: {
     backgroundColor: Color.primary1,
@@ -269,6 +277,7 @@ export const styles = StyleSheet.create({
     height: 90,
     width: 90,
     borderRadius: 10,
+    resizeMode: 'cover',
   },
   textRatingBottomSheet: {
     color: Color.primary1,
@@ -278,7 +287,7 @@ export const styles = StyleSheet.create({
   },
   viewContainerRating: {
     flexDirection: 'row',
-    marginTop: 15,
+    marginTop: 22,
     alignItems: 'center',
   },
   textAddressMerchantBottomSheet: {
@@ -296,7 +305,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   viewInformationMerchantBottomSheet: {
-    paddingTop: Size.S20,
+    paddingTop: Size.S16,
     flexDirection: 'row',
   },
   contentContainerBottmSheet: {
@@ -392,6 +401,18 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 30,
   },
+  textDeliveryCost: {
+    color: '#29D8E4',
+    textShadowRadius: 1,
+    textShadowColor: '#646982',
+    fontWeight: '800',
+    fontSize: 24,
+  },
+  textTotalDistance: {
+    color: '#005987',
+    fontSize: 16,
+    fontWeight: '800',
+  },
   textItemIncom: {
     color: Color.textBold,
     fontSize: 13,
@@ -414,6 +435,19 @@ export const styles = StyleSheet.create({
   },
   viewContainerNameUser: {
     flexDirection: 'row',
+  },
+  viewDot: {
+    width: 15,
+    height: 15,
+    borderRadius: 50,
+    backgroundColor: '#E46929',
+    marginEnd: 5,
+    marginTop: 5,
+  },
+  viewContainerAddressCustomer: {
+    flexDirection: 'row',
+    borderBottomWidth: 0.5,
+    borderBlockColor: '#646982',
   },
   viewContainerInformation: {
     paddingVertical: Size.S14,

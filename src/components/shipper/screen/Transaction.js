@@ -35,7 +35,26 @@ export const updateBalance = async (user, totalDeliveryFee, type) => {
         Alert.alert("liên hệ YumHub", "yêu cầu nhân viên kiểm tra giao dịch");
     }
 }
-
+export const updateBalanceMerchant = async (merchant, totalPriceFood, type) => {
+    try {
+        const currentDate = new Date();
+        const formattedDate = formatDate(currentDate);
+        const des = "hoàn thành đơn lúc: " + formattedDate;
+        if (type == 3){
+            const updateBalance = await Withdraw(merchant._id,
+                {
+                    amountTransantion: fee(totalPriceFood),
+                    description: des,
+                    status: 4
+                });
+        }else{
+            const updateBalance = await topUp(merchant._id, { amountTransantion: earn(totalPriceFood), description: des, status : 4 });
+        }
+        return true
+    } catch (error) {
+        return false
+    }
+}
 function formatDate(date) {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');

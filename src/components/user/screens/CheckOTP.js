@@ -1,102 +1,175 @@
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ToastAndroid } from 'react-native';
-import React, { useState, useRef } from 'react';
-import { checkotp } from '../UserHTTP';
+import {
+    Image, StyleSheet, Text, TextInput,
+    TouchableOpacity, View, ToastAndroid, Modal, ScrollView
+} from 'react-native';
+import React, { useState, useRef, useContext } from 'react';
+import { checkotp, forgotPass } from '../UserHTTP';
+import { UserContext } from '../UserContext';
+import AlertCustom from '../../../constants/AlertCustom';
 
 const CheckOTP = (props) => {
     const { route: { params: { email } } } = props;
     const navigation = props.navigation;
-    const [otp_2, setOTP2] = useState('');
+
     const [otp_1, setOTP1] = useState('');
+    const [otp_2, setOTP2] = useState('');
     const [otp_3, setOTP3] = useState('');
     const [otp_4, setOTP4] = useState('');
-    const [otp, setOTP] = useState('');
-
     const otp1Ref = useRef(null);
     const otp2Ref = useRef(null);
     const otp3Ref = useRef(null);
     const otp4Ref = useRef(null);
-   
+
+    const [isShowAlert, setisShowAlert] = useState(false);
+    const [optionAlert, setoptionAlert] = useState({});
+
     const handleNext = async () => {
         try {
             let total = otp_1 + otp_2 + otp_3 + otp_4;
-          
-            console.log(email);
             const result = await checkotp(email, total);
-            
+
             if (result.result) {
-                navigation.navigate('ChangePassword', { email: email, otp: total });
+                setoptionAlert({
+                    title: "Thành công",
+                    message: result.message,
+                    type: 1,
+                    otherFunction: () => navigation.navigate('ResetPassword', { email: email, otp: total })
+                })
+                setisShowAlert(true)
+
+            } else {
+                clearOTPFields();
+                setoptionAlert({
+                    title: "Lỗi",
+                    message: result.message,
+                    type: 3
+                })
+                setisShowAlert(true)
             }
-            console.log('>>>>17', result);
         } catch (error) {
-            console.log('......dong 37', error);
-            ToastAndroid.show(' failed', ToastAndroid.SHORT);
+            clearOTPFields();
+            setoptionAlert({
+                title: "Lỗi",
+                message: result.message,
+                type: 3
+            })
+            setisShowAlert(true)
         }
     };
 
-    const handleOTPChange = (otp, setOTP, nextRef) => {
-        setOTP(otp);
-        if (otp && nextRef) {
-            nextRef.current.focus();
+    const clearOTPFields = () => {
+        setOTP1('');
+        setOTP2('');
+        setOTP3('');
+        setOTP4('');
+        otp1Ref.current.focus();
+    };
+
+    const handleResendOtp = async () => {
+        try {
+            const result = await forgotPass(email);
+            ToastAndroid.show(result.message, ToastAndroid.SHORT);
+        } catch (error) {
+            ToastAndroid.show('Failed to resend OTP', ToastAndroid.SHORT);
         }
     };
+
+    const handleOTPChange = (otp, setOTP, nextRef, prevRef) => {
+        if (otp === '') {
+            setOTP(otp);
+            if (prevRef) {
+                prevRef.current.focus();
+            }
+        } else {
+            setOTP(otp);
+            if (nextRef) {
+                nextRef.current.focus();
+            }
+        }
+    };
+
     return (
-        <View style={{ flex: 1, backgroundColor: '#005987',}}>
-            <View style={styles.viewContainer}>
-                <View>
-                    <Image style={{ height: 117, width: 117, marginEnd: 30 }} source={require("../../../assets/iconAsset.png")}></Image>
-                    <Text style={styles.viewText}>Xác thực</Text>
-                    <Text style={styles.viewText2}>Chúng tôi đã gửi mã về email:</Text>
-                    <Text style={styles.viewText2}>example@gmail.com</Text>
-                </View>
-            </View>
-            <View style={styles.viewBody}>
-                <View style={{ flexDirection: 'row', marginTop: 24 }}>
-                    <Text style={styles.viewTextEmail}>Mã</Text>
-                    <TouchableOpacity>
-                        <Text style={{ marginStart: 238, fontSize: 14, fontWeight: '400', color: '#32343E' }}>Gửi lại</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.viewTextInputOTP}>
-                    <TextInput
-                        ref={otp1Ref}
-                        value={otp_1}
-                        onChangeText={(otp) => handleOTPChange(otp, setOTP1, otp2Ref)}
-                        maxLength={1}
-                        style={styles.viewTextInputEmail}
-                        keyboardType="numeric"
-                    />
-                    <TextInput
-                        ref={otp2Ref}
-                        value={otp_2}
-                        onChangeText={(otp) => handleOTPChange(otp, setOTP2, otp3Ref)}
-                        maxLength={1}
-                        style={styles.viewTextInputEmail}
-                        keyboardType="numeric"
-                    />
-                    <TextInput
-                        ref={otp3Ref}
-                        value={otp_3}
-                        onChangeText={(otp) => handleOTPChange(otp, setOTP3, otp4Ref)}
-                        maxLength={1}
-                        style={styles.viewTextInputEmail}
-                        keyboardType="numeric"
-                    />
-                    <TextInput
-                        ref={otp4Ref}
-                        value={otp_4}
-                        onChangeText={(otp) => handleOTPChange(otp, setOTP4, null)}
-                        maxLength={1}
-                        style={styles.viewTextInputEmail}
-                        keyboardType="numeric"
-                    />
-                </View>
-                <TouchableOpacity onPress={handleNext} style={styles.viewLogin}>
-                    <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>XÁC THỰC</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    )
+        <ScrollView>
+            <View style={{ flex: 1, backgroundColor: '#005987' }}>
+                <View style={styles.viewContainer}>
+                    <View>
+                        <View style={{ flexDirection: 'column-reverse' }}>
+                            <Image style={{ position: 'absolute', top: 0, height: 117, width: 117, marginEnd: 30, zIndex: -100 }} source={require("../../../assets/iconAsset.png")}></Image>
+                            <View style={styles.overlay}></View>
+                            <TouchableOpacity
+                                onPress={() => navigation.goBack()}
+                                style={{ width: 100, height: 100 }}
+                            >
+                                <View>
+                                    <Image style={styles.viewIconBack} source={require("../../../assets/IconBack.png")}></Image>
+                                </View>
+                            </TouchableOpacity>
 
+                        </View>
+                        <Text style={styles.viewText}>Xác thực</Text>
+                        <Text style={styles.viewText2}>Chúng tôi đã gửi mã về email:</Text>
+                        <Text style={styles.viewText2}>{email}</Text>
+                    </View>
+                </View>
+                <View style={styles.viewBody}>
+                    <View style={{ flexDirection: 'row', marginTop: 24 }}>
+                        <Text style={styles.viewTextEmail}>Mã</Text>
+                        <TouchableOpacity onPress={handleResendOtp}>
+                            <Text style={{ marginStart: 238, fontSize: 14, fontWeight: '400', color: '#32343E' }}>Gửi lại</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.viewTextInputOTP}>
+                        <TextInput
+                            ref={otp1Ref}
+                            value={otp_1}
+                            onChangeText={(otp) => handleOTPChange(otp, setOTP1, otp2Ref, null)}
+                            maxLength={1}
+                            style={styles.viewTextInputEmail}
+                            keyboardType="numeric"
+                        />
+                        <TextInput
+                            ref={otp2Ref}
+
+                            value={otp_2}
+                            onChangeText={(otp) => handleOTPChange(otp, setOTP2, otp3Ref, otp1Ref)}
+                            maxLength={1}
+                            style={styles.viewTextInputEmail}
+                            keyboardType="numeric"
+                        />
+                        <TextInput
+                            ref={otp3Ref}
+
+                            value={otp_3}
+                            onChangeText={(otp) => handleOTPChange(otp, setOTP3, otp4Ref, otp2Ref)}
+                            maxLength={1}
+                            style={styles.viewTextInputEmail}
+                            keyboardType="numeric"
+                        />
+                        <TextInput
+                            ref={otp4Ref}
+
+                            value={otp_4}
+                            onChangeText={(otp) => handleOTPChange(otp, setOTP4, null, otp3Ref)}
+                            maxLength={1}
+                            style={styles.viewTextInputEmail}
+                            keyboardType="numeric"
+                        />
+                    </View>
+                    <TouchableOpacity onPress={handleNext} style={styles.viewLogin}>
+                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>XÁC THỰC</Text>
+                    </TouchableOpacity>
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={isShowAlert}
+                        onRequestClose={setisShowAlert}
+                    >
+                        <AlertCustom closeModal={setisShowAlert} option={optionAlert} />
+                    </Modal>
+                </View>
+            </View>
+        </ScrollView>
+    );
 };
 
 export default CheckOTP;
@@ -131,14 +204,14 @@ const styles = StyleSheet.create({
         marginTop: 8,
         borderRadius: 8,
         textAlign: 'center',
-
+        borderWidth: 1,
+        borderColor: '#333',
     },
     viewTextEmail: {
         fontSize: 13,
         fontWeight: '400',
         color: '#32343E',
         marginStart: 44,
-
     },
     viewText2: {
         fontSize: 16,
@@ -164,6 +237,21 @@ const styles = StyleSheet.create({
         backgroundColor: '#005987',
         width: '100%',
         height: 230,
+    },
+    viewIconBack: {
+        position: 'absolute',
+        top: 40,
+        left: 24,
+        zIndex: 100
+    },
+    overlay: {
+        backgroundColor: 'rgba(0, 89, 135, 0.9)',
+        width: 250,
+        height: 250,
+        zIndex: 0,
+        position: 'absolute',
+        top: -133,
+        left: -132,
+        borderRadius: 125
     }
-
 });

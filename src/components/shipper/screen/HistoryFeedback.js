@@ -24,8 +24,8 @@ import {SetDeleteReview, UpdateShipperReview} from '../ShipperHTTP';
 import Loading from './Loading';
 import {styles} from '../styles/HistoryFeedbackStyle';
 import {launchImageLibrary} from 'react-native-image-picker';
-import { UserContext } from '../../user/UserContext';
-import { useNavigation } from '@react-navigation/native';
+import {UserContext} from '../../user/UserContext';
+import {useNavigation} from '@react-navigation/native';
 
 const HistoryFeedback = () => {
   const navigation = useNavigation();
@@ -171,7 +171,8 @@ const HistoryFeedback = () => {
   }, []);
 
   if (loading) {
-    return <Loading />;r
+    return <Loading />;
+    r;
   }
 
   return (
@@ -179,7 +180,12 @@ const HistoryFeedback = () => {
       <View style={styles.viewContainer}>
         <View style={styles.viewHeader}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Entypo style={{backgroundColor:'#F0F5FA', padding: 5, borderRadius: 50}} name={'chevron-left'} size={30} color='#32343E' />
+            <Entypo
+              style={{backgroundColor: '#F0F5FA', padding: 5, borderRadius: 50}}
+              name={'chevron-left'}
+              size={30}
+              color="#32343E"
+            />
           </TouchableOpacity>
           <Text style={styles.textHistoryFeedback}>Lịch sử đánh giá</Text>
         </View>
@@ -205,12 +211,6 @@ const HistoryFeedback = () => {
             onPress={() => setModalVisible(false)}
           />
           <View style={styles.centeredView}>
-            <View style={styles.modalViewHeader}>
-              <EvilIcons name={'tag'} size={25} color={'#19D6E5'} />
-              <TouchableOpacity>
-                <Text>Chi tiết đơn hàng</Text>
-              </TouchableOpacity>
-            </View>
             <View style={styles.modalViewInformation}>
               {selectedItem ? (
                 <Text style={styles.textNameCustomer}>

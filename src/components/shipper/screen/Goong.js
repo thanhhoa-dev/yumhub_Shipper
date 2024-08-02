@@ -50,8 +50,9 @@ import Loading from './Loading';
 import {styles} from '../styles/GoogStyle';
 import {GOONG_API_KEY} from '@env';
 import DropdownComponentGoong from './DropdownComponentGoong';
-import Slider from 'react-native-slide-to-unlock';
-import MapViewDirections from 'react-native-maps-directions';
+import BottomSheetComponent from './BottomSheetComponent';
+import LoadImage from './LoadImage';
+import { updateBalanceMerchant } from './Transaction';
 
 const Goong = () => {
   const navigation = useNavigation();
@@ -66,10 +67,7 @@ const Goong = () => {
   const [destination, setDestination] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeCoordinatesCustomer, setRouteCoordinatesCustomer] = useState([]);
-  const [locateCurrent, setLocateCurrent] = useState({
-    latitude: 10.835789,
-    longitude: 106.667878,
-  });
+  const [locateCurrent, setLocateCurrent] = useState();
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [distanceCustomer, setDistanceCustomer] = useState(null);
@@ -87,29 +85,31 @@ const Goong = () => {
   const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
   const [statusShipper, setStatusShipper] = useState(false);
   const [countdown, setCountdown] = useState(60);
+  const [countdownTimePaymentMethod, setCountdownTimePaymentMethod] =
+    useState(20);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [valueCancelOrder, setValueCancelOrder] = useState(1);
   const navigationState = useNavigationState(state => state);
   const {user, sendMessage, receiveMessage} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
-  var id = '6627e8b6bfd9baea698a1d4b';
+  var id = '663ccda31387830b4e4a788a';
   // var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
   const currentOrderImage = useRef('');
   const currentLocationCustomer = useRef('');
+  const currentLocationShipper = useRef('');
   //websocket
 
-  // console.log(order);
   // useEffect(() => {
   //   if (user && receiveMessage) {
   //     receiveMessage(async message => {
   //       console.log(message.command);
   //       switch (message.command) {
   //         case 'placeOrder':
-  //           setOrder(message);
   //           if (message.command === 'placeOrder' && statusShipper) {
+  //             setOrder(message);
   //             id = message.order._id;
   //             await UpdateShipperInformation(idUser, 8);
   //             setModalVisible(true);
@@ -118,7 +118,7 @@ const Goong = () => {
   //           break;
   //         case 'cancelled_from_merchant':
   //           console.log('cancelled_from_merchant');
-  //           setModalVisibleCancelOrderFromMerchant(true);
+  //           handleCancelToMerchant(6);
   //           break;
   //         default:
   //           console.log('Unknown command:', message.command);
@@ -180,6 +180,24 @@ const Goong = () => {
     }
   }, [countdown, id, idUser, order, statusShipper]);
 
+  const handleLocateCurrent = () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        setLocateCurrent({
+          latitude,
+          longitude,
+        });
+      },
+      error => console.log(error.message),
+      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+    );
+  };
+
+  useEffect(() => {
+    handleLocateCurrent();
+  }, []);
+
   useEffect(() => {
     if (order) {
       currentOrder.current = order;
@@ -193,6 +211,10 @@ const Goong = () => {
   useEffect(() => {
     currentLocationCustomer.current = destinationCustomer;
   }, [destinationCustomer]);
+
+  useEffect(() => {
+    currentLocationShipper.current = locateCurrent;
+  }, [locateCurrent]);
 
   const handleSendMessage = command => {
     console.log(command);
@@ -210,20 +232,6 @@ const Goong = () => {
     };
     timeReceiveApplication();
   }, [countdown]);
-
-  useEffect(() => {
-    Geolocation.getCurrentPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setLocateCurrent({
-          latitude,
-          longitude,
-        });
-      },
-      error => console.log(error.message),
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
-    );
-  }, []);
 
   useEffect(() => {
     if (locateCurrent && destination) {
@@ -264,7 +272,8 @@ const Goong = () => {
         setDuration(routes[0].legs[0].duration.text);
       }
     } catch (error) {
-      console.error(error);
+      Alert.alert('Không thể tìm ra vị trí của cửa hàng');
+      console.log(error);
     }
   };
 
@@ -289,7 +298,8 @@ const Goong = () => {
         setDurationCustomer(routes[0].legs[0].duration.text);
       }
     } catch (error) {
-      console.error(error);
+      Alert.alert('Không thể tìm ra vị trí của khách hàng');
+      console.log(error);
     }
   };
 
@@ -371,7 +381,6 @@ const Goong = () => {
           setIsTimerRunning(false);
           setCountdown(60);
           handlePresentPress();
-
           await updateOrderStatus(id, 8);
           await UpdateShipperInformation(idUser, 5);
           handleSendMessage('accept');
@@ -483,13 +492,13 @@ const Goong = () => {
               styles.textInformationFoodBottomSheet,
               {color: '#646982', fontSize: 14},
             ]}>
-            {item.food.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ
+            {item.other.priceForSale.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ
           </Text>
         </View>
         <View style={styles.viewItemImageFoodBottomSheet}>
-          <Image
+          <LoadImage
             style={{height: 47, width: 47, borderRadius: 50, marginEnd: 35}}
-            source={require('../../../assets/ZaloPlay.png')}
+            uri={item.image}
           />
           <Text style={styles.textInformationFoodBottomSheet}>
             x {item.food.quantity}
@@ -533,6 +542,36 @@ const Goong = () => {
       throw error;
     }
   };
+
+  const handleCancelToMerchant = (index) => {
+    try {
+      handleClosePress();
+      setIndex(0);
+      translateX.setValue(0);
+      navigation.navigate('CancelSuccessOrder', {
+        order: currentOrder.current,
+        index: index,
+      });
+      setOrder(null);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (
+        countdownTimePaymentMethod > 0 &&
+        index === 3 &&
+        order.paymentMethod !== 3
+      ) {
+        setCountdownTimePaymentMethod(prevCountdown => prevCountdown - 1);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [countdownTimePaymentMethod, index]);
 
   const checkfetchRouteCustomer = async () => {
     try {
@@ -579,18 +618,18 @@ const Goong = () => {
         setIndex(2);
         Alert.alert('Bạn chưa đi tới nơi nhỏ hơn 500 m');
       } else {
+        handleSendMessage('arrived');
         setIndex(3);
       }
     } else {
       console.error('Unable to fetch distance');
     }
   };
-
   const fetchShipperToCustomer = async () => {
     try {
       const response = await axios.get(`https://rsapi.goong.io/Direction`, {
         params: {
-          origin: `${locateCurrent.latitude},${locateCurrent.longitude}`,
+          origin: `${currentLocationShipper.current.latitude},${currentLocationShipper.current.longitude}`,
           destination: `${destinationCustomer.lat},${destinationCustomer.lng}`,
           vehicle: 'bike',
           api_key: GOONG_API_KEY,
@@ -607,7 +646,8 @@ const Goong = () => {
         setDurationCustomer(routes[0].legs[0].duration.text);
       }
     } catch (error) {
-      console.error(error);
+      Alert.alert('Không tìm ra đường đến khách hàng');
+      console.log(error);
     }
   };
 
@@ -615,6 +655,7 @@ const Goong = () => {
     setIndex(prevIndex => {
       let newIndex;
       if (prevIndex === 1) {
+        handleLocateCurrent();
         fetchShipperToCustomer();
         newIndex = 2;
       } else if (prevIndex === 2) {
@@ -635,10 +676,14 @@ const Goong = () => {
           handleSendMessage('waiting');
           break;
         case 2:
+          // thanh hoa
+          const updateMerchant = async () => {
+            await updateBalanceMerchant(currentOrder.current.order.merchantID, currentOrder.current.order.priceFood, currentOrder.current.order.paymentMethod )
+          }
+          updateMerchant()
           handleSendMessage('delivering');
           break;
         case 3:
-          handleSendMessage('arrived');
           break;
         case 4:
           handleConfirmCancel();
@@ -764,8 +809,8 @@ const Goong = () => {
       <GestureHandlerRootView style={{flex: 1, position: 'relative'}}>
         <View style={styles.viewStatusShipper}>
           {statusShipper ? (
-            <Text style={[styles.textStatusShipper, {color: '#005987'}]}>
-              Đang hoạt động
+            <Text style={[styles.textStatusShipper, {color: '#005987',backgroundColor:"#A7F9FF"}]}>
+              Đang hoạt động 
             </Text>
           ) : (
             <Text style={styles.textStatusShipper}>Không hoạt động</Text>
@@ -775,7 +820,7 @@ const Goong = () => {
               handleSetStatusShipper();
             }}
             style={styles.buttonPowerOffStatusShipper}>
-            <FontAwesome6 name={'power-off'} size={25} color={'#19D6E5'} />
+            <FontAwesome6 name={'power-off'} size={25} color={'#fff'} />
           </TouchableOpacity>
         </View>
         <MapView
@@ -840,537 +885,30 @@ const Goong = () => {
             />
           )}
         </MapView>
-        {order && destination && isBottomSheetVisible && (
-          <BottomSheet
-            index={0}
-            snapPoints={snapPoints}
-            onClose={() => setIsBottomSheetVisible(false)}>
-            <ScrollView>
-              <View>
-                <View style={styles.viewContainerBottomSheet}>
-                  {index < 2 ? (
-                    <View style={styles.viewInformationMerchantBottomSheet}>
-                      <Image
-                        style={styles.imageMerchantBottomSheet}
-                        source={require('../../../assets/ZaloPlay.png')}
-                      />
-                      <View
-                        style={
-                          styles.viewContainerInformationMerchatBottomSheet
-                        }>
-                        <Text
-                          style={styles.textNameMerchantBottomSheet}
-                          numberOfLines={1}>
-                          {order.order.merchantID.name}
-                        </Text>
-                        <Text
-                          style={styles.textAddressMerchantBottomSheet}
-                          numberOfLines={1}>
-                          {order.order.merchantID.address}
-                        </Text>
-                        <View style={styles.viewContainerRating}>
-                          <StarRating
-                            disabled={true}
-                            maxStars={1}
-                            rating={1}
-                            color={'#FC6E2A'}
-                            starSize={22}
-                            starStyle={{marginHorizontal: 0}}
-                            onChange={() => {}}
-                          />
-                          <Text style={styles.textRatingBottomSheet}>
-                            {order.order.merchantID.rating}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  ) : (
-                    <View style={styles.viewInformationMerchantBottomSheet}>
-                      <Image
-                        style={styles.imageMerchantBottomSheet}
-                        source={{uri: `${order.order.customerID.avatar}`}}
-                      />
-                      <View
-                        style={
-                          styles.viewContainerInformationMerchatBottomSheet
-                        }>
-                        <Text
-                          style={styles.textNameMerchantBottomSheet}
-                          numberOfLines={1}>
-                          {order.order.customerID.fullName}
-                        </Text>
-                        <Text
-                          style={styles.textAddressMerchantBottomSheet}
-                          numberOfLines={1}>
-                          {order.order.deliveryAddress}
-                        </Text>
-                        <View style={styles.viewContainerRating}>
-                          <StarRating
-                            disabled={true}
-                            maxStars={1}
-                            rating={1}
-                            color={'#FC6E2A'}
-                            starSize={22}
-                            starStyle={{marginHorizontal: 0}}
-                            onChange={() => {}}
-                          />
-                          <Text style={styles.textRatingBottomSheet}>
-                            {order.order.merchantID.rating}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  )}
-                  {!detailFoodOrder && (
-                    <View style={styles.viewTotalDistance}>
-                      <Text style={styles.textNumberDistanceBottomSheet}>
-                        {distance}
-                      </Text>
-                      <Text style={styles.textWishBottomSheet}>
-                        Chúc tài xế thượng lộ bình an
-                      </Text>
-                    </View>
-                  )}
-                  {index == 2 && (
-                    <View style={styles.viewTotalDistance}>
-                      <Text style={styles.textNumberDistanceBottomSheet}>
-                        {distanceCustomer}
-                      </Text>
-                      <Text style={styles.textWishBottomSheet}>
-                        Chúc tài xế thượng lộ bình an
-                      </Text>
-                    </View>
-                  )}
-                  {detailFoodOrder && index == 1 && (
-                    <View style={styles.viewListItemInformationFoodBottomSheet}>
-                      <View
-                        style={[
-                          styles.viewContainerIconBottomSheet,
-                          {marginBottom: 15},
-                        ]}>
-                        <Text style={styles.textListFoodBottomSheet}>
-                          Danh Sách Món
-                        </Text>
-                        <Text
-                          numberOfLines={1}
-                          style={styles.textCodeOrdersBottomSheet}>
-                          #{order.order._id}
-                        </Text>
-                      </View>
-                      <FlatList
-                        data={detailFoodOrder}
-                        renderItem={handleFlatlistFood}
-                        key={(index, item) => item.id}
-                        scrollEnabled={false}
-                      />
-                    </View>
-                  )}
-                  <View style={styles.viewContainerStepsDeliveryBottomSheet}>
-                    {detailFoodOrder ? (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <MaterialIcons
-                          style={[
-                            styles.IconStepsLoadDeliveryBottomSheet,
-                            {backgroundColor: '#005987'},
-                          ]}
-                          color={'white'}
-                          name={'done'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          shipper đã đến nhà hàng
-                        </Text>
-                      </View>
-                    ) : (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <Feather
-                          style={[
-                            styles.IconStepsLoadDeliveryBottomSheet,
-                            {backgroundColor: '#005987'},
-                          ]}
-                          color={'white'}
-                          name={'loader'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          shipper đã đến nhà hàng
-                        </Text>
-                      </View>
-                    )}
-                    {index >= 1 ? (
-                      <View
-                        style={[
-                          styles.viewConnectingWireBottomSheet,
-                          {borderStartColor: '#19D6E5'},
-                        ]}
-                      />
-                    ) : (
-                      <View style={styles.viewConnectingWireBottomSheet} />
-                    )}
 
-                    {index == 1 ? (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <Feather
-                          style={[
-                            styles.IconStepsLoadDeliveryBottomSheet,
-                            {backgroundColor: '#005987'},
-                          ]}
-                          color={'white'}
-                          name={'loader'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Shipper đã lấy món ăn
-                        </Text>
-                      </View>
-                    ) : index >= 2 ? (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <MaterialIcons
-                          style={[
-                            styles.IconStepsLoadDeliveryBottomSheet,
-                            {backgroundColor: '#005987'},
-                          ]}
-                          color={'white'}
-                          name={'done'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Shipper đã lấy món ăn
-                        </Text>
-                      </View>
-                    ) : (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <MaterialIcons
-                          style={[styles.IconStepsLoadDeliveryBottomSheet]}
-                          color={'white'}
-                          name={'done'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Shipper đã lấy món ăn
-                        </Text>
-                      </View>
-                    )}
-                    {index >= 2 ? (
-                      <View
-                        style={[
-                          styles.viewConnectingWireBottomSheet,
-                          {borderStartColor: '#19D6E5'},
-                        ]}
-                      />
-                    ) : (
-                      <View style={styles.viewConnectingWireBottomSheet} />
-                    )}
-                    {index == 2 ? (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <Feather
-                          style={[
-                            styles.IconStepsLoadDeliveryBottomSheet,
-                            {backgroundColor: '#005987'},
-                          ]}
-                          color={'white'}
-                          name={'loader'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Shipper đã đến nơi giao
-                        </Text>
-                      </View>
-                    ) : index >= 3 ? (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <MaterialIcons
-                          style={[
-                            styles.IconStepsLoadDeliveryBottomSheet,
-                            {backgroundColor: '#005987'},
-                          ]}
-                          color={'white'}
-                          name={'done'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Shipper đã đến nơi giao
-                        </Text>
-                      </View>
-                    ) : (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <MaterialIcons
-                          style={[styles.IconStepsLoadDeliveryBottomSheet]}
-                          color={'white'}
-                          name={'done'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Shipper đã đến nơi giao
-                        </Text>
-                      </View>
-                    )}
-
-                    {index >= 3 ? (
-                      <View
-                        style={[
-                          styles.viewConnectingWireBottomSheet,
-                          {borderStartColor: '#19D6E5'},
-                        ]}
-                      />
-                    ) : (
-                      <View style={styles.viewConnectingWireBottomSheet} />
-                    )}
-                    {index == 3 ? (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <Feather
-                          style={[
-                            styles.IconStepsLoadDeliveryBottomSheet,
-                            {backgroundColor: '#005987'},
-                          ]}
-                          color={'white'}
-                          name={'loader'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Đơn hàng hoàn tất
-                        </Text>
-                      </View>
-                    ) : index >= 4 ? (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <MaterialIcons
-                          style={[
-                            styles.IconStepsLoadDeliveryBottomSheet,
-                            {backgroundColor: '#005987'},
-                          ]}
-                          color={'white'}
-                          name={'done'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Shipper đã đến nơi giao
-                        </Text>
-                      </View>
-                    ) : (
-                      <View style={styles.viewStepsDeliveryBottomSheet}>
-                        <MaterialIcons
-                          style={[styles.IconStepsLoadDeliveryBottomSheet]}
-                          color={'white'}
-                          name={'done'}
-                        />
-                        <Text style={styles.textStepsDelivery}>
-                          Đơn hàng hoàn tất
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.viewLine} />
-                  <View style={styles.viewSummaryBottomSheet}>
-                    <Text style={styles.textSummaryBottomSheet}>Tóm tắt</Text>
-                    <View style={styles.viewContainerSummaryBottomSheet}>
-                      <Text style={styles.textItemSummaryBottmSheet}>
-                        Giá tiền
-                      </Text>
-                      <Text style={styles.textItemSummaryBottmSheet}>
-                        {formatCurrency(order.order.totalPaid)}
-                      </Text>
-                    </View>
-                    <View style={styles.viewContainerSummaryBottomSheet}>
-                      <Text style={styles.textItemSummaryBottmSheet}>
-                        Phí giao hàng
-                      </Text>
-                      <Text style={styles.textItemSummaryBottmSheet}>
-                        {formatCurrency(order.order.deliveryCost)}
-                      </Text>
-                    </View>
-                    <View style={styles.viewContainerSummaryBottomSheet}>
-                      <Text style={styles.textItemSummaryBottmSheet}>
-                        Thu hộ
-                      </Text>
-                      <Text style={styles.textItemSummaryBottmSheet}>
-                        {formatCurrency(0)}
-                      </Text>
-                    </View>
-                    <View style={styles.viewContainerSummaryBottomSheet}>
-                      <Text
-                        style={[
-                          styles.textItemSummaryBottmSheet,
-                          styles.textIncomeBottomSheet,
-                        ]}>
-                        Thu nhập
-                      </Text>
-                      <Text
-                        style={[
-                          styles.textItemSummaryBottmSheet,
-                          styles.textIncomeBottomSheet,
-                        ]}>
-                        {formatCurrency(17500)}
-                      </Text>
-                    </View>
-                  </View>
-                  {image && (
-                    <View
-                      style={{
-                        height: 190,
-                        marginTop: 10,
-                      }}>
-                      <Image
-                        style={{width: '100%', height: '100%'}}
-                        source={{uri: image}}
-                      />
-                    </View>
-                  )}
-                  <View style={styles.viewArriveRestaurantBottomSheet}>
-                    <View style={styles.buttonArriveRestaurantBottomSheet}>
-                      <Slider
-                        onEndReached={() => {
-                          handleUpdateIndex();
-                        }}
-                        containerStyle={styles.containerStyleSlider}
-                        sliderElement={
-                          <FontAwesome6
-                            style={styles.iconRightBottomSheet}
-                            name={'angles-right'}
-                            size={30}
-                          />
-                        }>
-                        <Text
-                          style={[
-                            styles.textArriveRestaurantBottomSheet,
-                            {marginStart: 50},
-                          ]}>
-                          {items[index]}
-                        </Text>
-                      </Slider>
-                    </View>
-                  </View>
-                  {index >= 3 && (
-                    <View style={[styles.viewContainerIconBottomSheet]}>
-                      {order.paymentMethod === 3 ? (
-                        <TouchableOpacity
-                          onPress={() => {
-                            setModalVisibleCancelOrder(true);
-                          }}
-                          style={[
-                            styles.buttonTakePhotoBottomSheet,
-                            {backgroundColor: '#E04444', flex: 1},
-                          ]}>
-                          <Text style={styles.textTakePhotoBottomSheet}>
-                            Hủy đơn
-                          </Text>
-                        </TouchableOpacity>
-                      ) : (
-                        <TouchableOpacity
-                          onPress={() => {
-                            setModalVisibleCancelOrder(true);
-                          }}
-                          style={[
-                            styles.buttonTakePhotoBottomSheet,
-                            {backgroundColor: '#E04444', flex: 1},
-                          ]}>
-                          <Text style={styles.textTakePhotoBottomSheet}>
-                            Hủy đơn
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-
-                      <TouchableOpacity
-                        onPress={openCamera}
-                        style={[
-                          styles.buttonTakePhotoBottomSheet,
-                          {marginStart: 20, flex: 1},
-                        ]}>
-                        <Text style={styles.textTakePhotoBottomSheet}>
-                          Chụp ảnh
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                  {index == 1 && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setModalVisibleCancelOrder(true);
-                      }}
-                      style={[
-                        styles.buttonTakePhotoBottomSheet,
-                        {backgroundColor: '#E04444'},
-                      ]}>
-                      <Text style={styles.textTakePhotoBottomSheet}>
-                        Nhà hàng đóng cửa/hết món
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-                <View style={styles.viewContainerCallUserBottomSheet}>
-                  {!showNumberPhone && (
-                    <View style={styles.viewContainerIconBottomSheet}>
-                      <View style={styles.viewInformationUserBottomSheet}>
-                        {order.order.customerID.avatar ? (
-                          <Image
-                            style={{height: 70, width: 70, borderRadius: 50}}
-                            source={{uri: `${order.order.customerID.avatar}`}}
-                          />
-                        ) : (
-                          <Image
-                            style={{height: 70, width: 70, borderRadius: 50}}
-                            source={require('../../../assets/ZaloPlay.png')}
-                          />
-                        )}
-                        <View style={styles.viewContainerInformationCustomer}>
-                          <Text style={styles.textUserBottomSheet}>
-                            {order.order.customerID.fullName}
-                          </Text>
-                          <View style={styles.viewContainerRating}>
-                            <StarRating
-                              disabled={true}
-                              maxStars={1}
-                              rating={1}
-                              color={'#FC6E2A'}
-                              starSize={22}
-                              starStyle={{marginHorizontal: 0}}
-                              onChange={() => {}}
-                            />
-                            <Text style={styles.textRatingBottomSheet}>
-                              4.7
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                      <View style={styles.viewInformationUserBottomSheet}>
-                        <TouchableOpacity
-                          onPress={() => {
-                            setShowNumberPhone(true);
-                          }}>
-                          <Ionicons
-                            style={styles.iconCallBottomSheet}
-                            color={'white'}
-                            name={'call-outline'}
-                            size={20}
-                          />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => {
-                            navigation.navigate('ChatWithCustomer', {
-                              order: order,
-                            });
-                          }}>
-                          <FontAwesome6
-                            style={styles.iconMessageBottomSheet}
-                            color={'#005987'}
-                            name={'message'}
-                            size={20}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  )}
-                  {showNumberPhone && (
-                    <View style={styles.viewContainerIconBottomSheet}>
-                      <Text style={styles.textCustomerPhoneNumber}>
-                        {order.order.customerID.phoneNumber}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          handleCall(order.order.customerID.phoneNumber);
-                        }}>
-                        <Ionicons
-                          style={styles.iconCallBottomSheet}
-                          color={'white'}
-                          name={'call-outline'}
-                          size={20}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </ScrollView>
-          </BottomSheet>
-        )}
+        <BottomSheetComponent
+          order={order}
+          destination={destination}
+          snapPoints={snapPoints}
+          isBottomSheetVisible={isBottomSheetVisible}
+          setIsBottomSheetVisible={setIsBottomSheetVisible}
+          index={index}
+          detailFoodOrder={detailFoodOrder}
+          distance={distance}
+          distanceCustomer={distanceCustomer}
+          handleFlatlistFood={handleFlatlistFood}
+          formatCurrency={formatCurrency}
+          image={image}
+          handleUpdateIndex={handleUpdateIndex}
+          items={items}
+          setModalVisibleCancelOrder={setModalVisibleCancelOrder}
+          countdownTimePaymentMethod={countdownTimePaymentMethod}
+          formatTime={formatTime}
+          openCamera={openCamera}
+          showNumberPhone={showNumberPhone}
+          setShowNumberPhone={setShowNumberPhone}
+          handleCall={handleCall}
+        />
       </GestureHandlerRootView>
       {order && (
         <Modal animationType="slide" transparent={true} visible={modalVisible}>
@@ -1389,16 +927,7 @@ const Goong = () => {
                   styles.viewContainerInformation,
                   {flexDirection: 'row'},
                 ]}>
-                <View
-                  style={{
-                    width: 15,
-                    height: 15,
-                    borderRadius: 50,
-                    backgroundColor: '#E46929',
-                    marginEnd: 5,
-                    marginTop: 5,
-                  }}
-                />
+                <View style={styles.viewDot} />
                 <View style={{marginEnd: 10}}>
                   <View style={styles.viewContainerNameUser}>
                     <Text style={styles.textInformation}>Lấy: </Text>
@@ -1423,21 +952,15 @@ const Goong = () => {
               <View
                 style={[
                   styles.viewContainerInformation,
-                  {
-                    flexDirection: 'row',
-                    borderBottomWidth: 0.5,
-                    borderBlockColor: '#646982',
-                  },
+                  styles.viewContainerAddressCustomer,
                 ]}>
                 <View
-                  style={{
-                    width: 15,
-                    height: 15,
-                    borderRadius: 50,
-                    backgroundColor: '#29D8E4',
-                    marginEnd: 5,
-                    marginTop: 5,
-                  }}
+                  style={[
+                    styles.viewDot,
+                    {
+                      backgroundColor: '#29D8E4',
+                    },
+                  ]}
                 />
                 <View style={{marginEnd: 10}}>
                   <View style={[styles.viewContainerNameUser, {}]}>
@@ -1460,14 +983,14 @@ const Goong = () => {
                       styles.textItemIncom,
                       {color: '#333', fontSize: 14},
                     ]}>
-                    Quảng Đường ước tính:
+                    Quảng đường ước tính:
                   </Text>
                   <Text
                     style={[
                       styles.textItemIncom,
-                      {color: '#005987', fontSize: 16, fontWeight: '800'},
+                      styles.textTotalDistance,
                     ]}>
-                    {order.order.totalDistance} km
+                    {order.order.totalDistance} Km
                   </Text>
                 </View>
                 <View style={styles.viewItemIncom}>
@@ -1478,18 +1001,8 @@ const Goong = () => {
                     ]}>
                     Thu nhập từ đơn này:
                   </Text>
-                  <Text
-                    style={[
-                      styles.textItemIncom,
-                      {
-                        color: '#29D8E4',
-                        textShadowRadius: 1,
-                        textShadowColor: '#646982',
-                        fontWeight: '800',
-                        fontSize: 24,
-                      },
-                    ]}>
-                    {order.order.deliveryCost
+                  <Text style={[styles.textItemIncom, styles.textDeliveryCost]}>
+                    {order.order.revenueDelivery
                       .toString()
                       .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
                     đ
@@ -1582,7 +1095,7 @@ const Goong = () => {
         </View>
       </Modal>
 
-      {order && modalVisibleCancelOrderFromMerchant && (
+      {/* {order && modalVisibleCancelOrderFromMerchant && (
         <Modal
           animationType="slide"
           transparent={true}
@@ -1608,7 +1121,7 @@ const Goong = () => {
             </View>
           </View>
         </Modal>
-      )}
+      )} */}
     </View>
   );
 };
