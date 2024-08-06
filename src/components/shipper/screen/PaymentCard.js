@@ -69,8 +69,15 @@ const StripeApp = () => {
     const openPaymentSheet = async () => {
         setLoading(true);
         if (!clientSecret) {
-          Alert.alert("Lỗi", "Vui lòng thử lại");
-          navigation.goBack();
+          setoptionAlert({
+            title: "Lỗi",
+            message: "Thanh toán không thành công",
+            type: 3,
+            otherFunction: () => {
+              navigation.goBack()
+            }
+          })
+          setisShowAlert(true)
         }
         setLoading(false);
         const { error } = await initPaymentSheet({
@@ -82,10 +89,16 @@ const StripeApp = () => {
         if (!error) {
           const { error: paymentError } = await presentPaymentSheet();
           if (paymentError) {
-            Alert.alert(`Lỗi`, "Bạn đã hủy giao dịch");
-            navigation.goBack();
+            setoptionAlert({
+              title: "Lỗi",
+              message: "Thanh toán không thành công",
+              type: 3,
+              otherFunction: () => {
+                navigation.goBack()
+              }
+            })
+            setisShowAlert(true)
           } else {
-            Alert.alert('Thành công', 'Giao dịch của bạn đã được xác nhận!');
             paymentSuccess()
           }
         } else {

@@ -156,7 +156,6 @@ const QRCodePayOs = () => {
                 break;
             case "PAID":
                 await paymentSuccess()
-                Alert.alert("giao dịch thành công");
                 break;
             case "CANCELLED":
                 Alert.alert("giao dịch này đã bị hủy");

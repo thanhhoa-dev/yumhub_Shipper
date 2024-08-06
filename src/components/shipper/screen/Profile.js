@@ -10,23 +10,28 @@ import {
   FlatList,
   ScrollView,
 } from 'react-native';
-import React, {useState, useEffect, useContext} from 'react';
-import {getAll, UpdateProfile} from '../ShipperHTTP';
-import {UserContext} from '../../user/UserContext';
-import {Dropdown} from 'react-native-element-dropdown';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { getAll, UpdateProfile, uploadImage } from '../ShipperHTTP';
+import { UserContext } from '../../user/UserContext';
+import { Dropdown } from 'react-native-element-dropdown';
 import AlertCustom from '../../../constants/AlertCustom';
+import DatePicker from 'react-native-date-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/FontAwesome6';
+import LoadImage from './LoadImage';
+import FastImage from 'react-native-fast-image';
 
 const data = [
-  {label: 'Nam', value: 'Male'},
-  {label: 'Nữ', value: 'Female'},
+  { label: 'Nam', value: 'Male' },
+  { label: 'Nữ', value: 'Female' },
 ];
 
-const Profile = ({navigation}) => {
+const Profile = ({ navigation }) => {
   const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
   const [visible, setVisible] = useState(false);
-  const {user} = useContext(UserContext);
-  const {setUser} = useContext(UserContext);
+  const { user } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   const idUser = user.checkAccount._id;
   const [fullName, setFullName] = useState(user.checkAccount.fullName);
   const [email, setemail] = useState(user.checkAccount.email);
@@ -35,7 +40,10 @@ const Profile = ({navigation}) => {
   const [birthDay, setBirthDay] = useState(user.checkAccount.birthDay);
   const [isShowAlert, setIsShowAlert] = useState(false);
   const [optionAlert, setOptionAlert] = useState({});
-  // console.log(user);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [avatar, setavatar] = useState(user.checkAccount.avatar)
+  const [isShowGetImgFrom, setisShowGetImgFrom] = useState(false)
+  const [isLoading, setisLoading] = useState(false)
 
   const renderLabel = () => {
     if (value || isFocus) {
@@ -43,8 +51,86 @@ const Profile = ({navigation}) => {
     return null;
   };
 
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split('/').map(Number);
+    return new Date(year, month - 1, day);
+  };
+  const handleDateChange = (date) => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    setBirthDay(`${day}/${month}/${year}`);
+    setDatePickerVisible(false);
+  };
+
+  const takePhoto = useCallback(async response => {
+    setisLoading(true)
+    setisShowGetImgFrom(false)
+    if (response.didCancel) return;
+    if (response.errorCode) {
+      console.error('ImagePicker Error: ', response.errorCode);
+      return;
+    }
+    if (response.errorMessage) {
+      console.error('ImagePicker Error: ', response.errorMessage);
+      return;
+    }
+    if (response.assets && response.assets.length > 0) {
+      const asset = response.assets[0];
+      const formData = new FormData();
+      formData.append('file', {
+        uri: asset.uri,
+        type: asset.type,
+        name: asset.fileName,
+      });
+      try {
+        const result = await uploadImage(formData);
+        if (result) {
+          setavatar(result.url)
+          setisLoading(false)
+        } else {
+          setOptionAlert({
+            title: 'Có lỗi xảy ra',
+            message: "Thử lại sau",
+            type: 3
+          })
+          setIsShowAlert(true)
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        setOptionAlert({
+          title: 'Có lỗi xảy ra',
+          message: "Thử lại sau",
+          type: 3
+        })
+        setIsShowAlert(true)
+      }
+    }
+  }, []);
+
+  const openCamera = useCallback(async () => {
+
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+      saveToPhotos: true,
+    };
+    launchCamera(options, takePhoto);
+
+  }, [takePhoto]);
+
+  //hiển thị thư viện
+  const openLibrary = useCallback(async () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+      saveToPhotos: true,
+    };
+    await launchImageLibrary(options, takePhoto);
+  }, []);
+
   return (
-    <View style={{flex: 1, backgroundColor: 'white'}}>
+    <View style={{ flex: 1, backgroundColor: 'white' }}>
       <View style={styles.viewHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image style={{}} source={require('../../../assets/IconBack.png')} />
@@ -62,11 +148,28 @@ const Profile = ({navigation}) => {
       </View>
       <ScrollView>
         <View>
-          <View style={{alignSelf: 'center', marginTop: 31}}>
-            <Image
-              style={styles.viewImage}
-              source={require('../../../assets/Donut.png')}
-            />
+          <View style={{ alignSelf: 'center', marginTop: 31 }}>
+            <View style={{ alignSelf: 'center', marginTop: 31 }}>
+              <LoadImage
+                uri={avatar}
+                style={styles.viewImage}
+              />
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#E46929", width: 41, height: 41,
+                  justifyContent: 'center', alignItems: 'center',
+                  borderRadius: 20, position: 'absolute', right: 0, bottom: 0
+                }}
+                onPress={() => setisShowGetImgFrom(true)}
+              >
+                <Icon
+                  name="camera-rotate"
+                  size={20}
+                  color="#005987"
+                  FontWeight={"700"}
+                />
+              </TouchableOpacity>
+            </View>
             <Text
               style={{
                 fontSize: 16,
@@ -96,6 +199,7 @@ const Profile = ({navigation}) => {
                 value={email}
                 onChangeText={text => setemail(text)}
                 paddingStart={20}
+                editable={false}
               />
             </View>
 
@@ -107,6 +211,7 @@ const Profile = ({navigation}) => {
                 onChangeText={text => setPhoneNumber(text)}
                 keyboardType="numeric"
                 paddingStart={20}
+                editable={false}
               />
             </View>
 
@@ -136,11 +241,18 @@ const Profile = ({navigation}) => {
 
             <View>
               <Text style={styles.textContent}>Ngày sinh</Text>
-              <TextInput
-                style={styles.viewInput}
-                value={birthDay}
-                onChangeText={text => setBirthDay(text)}
-                paddingStart={20}
+              <TouchableOpacity onPress={() => setDatePickerVisible(true)}>
+                <View style={styles.viewInput}>
+                  <Text style={styles.birthdayText}>{birthDay}</Text>
+                </View>
+              </TouchableOpacity>
+              <DatePicker
+                modal
+                mode="date"
+                open={datePickerVisible}
+                date={parseDate(birthDay)}
+                onConfirm={handleDateChange}
+                onCancel={() => setDatePickerVisible(false)}
               />
             </View>
 
@@ -170,6 +282,7 @@ const Profile = ({navigation}) => {
         style={styles.viewLogin}
         onPress={async () => {
           const handleUpdateProfile = await UpdateProfile(idUser, {
+            avatar : avatar,
             fullName: fullName,
             email: email,
             phoneNumber: phoneNumber,
@@ -177,6 +290,7 @@ const Profile = ({navigation}) => {
             birthDay: birthDay,
           });
           if (handleUpdateProfile.result) {
+            setUser({ checkAccount: handleUpdateProfile.data })
             setOptionAlert({
               title: 'Thành công',
               message: 'Cập nhật thông tin thành công',
@@ -192,16 +306,57 @@ const Profile = ({navigation}) => {
             setIsShowAlert(true);
           }
         }}>
-        <Text style={{color: '#FFF', fontSize: 14, fontWeight: '700'}}>
+        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>
           Cập nhật
         </Text>
       </TouchableOpacity>
       <Modal
         animationType="slide"
         transparent={true}
+        visible={isShowGetImgFrom}
+        onRequestClose={setisShowGetImgFrom}
+      >
+        <View style={{ backgroundColor: 'rgba(0,0,0,0.4)', width: "100%", height: "100%", justifyContent: "flex-end" }}>
+          <View style={{
+            height: 125, width: "100%", backgroundColor: 'white', flexDirection: 'row',
+            justifyContent: 'space-around', alignItems: 'center'
+          }}>
+            <TouchableOpacity style={{
+              backgroundColor: '#E46929', width: '40%', height: 62,
+              borderRadius: 15, justifyContent: 'center', alignItems: 'center'
+            }} onPress={openCamera}>
+              <Text style={{ color: '#FFF9E6', fontSize: 12, fontWeight: '700' }}>CHỤP ẢNH</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{
+              backgroundColor: '#29D8E4', width: '40%', height: 62,
+              justifyContent: 'center', alignItems: 'center', borderRadius: 15
+            }} onPress={openLibrary}>
+              <Text style={{ color: 'black', fontSize: 12, fontWeight: '700', width: 90, textAlign: 'center' }}>CHỌN ẢNH TỪ THƯ VIỆN</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
         visible={isShowAlert}
         onRequestClose={setIsShowAlert}>
         <AlertCustom closeModal={setIsShowAlert} option={optionAlert} />
+      </Modal>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isLoading}
+        onRequestClose={setisLoading}
+      >
+        <View style={{ backgroundColor: 'rgba(0,0,0,0.4)', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          <FastImage
+            style={{ width: 200, height: 200 }}
+            source={require('../../../assets/loading3dot-unscreen.gif')}
+            priority={FastImage.priority.normal}
+            resizeMode={FastImage.resizeMode.contain}
+          />
+        </View>
       </Modal>
     </View>
   );
@@ -275,6 +430,7 @@ const styles = StyleSheet.create({
   viewImage: {
     width: 128,
     height: 128,
+    borderRadius: 100
   },
   viewHeader: {
     marginTop: 20,
@@ -302,4 +458,11 @@ const styles = StyleSheet.create({
   modalItemText: {
     fontSize: 18,
   },
+  birthdayText: {
+    color: '#000',
+    fontSize: 16,
+    lineHeight: 56,
+    paddingHorizontal: 20,
+    width: '100%'
+  }
 });

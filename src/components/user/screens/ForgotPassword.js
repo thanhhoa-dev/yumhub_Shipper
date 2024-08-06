@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { forgotPass } from '../UserHTTP';
 import AlertCustom from '../../../constants/AlertCustom';
+import Loading from '../../shipper/screen/Loading';
 
 const {width, height} = Dimensions.get('window');
 
@@ -15,6 +16,7 @@ const ForgotPassword = (props) => {
     const [email, setEmail] = useState('');
     const [isshowAlert, setisshowAlert] = useState(false)
     const [optionAlert, setoptionAlert] = useState({})
+    const [isLoading, setisLoading] = useState(false)
     const handleForgotPass = async () => {
         if (!email) {
             setoptionAlert({
@@ -36,8 +38,9 @@ const ForgotPassword = (props) => {
             return;
         }
         try {
-            // console.log(email);
+            setisLoading(true)
             const result = await forgotPass(email);
+            setisLoading(false)
             if (result.result) {
                 setoptionAlert({
                     title: "Thành công",
@@ -64,6 +67,7 @@ const ForgotPassword = (props) => {
             setisshowAlert(true)
         }
     };
+    if(isLoading) return <Loading />
     return (
         <ScrollView>
             <View style={{ flex: 1, backgroundColor: '#005987', width: width, height: height }}>
@@ -102,7 +106,7 @@ const ForgotPassword = (props) => {
                         <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>GỬI MÃ </Text>
                     </TouchableOpacity>
                     <Modal
-                        animationType="slide"
+                        animationType="fade"
                         transparent={true}
                         visible={isshowAlert}
                         onRequestClose={setisshowAlert}

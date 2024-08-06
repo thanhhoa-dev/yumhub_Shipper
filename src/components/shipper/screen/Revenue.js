@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useCallback, useState} from 'react';
 import {Alert, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
@@ -7,6 +7,7 @@ import {styles} from '../styles/RevenueStyle';
 import DetailRevenue from './DetailRevenue';
 import DropdownComponent from './DropdownComponent';
 import History from './History';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Revenue = () => {
   const [date, setDate] = useState(new Date());
@@ -53,7 +54,7 @@ const Revenue = () => {
     });
   };
 
-  useEffect(() => {
+  const updateDates = useCallback(() => {
     const weekDays = getWeekDays(date);
     const startOfWeek = weekDays[0];
     const endOfWeek = weekDays[6];
@@ -63,6 +64,12 @@ const Revenue = () => {
     setStartOfMonth(getStartOfMonth(date));
     setEndOfMonth(getEndOfMonth(date));
   }, [date]);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateDates();
+    }, [updateDates])
+  );
 
   const getWeekDays = date => {
     const startOfWeek = new Date(date);
