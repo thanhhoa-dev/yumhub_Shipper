@@ -1,7 +1,13 @@
 import React, { useState, useContext } from 'react';
-import { View, TextInput, StyleSheet, Image, Text, TouchableOpacity,ToastAndroid, ScrollView} from 'react-native';
+import {
+    View, TextInput, StyleSheet, Image, Text,
+    TouchableOpacity, ToastAndroid, ScrollView,
+    Modal
+} from 'react-native';
 import { changePass } from '../../user/UserHTTP';
 import { UserContext } from '../../user/UserContext';
+import AlertCustom from '../../../constants/AlertCustom';
+import FastImage from 'react-native-fast-image';
 
 
 const ChangePass = ({ navigation }) => {
@@ -10,25 +16,58 @@ const ChangePass = ({ navigation }) => {
     const [passConfirm, setPassWordConfirm] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const { user } = useContext(UserContext)
-    const {setUser} = useContext(UserContext);
+    const { setUser } = useContext(UserContext);
+    const [isShowAlert, setisShowAlert] = useState(false)
+    const [optionAlert, setoptionAlert] = useState({})
     const idUser = user.checkAccount._id;
+    const [isLoading, setisLoading] = useState(false)
     // console.log(idUser);
     const handleChange = async () => {
         if (passNew !== passConfirm) {
-            ToastAndroid.show('Mật khẩu mới không khớp', ToastAndroid.SHORT);
+            setoptionAlert({
+                title: 'Mật khẩu mới không khớp',
+                message: "",
+                type: 2
+            })
+            setisShowAlert(true)
+            return;
+        }
+        if (passNew.length < 4) {
+            setoptionAlert({
+                title: 'Mật khẩu tối thiểu 4 ký tự',
+                message: "",
+                type: 2
+            })
+            setisShowAlert(true)
             return;
         }
         try {
-            const result = await changePass(passOld, passNew, idUser);
-            console.log(result);
+            setisLoading(true)
+            const result = await changePass(idUser, passOld, passNew);
+            setisLoading(false)
             if (result.result) {
-                ToastAndroid.show('Đổi mật khẩu thành công', ToastAndroid.SHORT);
-                setUser(null);
+                setisShowAlert(true)
+                setoptionAlert({
+                    title: 'Thành công',
+                    message: "Đã đổi mật khẩu",
+                    type: 1,
+                    otherFunction : ()=>{setUser(null)}
+                })
             } else {
-                ToastAndroid.show(result.message || 'Thay đổi mật khẩu thất bại', ToastAndroid.SHORT);
+                setoptionAlert({
+                    title: 'Mật khẩu không đúng',
+                    message: "",
+                    type: 3
+                })
+                setisShowAlert(true)
             }
         } catch (e) {
-            ToastAndroid.show('Thay đổi mật khẩu thất bại', ToastAndroid.SHORT);
+            setoptionAlert({
+                title: 'Có lỗi xảy ra',
+                message: "thử lại sau",
+                type: 3
+            })
+            setisShowAlert(true)
         }
     };
     const togglePasswordVisibility = () => {
@@ -50,7 +89,7 @@ const ChangePass = ({ navigation }) => {
                 </View>
                 <View style={styles.viewTextInputPassword}>
                     <TextInput
-                    secureTextEntry={!showPassword}
+                        secureTextEntry={!showPassword}
                         value={passOld}
                         onChangeText={setPassOld}
                         placeholder=""
@@ -66,7 +105,7 @@ const ChangePass = ({ navigation }) => {
                 </View>
                 <View style={styles.viewTextInputPassword}>
                     <TextInput
-                    secureTextEntry={!showPassword}
+                        secureTextEntry={!showPassword}
                         value={passNew}
                         onChangeText={setPassNew}
                         placeholder=""
@@ -97,12 +136,34 @@ const ChangePass = ({ navigation }) => {
                     <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>Xác nhận</Text>
                 </TouchableOpacity>
             </ScrollView>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isShowAlert}
+                onRequestClose={setisShowAlert}>
+                <AlertCustom closeModal={setisShowAlert} option={optionAlert} />
+            </Modal>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={isLoading}
+                onRequestClose={setisLoading}
+            >
+                <View style={{ backgroundColor: 'rgba(0,0,0,0.4)', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                    <FastImage
+                        style={{ width: 200, height: 200 }}
+                        source={require('../../../assets/loading3dot-unscreen.gif')}
+                        priority={FastImage.priority.normal}
+                        resizeMode={FastImage.resizeMode.contain}
+                    />
+                </View>
+            </Modal>
         </View>
     )
 };
 
 const styles = StyleSheet.create({
-    viewTextInputPassword:{
+    viewTextInputPassword: {
         width: 327,
         height: 62,
         backgroundColor: '#F0F5FA',
@@ -167,7 +228,8 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         width: '100%',
         height: '100%',
-        borderRadius: 25,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25
     },
     viewContainer: {
         backgroundColor: '#005987',

@@ -7,6 +7,7 @@ import { useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login } from '../UserHTTP';
 import AlertCustom from '../../../constants/AlertCustom';
+import Loading from '../../shipper/screen/Loading';
 
 
 const Login = (props) => {
@@ -17,17 +18,19 @@ const Login = (props) => {
     const [showPassword, setShowPassword] = useState(false);
     const [isshowAlert, setisshowAlert] = useState(false)
     const [optionAlert, setoptionAlert] = useState({})
+    const [isLoading, setisLoading] = useState(false)
 
     const handleLogin = async () => {
         try {
+            setisLoading(true)
             const result = await login(phoneNumber, password);
-            // console.log(result);
             if (result.data.token) {
                 await AsyncStorage.setItem('token', result.data.token);
                 await AsyncStorage.setItem('Username', phoneNumber);
                 await AsyncStorage.setItem('Password', password);
                 setUser(result.data);
             } else {
+                setisLoading(false)
                 setoptionAlert({
                     title : 'Lỗi đăng nhập',
                     message: result.data.message,
@@ -36,6 +39,7 @@ const Login = (props) => {
                 setisshowAlert(true)
             }
         } catch (error) {
+            setisLoading(false)
             setoptionAlert({
                 title : 'Lỗi kết nối',
                 message: "kiểm tra mạng của bạn",
@@ -69,6 +73,7 @@ const Login = (props) => {
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+    if(isLoading) return <Loading />
     return (
         <ScrollView>
             <View style={styles.container}>
@@ -76,7 +81,6 @@ const Login = (props) => {
                     <View>
                         <Image style={{ height: 117, width: 117, marginEnd: 30 }} source={require("../../../assets/iconAsset.png")}></Image>
                         <Text style={styles.viewText}>Yumhub chào bạn</Text>
-                        <Text style={styles.viewText2}>Nhập hoặc tạo tài khoản với vài bước</Text>
                     </View>
                 </View>
                 <View style={styles.viewBody}>
@@ -123,7 +127,7 @@ const Login = (props) => {
                     </TouchableOpacity>
                 </View>
                 <Modal
-                    animationType="slide"
+                    animationType="fade"
                     transparent={true}
                     visible={isshowAlert}
                     onRequestClose={setisshowAlert}

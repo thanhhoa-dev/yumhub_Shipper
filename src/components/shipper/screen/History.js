@@ -6,8 +6,8 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import { Color } from '../../../constants/theme';
 import { useNavigation } from '@react-navigation/native';
 import { UserContext } from '../../user/UserContext';
+import { useFocusEffect } from '@react-navigation/native';
 import LoadingComponent from './LoadingComponent';
-
 
 const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -56,18 +56,23 @@ const History = ({ startDate, endDate }) => {
     const [listHistory, setlistHistory] = useState([]);
     const [isLoading, setisLoading] = useState(true)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getHistoryShipper(user.checkAccount._id);
-                setlistHistory(response.historyShipper);
-                setisLoading(false)
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        fetchData();
-    }, [user.merchantID]);
+    const fetchData = useCallback(async () => {
+        setisLoading(true)
+        try {
+            const response = await getHistoryShipper(user.checkAccount._id);
+            setlistHistory(response.historyShipper);
+        } catch (error) {
+            console.log(error);
+        }
+        setisLoading(false)
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchData();
+        }, [fetchData])
+    );
+
     const formatCurrency = (amount) => {
         if (amount === undefined) return '0 ₫';
         const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -79,23 +84,29 @@ const History = ({ startDate, endDate }) => {
         return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
 
-
-
-    const filteredList = useMemo(() => filterByDateRange(listHistory, startDate, endDate), [listHistory, startDate, endDate]);
+    const filteredList = useMemo(() => {
+        const list = filterByDateRange(listHistory, startDate, endDate);
+        return list.sort((a, b) => new Date(b.timeBook) - new Date(a.timeBook));
+    }, [listHistory, startDate, endDate]);
 
     const status = (idStatus) => {
         switch (idStatus) {
             case "661760e3fc13ae3574ab8ddf":
+                return { text: "Đang đợi lấy hàng", color: "#29D8E4" };
             case "661760e3fc13ae3574ab8de0":
-            case "661760e3fc13ae3574ab8dde":
-            case "661761a5fc13ae3517ab89f5":
-            case "661760e3fc13ae3574ab8de3":
                 return { text: "Đang giao", color: "#29D8E4" };
+            case "661760e3fc13ae3574ab8dde":
+                return { text: "Đang tìm shipper", color: "#29D8E4" };
+            case "661761a5fc13ae3517ab89f5":
+                return { text: "Đã đến nơi giao", color: "#29D8E4" };
+            case "661760e3fc13ae3574ab8de3":
+                return { text: "Đang đi lấy hàng", color: "#29D8E4" };
             case "661760e3fc13ae3574ab8de1":
                 return { text: "Thành công", color: "#005987" };
             case "661760e3fc13ae3574ab8de2":
-            case "6656a8738913d56206f64e01":
                 return { text: "Hủy đơn", color: "#E46929" };
+            case "6656a8738913d56206f64e01":
+                return { text: "Khách không nhận", color: "#E46929" };
             default:
                 return { text: "unknown", color: "#000" };
         }

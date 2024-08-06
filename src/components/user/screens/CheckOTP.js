@@ -1,15 +1,20 @@
 import {
     Image, StyleSheet, Text, TextInput,
-    TouchableOpacity, View, ToastAndroid, Modal, ScrollView
+    TouchableOpacity, View, ToastAndroid, Modal, ScrollView,
+    Dimensions
 } from 'react-native';
 import React, { useState, useRef, useContext } from 'react';
 import { checkotp, forgotPass } from '../UserHTTP';
 import { UserContext } from '../UserContext';
 import AlertCustom from '../../../constants/AlertCustom';
+import Loading from '../../shipper/screen/Loading';
 
+
+const {width , height } = Dimensions.get('window')
 const CheckOTP = (props) => {
     const { route: { params: { email } } } = props;
     const navigation = props.navigation;
+    const [isLoading, setisLoading] = useState(false)
 
     const [otp_1, setOTP1] = useState('');
     const [otp_2, setOTP2] = useState('');
@@ -24,10 +29,11 @@ const CheckOTP = (props) => {
     const [optionAlert, setoptionAlert] = useState({});
 
     const handleNext = async () => {
+        setisLoading(true)
         try {
             let total = otp_1 + otp_2 + otp_3 + otp_4;
             const result = await checkotp(email, total);
-
+            setisLoading(false)
             if (result.result) {
                 setoptionAlert({
                     title: "Thành công",
@@ -47,6 +53,7 @@ const CheckOTP = (props) => {
                 setisShowAlert(true)
             }
         } catch (error) {
+            setisLoading(false)
             clearOTPFields();
             setoptionAlert({
                 title: "Lỗi",
@@ -66,11 +73,24 @@ const CheckOTP = (props) => {
     };
 
     const handleResendOtp = async () => {
+        setisLoading(true)
         try {
             const result = await forgotPass(email);
-            ToastAndroid.show(result.message, ToastAndroid.SHORT);
+            setisLoading(false)
+            setoptionAlert({
+                title: "Thành công",
+                message: "Kiểm tra email của bạn",
+                type: 1
+            })
+            setisShowAlert(true)
         } catch (error) {
-            ToastAndroid.show('Failed to resend OTP', ToastAndroid.SHORT);
+            setisLoading(false)
+            setoptionAlert({
+                title: "Có lỗi xảy ra",
+                message: "Thử lại sau",
+                type: 3
+            })
+            setisShowAlert(true)
         }
     };
 
@@ -88,9 +108,10 @@ const CheckOTP = (props) => {
         }
     };
 
+    if(isLoading) return <Loading />
     return (
-        <ScrollView>
-            <View style={{ flex: 1, backgroundColor: '#005987' }}>
+        <ScrollView style={{ flex: 1}}>
+            <View style={{ flex: 1, backgroundColor: '#005987', height : height }}>
                 <View style={styles.viewContainer}>
                     <View>
                         <View style={{ flexDirection: 'column-reverse' }}>
@@ -159,7 +180,7 @@ const CheckOTP = (props) => {
                         <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>XÁC THỰC</Text>
                     </TouchableOpacity>
                     <Modal
-                        animationType="slide"
+                        animationType="fade"
                         transparent={true}
                         visible={isShowAlert}
                         onRequestClose={setisShowAlert}
@@ -176,16 +197,16 @@ export default CheckOTP;
 
 const styles = StyleSheet.create({
     viewLogin: {
-        marginStart: 20,
-        marginTop: 31,
         width: "80%",
         height: 62,
         borderRadius: 12,
-        flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#19D6E5',
         justifyContent: 'center',
-        marginStart: 40,
+        position : 'absolute',
+        bottom : 50,
+        left: '50%',
+        transform: [{translateX: -(width*0.8)/2}]
     },
     viewForgotPass: {
         marginTop: 25,
@@ -230,8 +251,9 @@ const styles = StyleSheet.create({
     viewBody: {
         backgroundColor: 'white',
         width: '100%',
-        height: '100%',
-        borderRadius: 25,
+        height: height - 230,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius : 25
     },
     viewContainer: {
         backgroundColor: '#005987',

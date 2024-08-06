@@ -785,7 +785,6 @@ const Goong = () => {
       handleClosePress();
       // await updateOrderStatus(id, 5);
       const result = await UpdateOrder(currentOrder.current.order._id, data);
-      console.log(result);
       translateX.setValue(0);
       handleSendMessage('success');
       setImage('');
