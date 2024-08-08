@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import StarRating from 'react-native-star-rating-widget';
-import {CreateReivew, GetOrderByID, uploadImage} from '../ShipperHTTP';
+import {CreateReivew, getListReviewCustomer, GetOrderByID, setUpdateCustomer, uploadImage} from '../ShipperHTTP';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {styles} from '../styles/SubmitReviewStyle';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -27,25 +27,29 @@ const SubmitReview = () => {
   const [descriptionCustomer, setDescriptionCustomer] = useState('');
   const [image, setImage] = useState([]);
   const {user} = useContext(UserContext);
-
+  const [reviewsCustomer, setReviewsCustomer] = useState([]);
   const route = useRoute();
   const {order} = route.params;
   const idUser = user.checkAccount._id;
 
-  const handleCreateReview = async () => {
+  const handleCreateReview = async (idCustomer) => {
     const customerReviewData = {
       orderID: order.order._id,
       reviewID: idUser,
       description: descriptionCustomer,
       rating: ratingCustomer,
-      typeOfReview: 3,
+      typeOfReviewID: 3,
       images: image,
     };
     try {
       if (ratingCustomer !== 0) {
         await CreateReivew(customerReviewData);
-        navigation.goBack();
-        ToastAndroid.show('Gửi đánh giá thành công', ToastAndroid.SHORT);
+        const listReviewCustomer = await getListReviewCustomer(idCustomer);
+        setReviewsCustomer(listReviewCustomer.history);
+        setTimeout(() => {
+          ToastAndroid.show('Gửi đánh giá thành công', ToastAndroid.SHORT);
+          navigation.goBack();
+        }, 2000);
       } else {
         Alert.alert('Bạn chưa đánh giá sao nào!!');
       }
@@ -53,6 +57,27 @@ const SubmitReview = () => {
       console.log('Error creating review:', error);
     }
   };
+
+
+  useEffect(() => {
+    const averageTotalCustomer = async () =>{
+    if (reviewsCustomer) {
+      let totalRating = 0;
+      if (reviewsCustomer.length > 0) {
+        for (let i = 0; i < reviewsCustomer.length; i++) {
+          totalRating += reviewsCustomer[i].review.rating;
+        }
+        let total = totalRating / reviewsCustomer.length;
+        const data = {
+          rating: `${total}`
+        }
+        await setUpdateCustomer(order.order.customerID._id, data);
+      }
+    }
+  }
+  averageTotalCustomer();
+  }, [reviewsCustomer]);
+
 
   /// xử lý hình ảnh
   const takePhoto = useCallback(async response => {
@@ -181,7 +206,7 @@ const SubmitReview = () => {
             </View>
           </View>
           <TouchableOpacity
-            onPress={handleCreateReview}
+            onPress={() =>{handleCreateReview(order.order.customerID._id)}}
             style={styles.buttonSubmitReview}>
             <Text style={styles.textSumbmitReview}>Gửi Đánh Giá</Text>
           </TouchableOpacity>

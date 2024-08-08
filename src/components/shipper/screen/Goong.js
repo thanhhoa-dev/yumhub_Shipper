@@ -68,8 +68,8 @@ const Goong = () => {
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeCoordinatesCustomer, setRouteCoordinatesCustomer] = useState([]);
   const [locateCurrent, setLocateCurrent] = useState({
-    longitude: 106.624832,
-    latitude: 10.8545074
+    longitude:106.6653188,
+    latitude:10.8356961
   });
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
@@ -96,8 +96,9 @@ const Goong = () => {
   const {user, sendMessage, receiveMessage} = useContext(UserContext);
 
   const [order, setOrder] = useState(null);
-  // var id = '663ccda31387830b4e4a788a';
-  var id;
+  const [checkImage, setCheckImage] = useState(false);
+  var id = '663ccda31387830b4e4a788a';
+  // var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
   const currentOrderImage = useRef('');
@@ -183,18 +184,51 @@ const Goong = () => {
   //   }
   // }, [countdown, id, idUser, order, statusShipper]);
 
-  const handleLocateCurrent = () => {
-    Geolocation.getCurrentPosition(
-      position => {
-        const {latitude, longitude} = position.coords;
-        setLocateCurrent({
-          latitude,
-          longitude,
-        });
-      },
-      error => console.log(error.message),
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
-    );
+  const handleLocateCurrent = async () => {
+    // Geolocation.getCurrentPosition(
+    //   position => {
+    //     const {latitude, longitude} = position.coords;
+    //     setLocateCurrent({
+    //       latitude,
+    //       longitude,
+    //     });
+    //   },
+    //   error => console.log(error.message),
+    //   {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
+    // );
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'This app needs access to your location.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          Geolocation.getCurrentPosition(
+            position => {
+              const {latitude, longitude} = position.coords;
+              setLocateCurrent({
+                latitude,
+                longitude,
+              });
+            },
+            error => {
+              console.log(error.message);
+            },
+            {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+          );
+        } else {
+          console.log('Location permission denied');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    }
   };
 
   useEffect(() => {
@@ -227,6 +261,7 @@ const Goong = () => {
   useEffect(() => {
     const timeReceiveApplication = async () => {
       if (countdown === 0 && isTimerRunning) {
+        handleSendMessage('refuse');
         setOrder(null);
         setModalVisible(false);
         setCountdown(60);
@@ -721,8 +756,10 @@ const Goong = () => {
         name: asset.fileName,
       });
       try {
+        setCheckImage(true);
         const result = await uploadImage(formData);
         setImage(result.url);
+        setCheckImage(false);
       } catch (error) {
         console.error('Error uploading image:', error);
       }
@@ -774,7 +811,7 @@ const Goong = () => {
     const formattedSeconds = String(remainingSeconds).padStart(2, '0');
     return `${formattedMinutes}:${formattedSeconds}`;
   };
-//  console.log(currentOrder.current.order._id);
+
   const handleConfirmCancel = async () => {
     const data = {
       imageGiveFood: currentOrderImage.current,
@@ -783,8 +820,7 @@ const Goong = () => {
     try {
       setIndex(0);
       handleClosePress();
-      // await updateOrderStatus(id, 5);
-      const result = await UpdateOrder(currentOrder.current.order._id, data);
+      await UpdateOrder(currentOrder.current.order._id, data);
       translateX.setValue(0);
       handleSendMessage('success');
       setImage('');
@@ -912,6 +948,7 @@ const Goong = () => {
           showNumberPhone={showNumberPhone}
           setShowNumberPhone={setShowNumberPhone}
           handleCall={handleCall}
+          checkImage={checkImage}
         />
       </GestureHandlerRootView>
       {order && (

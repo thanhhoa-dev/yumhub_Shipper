@@ -19,6 +19,8 @@ import Slider from 'react-native-slide-to-unlock';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import LoadingComponent from './LoadingComponent';
+import Loading from './Loading';
 
 
 const BottomSheetComponent = ({
@@ -42,7 +44,8 @@ const BottomSheetComponent = ({
   openCamera,
   showNumberPhone,
   setShowNumberPhone,
-  handleCall
+  handleCall,
+  checkImage
 }) => {
   const navigation = useNavigation();
   return (
@@ -53,6 +56,8 @@ const BottomSheetComponent = ({
         index={0}
         snapPoints={snapPoints}
         onClose={() => setIsBottomSheetVisible(false)}>
+          
+      {!checkImage ? (
         <BottomSheetScrollView>
             <View style={styles.viewContainerBottomSheet}>
               {index < 2 ? (
@@ -592,6 +597,9 @@ const BottomSheetComponent = ({
               )}
             </View>
         </BottomSheetScrollView>
+      ) : (
+        <Loading/>
+      )}
       </BottomSheet>
     )
   );

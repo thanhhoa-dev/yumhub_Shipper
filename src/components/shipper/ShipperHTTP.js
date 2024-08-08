@@ -256,3 +256,27 @@ export const UpdateProfile = async (id, data) => {
     ToastAndroid.show('error', ToastAndroid.SHORT);
   }
 };
+
+export const getListReviewCustomer = async (id) => {
+  try {
+    const axiosInstance = AxiosInstance();
+    const url = 'orders/historyCustomerIsReview';
+    const params = {id : id}
+    return await axiosInstance.get(url, {params});
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export const setUpdateCustomer = async (id, data) => {
+  try {
+    const axiosInstance = AxiosInstance();
+    const url = 'customers/updateCustomer';
+    const params = {id: id}
+    return await axiosInstance.patch(url, data, {params});
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
