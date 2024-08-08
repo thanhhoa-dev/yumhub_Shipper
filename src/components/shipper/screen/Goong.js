@@ -1007,7 +1007,7 @@ const Goong = () => {
                   <View style={[styles.viewContainerNameUser, {}]}>
                     <Text style={styles.textInformation}>Giao: </Text>
                     <Text style={styles.textInformation}>
-                      {order.order.customerID.fullName}
+                      {order.order.deliveryFullName}
                     </Text>
                   </View>
                   <Text

@@ -29,13 +29,6 @@ const DetailHistory = () => {
           <Text style={styles.price}>{formatCurrency(item.food.price)}</Text>
         </View>
         <Text style={styles.description}>{item.food.description}</Text>
-        <TouchableOpacity
-          onPress={() => {
-
-          }}
-        >
-          <Text style={styles.more}>Xem thêm</Text>
-        </TouchableOpacity>
       </View>
     );
   };
@@ -57,7 +50,7 @@ const DetailHistory = () => {
   }, []);
 
   const formatCurrency = (amount) => {
-    if(typeof amount !== "number") return 0 + ' ₫';
+    if (typeof amount !== "number") return 0 + ' ₫';
     const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     return formattedAmount.replace('₫', '') + ' ₫';
   };
@@ -109,20 +102,20 @@ const DetailHistory = () => {
     const renderStatus = (idstatus) => {
       switch (idstatus) {
         case "6656a8738913d56206f64e01":
-          return {customer: "không nhận" }
+          return { customer: "không nhận" }
         case "661760e3fc13ae3574ab8de1":
-          return {customer: "đã nhận" }
+          return { customer: "đã nhận" }
         case "661760e3fc13ae3574ab8de2":
-          return {customer: "chưa nhận" }
+          return { customer: "chưa nhận" }
         default:
-          return {customer: "" }
+          return { customer: "" }
       }
     }
     const createItemToReviewDetail = () => {
       return {
-        user : order.customerID,
-        review : item,
-        image : []
+        user: order.customerID,
+        review: item,
+        image: []
       }
     }
     if (item.typeOfReview.name !== "customerToShipper") return (<View></View>)
@@ -148,7 +141,7 @@ const DetailHistory = () => {
               </Text>
               <TouchableOpacity
                 onPress={() => {
-                  navigation.navigate("ReviewDetail", { item : createItemToReviewDetail(item.typeOfReview.name) })
+                  navigation.navigate("ReviewDetail", { item: createItemToReviewDetail(item.typeOfReview.name) })
                 }}
               >
                 <View style={styles.viewMore}>
@@ -193,7 +186,7 @@ const DetailHistory = () => {
       <FlatList
         data={listFoods}
         renderItem={handleRenderListFoods}
-        keyExtractor={(item,index) => `food-${item._id}`+index}
+        keyExtractor={(item, index) => `food-${item._id}` + index}
         scrollEnabled={false}
       />
       <View style={styles.rowTotal}>
@@ -202,7 +195,9 @@ const DetailHistory = () => {
       </View>
       <View style={styles.rowTotal}>
         <Text style={styles.total}>Quán nhận từ shipper:</Text>
-        <Text style={styles.money}>{formatCurrency(order.priceFood - order.voucherID.discountAmount)}</Text>
+        {order.voucherID && (
+          <Text style={styles.money}>{formatCurrency(order.priceFood - order.voucherID.discountAmount)}</Text>
+        )}
       </View>
       <View style={styles.rowTotal}>
         <Text style={styles.total}>Thu nhập:</Text>

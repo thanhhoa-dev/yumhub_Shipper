@@ -7,7 +7,12 @@ import FastImage from 'react-native-fast-image';
  * type 1 : success
  * type 2 : warning
  * type 3 : error
- * 
+ * option : {
+ *    title : string
+ *    message : string
+ *    type : number
+ *    otherFunction? : function
+ * }
  */
 
 const AlertCustom = ({ closeModal, option }) => {
@@ -15,13 +20,13 @@ const AlertCustom = ({ closeModal, option }) => {
   switch (option.type) {
     default:
     case 1:
-      uri = 'https://cdn.dribbble.com/users/251873/screenshots/9289747/13540-sign-for-success-alert.gif'
+      uri = 'https://icons.veryicon.com/png/o/miscellaneous/8atour/success-35.png'
       break;
     case 2:
-      uri = 'https://cdn.pixabay.com/animation/2023/03/19/14/10/14-10-13-121_512.gif'
+      uri = 'https://logowik.com/content/uploads/images/warning6444.logowik.com.webp'
       break;
     case 3:
-      uri = 'https://cdn.dribbble.com/users/251873/screenshots/9388228/error-img.gif'
+      uri = 'https://cdn-icons-png.flaticon.com/512/5219/5219070.png'
       break;
   }
   setTimeout(() => {
@@ -34,13 +39,11 @@ const AlertCustom = ({ closeModal, option }) => {
     <View style={styles.containerOverlay}>
       <View style={styles.container}>
           <Text style={styles.header}>{option.title}</Text>
-          <FastImage
+          <Image
             style={styles.imgGif}
             source={{
               uri: uri,
             }}
-            priority={FastImage.priority.normal}
-            resizeMode={FastImage.resizeMode.contain}
           />
           <Text style={styles.message}>{option.message}</Text>
       </View>
@@ -58,29 +61,32 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   container: {
-    width: '90%',
+    width: '80%',
     backgroundColor: "white",
-    paddingVertical : 8,
-    borderRadius : 35,
+    paddingVertical : 3,
+    borderRadius : 20,
     borderWidth : 1,
     borderColor : '#005987'
   },
   imgGif: {
-    width: '90%',
-    height: 200,
-    alignSelf : 'center'
+    width : 80,
+    height : 80,
+    alignSelf : 'center',
+    marginBottom : 20
   },
   header : {
-    fontSize : 20,
-    fontWeight : '700',
-    color : 'black',
-    textAlign : 'center'
-  },
-  message : {
-    fontSize : 16,
+    marginTop : 30,
+    fontSize : 30,
     fontWeight : '700',
     color : 'black',
     textAlign : 'center',
-    marginBottom : 10
+    marginBottom : 50
+  },
+  message : {
+    fontSize : 20,
+    fontWeight : '700',
+    color : 'black',
+    textAlign : 'center',
+    marginBottom : 50
   }
 })

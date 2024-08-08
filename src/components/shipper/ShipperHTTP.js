@@ -247,7 +247,8 @@ export const UpdateProfile = async (id, data) => {
       email: data.email,
       fullName: data.fullName,
       sex: data.gender,
-      birthDay: data.birthDay
+      birthDay: data.birthDay,
+      avatar: data.avatar,
     };
     return await axiosInstance.patch(url, body, {params});
   } catch (error) {

@@ -26,6 +26,7 @@ import PaymentCard from './screen/PaymentCard'
 import WithdrawPaymentMethod from './screen/WithdrawMethod'
 import HistoryTransaction from './screen/HistoryTransaction';
 import ReviewDetail from './screen/ReviewDetail';
+import ViewGame1 from './screen/ViewGame1';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,10 +41,10 @@ const ShipperTabNavigation = () => {
           return <Feather name={'home'} size={20} color={'#19D6E5'} />;
         } else if (rn === 'Doanh thu') {
           return <Feather name={'credit-card'} size={20} color={'#19D6E5'} />;
-        } else if (rn === 'Thông báo') {
+        } else if (rn === 'Giải trí') {
           return (
             <Ionicons
-              name={'notifications-outline'}
+              name={"game-controller-outline"}
               size={20}
               color={'#19D6E5'}
             />
@@ -62,10 +63,10 @@ const ShipperTabNavigation = () => {
           return <Feather name={'home'} size={20} color={'#005987'} />;
         } else if (rn === 'Doanh thu') {
           return <Feather name={'credit-card'} size={20} color={'#005987'} />;
-        } else if (rn === 'Thông báo') {
+        } else if (rn === 'Giải trí') {
           return (
             <Ionicons
-              name={'notifications-outline'}
+              name={'game-controller-outline'}
               size={20}
               color={'#005987'}
             />
@@ -101,7 +102,7 @@ const ShipperTabNavigation = () => {
       />
       <Tab.Screen
         options={{headerShown: false}}
-        name="Thông báo"
+        name="Giải trí"
         component={Notification}
       />
       <Tab.Screen
@@ -205,6 +206,11 @@ const ShipperStackNavigation = () => {
         options={{headerShown: false}}
         name="ReviewDetail"
         component={ReviewDetail}
+      />
+       <Stack.Screen
+        options={{headerShown: false}}
+        name="ViewGame1"
+        component={ViewGame1}
       />
     </Stack.Navigator>
   );

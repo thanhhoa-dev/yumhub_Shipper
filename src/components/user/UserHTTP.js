@@ -15,16 +15,16 @@ export const login = async (phoneNumber, password) => {
   }
 };
 
-export const changePass = async (id, passNew, passOld) => {
+export const changePass = async (id, passOld, passNew) => {
   try {
     const axiosInstance = await AxiosInstance();
-    const url = 'shippers/changePass/:id';
+    const url = 'shippers/changePass';
+    const params = {id: id};
     const body = {
-      id: id,
       passOld: passOld,
       passNew: passNew,
     };
-    return await axiosInstance.post(url, body);
+    return await axiosInstance.post(url, body, {params});
   } catch (error) {
     ToastAndroid.show('error', ToastAndroid.SHORT);
   }
