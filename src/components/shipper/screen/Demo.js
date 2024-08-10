@@ -9,7 +9,7 @@ import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 import { uploadImage } from '../ShipperHTTP';
 import { toast } from '@baronha/ting';
 
-const { width, height } = Dimensions.get('window');
+
 const Demo = () => {
     const flatListRef = useRef(null);
     const [listPhoto, setlistPhoto] = useState([])

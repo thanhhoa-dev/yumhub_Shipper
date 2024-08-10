@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Image, ActivityIndicator, StyleSheet, Dimensions } from 'react-native';
 import ImageSize from 'react-native-image-size';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
+const MAX_WIDTH_PERCENTAGE = 0.6;
+
 const ImageChat = ({ uri, style = {} }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -13,15 +15,21 @@ const ImageChat = ({ uri, style = {} }) => {
     const fetchImageSize = async () => {
       try {
         const { width: imgWidth, height: imgHeight } = await ImageSize.getSize(uri);
-        let scaleFactor = 1/3;
-        if (Math.ceil(imgWidth * scaleFactor) > screenWidth){
-            scaleFactor = 1/7
-        }if (Math.ceil(imgWidth * scaleFactor) < 100){
-            scaleFactor = 1/2
+
+        // Tính toán chiều rộng và chiều cao mới của ảnh
+        const maxWidth = screenWidth * MAX_WIDTH_PERCENTAGE;
+        let finalWidth = imgWidth;
+        let finalHeight = imgHeight;
+
+        if (imgWidth > maxWidth) {
+          const scaleFactor = maxWidth / imgWidth;
+          finalWidth = imgWidth * scaleFactor;
+          finalHeight = imgHeight * scaleFactor;
         }
+
         setImageDimensions({
-          width: imgWidth * scaleFactor,
-          height: imgHeight * scaleFactor,
+          width: finalWidth,
+          height: finalHeight,
         });
       } catch (error) {
         console.error(error);
@@ -29,7 +37,7 @@ const ImageChat = ({ uri, style = {} }) => {
     };
 
     fetchImageSize();
-  }, []);
+  }, [uri]);
 
   const handleLoadStart = () => {
     setLoading(true);
@@ -57,7 +65,7 @@ const ImageChat = ({ uri, style = {} }) => {
       {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loading} />}
       <Image
         source={getImageSource()}
-        style={[style,{ width: imageDimensions.width, height: imageDimensions.height }]}
+        style={[style, { width: imageDimensions.width, height: imageDimensions.height }]}
         onLoadStart={handleLoadStart}
         onLoadEnd={handleLoadEnd}
         onError={handleError}
@@ -73,10 +81,6 @@ const styles = StyleSheet.create({
   },
   loading: {
     position: 'absolute',
-  },
-  hiddenImage: {
-    width: 0,
-    height: 0,
   },
 });
 
