@@ -134,14 +134,14 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
   iconMessageBottomSheet: {
-    padding: 15,
+    padding: 10,
     backgroundColor: Color.white,
     borderRadius: 50,
     borderColor: Color.primary1,
     borderWidth: 1,
   },
   iconCallBottomSheet: {
-    padding: 15,
+    padding: 10,
     backgroundColor: Color.primary1,
     borderRadius: 50,
     elevation: 15,
@@ -159,13 +159,12 @@ export const styles = StyleSheet.create({
   },
   viewContainerCallUserBottomSheet: {
     marginTop: 27,
-    paddingVertical: Size.S18,
-    paddingHorizontal: 25,
+    paddingVertical: Size.S16,
+    paddingHorizontal: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderWidth: 1,
     marginHorizontal: 1,
-    height: 116,
     justifyContent: 'center',
   },
   textArriveRestaurantBottomSheet: {
