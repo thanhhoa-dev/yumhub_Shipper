@@ -530,7 +530,7 @@ const BottomSheetComponent = ({
                       />
                     )}
                     <View style={styles.viewContainerInformationCustomer}>
-                      <Text style={styles.textUserBottomSheet}>
+                      <Text numberOfLines={1} style={styles.textUserBottomSheet}>
                         {order.order.deliveryFullName || order.order.customerID.fullName}
                       </Text>
                       <View style={[styles.viewContainerRating, {marginTop:6}]}>
@@ -549,7 +549,7 @@ const BottomSheetComponent = ({
                       </View>
                     </View>
                   </View>
-                  <View style={styles.viewInformationUserBottomSheet}>
+                  <View style={[styles.viewInformationUserBottomSheet, ]}>
                     <TouchableOpacity
                       onPress={() => {
                         setShowNumberPhone(true);
