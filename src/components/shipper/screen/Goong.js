@@ -97,8 +97,8 @@ const Goong = () => {
 
   const [order, setOrder] = useState(null);
   const [checkImage, setCheckImage] = useState(false);
-  var id = '663ccda31387830b4e4a788a';
-  // var id;
+  // var id = '663ccda31387830b4e4a788a';
+  var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
   const currentOrderImage = useRef('');
