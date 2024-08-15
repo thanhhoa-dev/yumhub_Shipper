@@ -124,6 +124,10 @@ const Goong = () => {
             console.log('cancelled_from_merchant');
             handleCancelToMerchant(6);
             break;
+          case 'cancelled_from_customer':
+            console.log('cancelled_from_customer');
+            handleCancelFromCus()
+            break;
           default:
             console.log('Unknown command:', message.command);
             break;
@@ -590,6 +594,17 @@ const Goong = () => {
         order: currentOrder.current,
         index: index,
       });
+      setOrder(null);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+  const handleCancelFromCus = () => {
+    try {
+      handleClosePress();
+      setIndex(0);
+      translateX.setValue(0);
       setOrder(null);
     } catch (error) {
       console.log(error);
