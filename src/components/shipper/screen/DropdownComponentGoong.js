@@ -3,10 +3,9 @@ import {StyleSheet, View, Text} from 'react-native';
 import {Dropdown} from 'react-native-element-dropdown';
 
 const data = [
-  {label: 'Nhà hàng hết món', value: 1},
-  {label: 'Khách không nhận hàng', value: 2},
-  {label: 'Khách bom hàng', value: 3},
-  {label: 'Sự cố không muốn', value: 4},
+  {label: 'Khách không nhận hàng', value: 1},
+  {label: 'Khách bom hàng', value: 2},
+  {label: 'Sự cố không muốn', value: 3},
 ];
 
 const DropdownComponentGoong = ({valueCancelOrder, setValueCancelOrder}) => {
