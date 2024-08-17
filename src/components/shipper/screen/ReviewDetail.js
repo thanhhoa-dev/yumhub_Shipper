@@ -15,6 +15,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import StarRating from 'react-native-star-rating-widget';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {styles} from '../styles/ReviewDetailStyle';
+import LoadImage from './LoadImage';
 
 const ReviewDetail = () => {
   const navigation = useNavigation();
@@ -89,11 +90,11 @@ const ReviewDetail = () => {
             {numberStarRating(item.review.rating)}
           </Text>
         </View>
-        {item.user.avatar && (
+        {item.review.orderID && (
           <View style={styles.viewContainerImage}>
-            <Image
+            <LoadImage
               style={styles.imageReviewDetail}
-              source={{uri: `${item.user.avatar}`}}
+              uri= {item.review.orderID.imageGiveFood}
             />
           </View>
         )}

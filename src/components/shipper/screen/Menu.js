@@ -6,19 +6,27 @@ import {
   ScrollView,
   Image,Modal
 } from 'react-native';
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { UserContext } from '../../user/UserContext';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Feather from 'react-native-vector-icons/Feather';
 import Dialog from 'react-native-dialog';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import { useFocusEffect } from '@react-navigation/native';
+
 const Menu = ({ navigation }) => {
   const { user } = useContext(UserContext);
   const { setUser } = useContext(UserContext);
-  const idUser = user.checkAccount._id;
   const [visible, setVisible] = useState(false);
-  // console.log(user);
+  const [refresh, setRefresh] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setRefresh(prev => !prev);
+    }, [])
+  );
+
   const handleLogout = () => {
     setVisible(true);
   };

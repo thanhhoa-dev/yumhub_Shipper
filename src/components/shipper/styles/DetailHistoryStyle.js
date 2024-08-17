@@ -79,7 +79,7 @@ export const styles = StyleSheet.create({
     marginTop : 3
   },
   description : {
-    paddingLeft : 23,
+    paddingLeft : 48,
     fontSize : Size.S14,
     fontWeight : FontWeight.FW600,
     color : "#646982",

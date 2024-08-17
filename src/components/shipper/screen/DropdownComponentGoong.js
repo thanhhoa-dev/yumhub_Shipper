@@ -8,7 +8,13 @@ const data = [
   {label: 'Sự cố không muốn', value: 3},
 ];
 
-const DropdownComponentGoong = ({valueCancelOrder, setValueCancelOrder}) => {
+const dataMerchant = [
+  {label: 'Nhà hàng hết món', value: 1},
+  {label: 'Nhà hàng đóng cửa', value: 2},
+  {label: 'Sự cố không muốn', value: 3},
+];
+
+const DropdownComponentGoong = ({valueCancelOrder, setValueCancelOrder, index}) => {
   return (
     <View>
       <Dropdown
@@ -16,7 +22,7 @@ const DropdownComponentGoong = ({valueCancelOrder, setValueCancelOrder}) => {
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         iconStyle={styles.iconStyle}
-        data={data}
+        data={index === 2 ? dataMerchant : data }
         maxHeight={300}
         labelField="label"
         valueField="value"

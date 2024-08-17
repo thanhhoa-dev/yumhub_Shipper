@@ -776,7 +776,9 @@ const Goong = () => {
         setImage(result.url);
         setCheckImage(false);
       } catch (error) {
-        console.error('Error uploading image:', error);
+        setCheckImage(false);
+        Alert.alert('Xảy ra lỗi mạng thử lại sau');
+        // console.error('Error uploading image:', error);
       }
     }
   }, []);
@@ -1138,6 +1140,7 @@ const Goong = () => {
               <DropdownComponentGoong
                 valueCancelOrder={valueCancelOrder}
                 setValueCancelOrder={setValueCancelOrder}
+                index={index}
               />
             </View>
             <TouchableOpacity

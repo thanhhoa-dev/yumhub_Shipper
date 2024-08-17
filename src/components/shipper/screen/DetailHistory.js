@@ -23,7 +23,7 @@ const DetailHistory = () => {
       <View style={styles.viewContainerItemFood}>
         <View style={styles.headerItemFood}>
           <View style={styles.headername}>
-            <Text style={[styles.nameFood, { width: 21 }]}>{item.food.quantity}x</Text>
+            <Text style={[styles.nameFood, { width: 41}]}>{item.food.quantity}x</Text>
             <Text style={styles.nameFood}>{item.name}</Text>
           </View>
           <Text style={styles.price}>{formatCurrency(item.food.price)}</Text>
