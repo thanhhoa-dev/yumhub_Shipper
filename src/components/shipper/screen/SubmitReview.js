@@ -20,6 +20,7 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {UserContext} from '../../user/UserContext';
 import Feather from 'react-native-vector-icons/Feather';
+import LoadingComponent from './LoadingComponent';
 
 const SubmitReview = () => {
   const navigation = useNavigation();
@@ -31,6 +32,7 @@ const SubmitReview = () => {
   const route = useRoute();
   const {order} = route.params;
   const idUser = user.checkAccount._id;
+  const [checkLoading, setCheckLoading] = useState(false);
 
   const handleCreateReview = async (idCustomer) => {
     const customerReviewData = {
@@ -81,13 +83,19 @@ const SubmitReview = () => {
 
   /// xử lý hình ảnh
   const takePhoto = useCallback(async response => {
-    if (response.didCancel) return;
+    setCheckLoading(true)
+    if (response.didCancel) {
+      setCheckLoading(false)
+      return;
+    }
     if (response.errorCode) {
       console.error('ImagePicker Error: ', response.errorCode);
+      setCheckLoading(false)
       return;
     }
     if (response.errorMessage) {
       console.error('ImagePicker Error: ', response.errorMessage);
+      setCheckLoading(false)
       return;
     }
     if (response.assets && response.assets.length > 0) {
@@ -101,7 +109,9 @@ const SubmitReview = () => {
       try {
         const result = await uploadImage(formData);
         setImage([result.url]);
+        setCheckLoading(false);
       } catch (error) {
+        setCheckLoading(false);
         console.error('Error uploading image:', error);
       }
     }
@@ -177,7 +187,7 @@ const SubmitReview = () => {
                   </TouchableOpacity>
                 )}
               </View>
-              {image.length > 0 && (
+              {image.length > 0 && !checkLoading && (
                 <View style={styles.viewContainerImage}>
                   <View style={styles.viewIcon}>
                     <TouchableOpacity
@@ -203,6 +213,10 @@ const SubmitReview = () => {
                   </View>
                 </View>
               )}
+              {checkLoading && (
+                <View style={styles.viewContainerImage}>
+                  <LoadingComponent/>
+                </View>)}
             </View>
           </View>
           <TouchableOpacity
