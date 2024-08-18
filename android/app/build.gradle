@@ -107,6 +107,14 @@ android {
             task.dependsOn 'copyReactNativeVectorIconFonts'
         }
     }
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == "release") {
+            variant.outputs.all { output ->
+                def apkName = "yumhubshipper.apk"
+                output.outputFileName = apkName
+            }
+        }
+    }
 }
 
 dependencies {
