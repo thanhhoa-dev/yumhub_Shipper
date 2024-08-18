@@ -10,7 +10,6 @@ export const styles = StyleSheet.create({
     borderRadius: 50,
   },
   textStatusShipper: {
-    width:165,
     backgroundColor: "#D3D3D3",
     paddingVertical: Size.S12,
     paddingHorizontal: Size.S20,
@@ -22,13 +21,13 @@ export const styles = StyleSheet.create({
   viewStatusShipper: {
     position: 'absolute',
     top: 40,
-    left:20,
     backgroundColor: 'rgba(0, 0, 0, 0)',
     zIndex: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    paddingHorizontal:30
   },
   viewContainerBottomSheet: {
     flex: 1,

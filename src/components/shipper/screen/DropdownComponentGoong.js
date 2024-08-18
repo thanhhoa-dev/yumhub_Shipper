@@ -22,7 +22,7 @@ const DropdownComponentGoong = ({valueCancelOrder, setValueCancelOrder, index}) 
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         iconStyle={styles.iconStyle}
-        data={index === 2 ? dataMerchant : data }
+        data={index === 1 ? dataMerchant : data }
         maxHeight={300}
         labelField="label"
         valueField="value"

@@ -97,7 +97,7 @@ const Goong = () => {
 
   const [order, setOrder] = useState(null);
   const [checkImage, setCheckImage] = useState(false);
-  // var id = '663ccda31387830b4e4a788a';
+  // var id = '66c07f475e61f3aa7119f1f4';
   var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
@@ -534,7 +534,7 @@ const Goong = () => {
               styles.textInformationFoodBottomSheet,
               {color: '#646982', fontSize: 14},
             ]}>
-            {item.other.priceForSale.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ
+            {item.other.priceForSale != null ? item.other.priceForSale.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : item.other.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} đ
           </Text>
         </View>
         <View style={styles.viewItemImageFoodBottomSheet}>
@@ -867,7 +867,7 @@ const Goong = () => {
         <View style={styles.viewStatusShipper}>
           {statusShipper ? (
             <Text style={[styles.textStatusShipper, {color: '#005987',backgroundColor:"#A7F9FF"}]}>
-              Đang hoạt động 
+              Đang hoạt động
             </Text>
           ) : (
             <Text style={styles.textStatusShipper}>Không hoạt động</Text>

@@ -96,7 +96,7 @@ const BottomSheetComponent = ({
                         onChange={() => {}}
                       />
                       <Text style={styles.textRatingBottomSheet}>
-                        {order.order.merchantID.rating}
+                        {(order.order.merchantID.rating).toFixed(1)}
                       </Text>
                     </View>
                   </View>
