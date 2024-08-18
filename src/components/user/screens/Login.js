@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { login } from '../UserHTTP';
 import AlertCustom from '../../../constants/AlertCustom';
 import Loading from '../../shipper/screen/Loading';
+import Feather from 'react-native-vector-icons/Feather'
 
 
 const Login = (props) => {
@@ -111,8 +112,8 @@ const Login = (props) => {
                         <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeButton}>
                             {
                                 showPassword
-                                    ? <Image style={styles.eyeIcon} source={require("../../../assets/Group.png")} />
-                                    : <Image style={styles.eyeIcon} source={require("../../../assets/eye-off.png")} />
+                                ? <Feather name='eye' size={20}/>
+                                : <Feather name='eye-off' size={20}/>
                             }
                             
                         </TouchableOpacity>
@@ -157,10 +158,13 @@ const styles = StyleSheet.create({
     },
     eyeButton: {
         position: 'absolute',
-        right: 15,
-        top: '60%',
+        right: 10,
+        top: '40%',
         transform: [{ translateY: -12.5 }],
         zIndex: 1,
+        padding:10,
+        width:40,
+        height:40,
     },
     eyeIcon: {
         width: 20,
