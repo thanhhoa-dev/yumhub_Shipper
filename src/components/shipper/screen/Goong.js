@@ -26,7 +26,7 @@ import {
   BackHandler,
 } from 'react-native';
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service'
 import {
   GetOrderByID,
   ShowDetail,
@@ -36,14 +36,9 @@ import {
 import axios from 'axios';
 import {UpdateShipperInformation} from '../ShipperHTTP';
 import {UserContext} from '../../user/UserContext';
-import BottomSheet from '@gorhom/bottom-sheet';
 import {GestureHandlerRootView, ScrollView} from 'react-native-gesture-handler';
-import StarRating from 'react-native-star-rating-widget';
-import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {launchCamera} from 'react-native-image-picker';
 import {useNavigation, useNavigationState} from '@react-navigation/native';
 import Loading from './Loading';
@@ -67,10 +62,14 @@ const Goong = () => {
   const [destination, setDestination] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeCoordinatesCustomer, setRouteCoordinatesCustomer] = useState([]);
+<<<<<<< HEAD
   const [locateCurrent, setLocateCurrent] = useState({
     longitude:106.624832,
     latitude:10.8545021
 });
+=======
+  const [locateCurrent, setLocateCurrent] = useState(null);
+>>>>>>> 4a122b20b805a3b2ebf12dedc2ccf79d2d189f77
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [distanceCustomer, setDistanceCustomer] = useState(null);
@@ -82,7 +81,6 @@ const Goong = () => {
   const [index, setIndex] = useState(0);
   const [showNumberPhone, setShowNumberPhone] = useState(false);
   const translateX = useRef(new Animated.Value(0)).current;
-  const {width} = Dimensions.get('window');
   const bottomSheetRef = useRef(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
@@ -189,6 +187,7 @@ const Goong = () => {
   // }, [countdown, id, idUser, order, statusShipper]);
 
   const handleLocateCurrent = async () => {
+    // console.log('ahihi');
     // Geolocation.getCurrentPosition(
     //   position => {
     //     const {latitude, longitude} = position.coords;
@@ -318,6 +317,9 @@ const Goong = () => {
       console.log(error);
     }
   };
+  function degreesToRadians(degrees) {
+    return degrees * (Math.PI / 180);
+  }
 
   const fetchRouteCustomer = async () => {
     try {
@@ -332,11 +334,22 @@ const Goong = () => {
 
       const {routes} = response.data;
 
+        const R = 6371; // Bán kính Trái đất theo km
+        const dLat = degreesToRadians(destinationCustomer.lat - destination.latitude);
+        const dLon = degreesToRadians(destinationCustomer.lng - destination.longitude);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(degreesToRadians(destination.latitude)) * Math.cos(degreesToRadians(destinationCustomer.lat)) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c; // Khoảng cách theo km
+
       if (routes && routes.length > 0) {
         const points = routes[0].overview_polyline.points;
         const coordinates = decodePolyline(points);
         setRouteCoordinatesCustomer(coordinates);
-        setDistanceCustomer(routes[0].legs[0].distance.text);
+        // setDistanceCustomer(routes[0].legs[0].distance.text);
+        // console.log(distance);
+        // setDistanceCustomer(distance.toFixed(1)+ ' ' +'km');
         setDurationCustomer(routes[0].legs[0].duration.text);
       }
     } catch (error) {
@@ -516,10 +529,13 @@ const Goong = () => {
   };
 
   const handleShowDetail = async () => {
+    setCheckImage(true);
     try {
       const result = await ShowDetail(id);
       setDetailFoodOrder(result);
+      setCheckImage(false);
     } catch (error) {
+      setCheckImage(false);
       console.log(error);
     }
   };
@@ -639,24 +655,34 @@ const Goong = () => {
 
       const {routes} = response.data;
 
+      const R = 6371; // Bán kính Trái đất theo km
+      const dLat = degreesToRadians(currentLocationCustomer.current.lat - locateCurrent.latitude);
+      const dLon = degreesToRadians(currentLocationCustomer.current.lng - locateCurrent.longitude);
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(degreesToRadians(locateCurrent.latitude)) * Math.cos(degreesToRadians(currentLocationCustomer.current.lat)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distanceText = R * c; // Khoảng cách theo km
+
       if (routes && routes.length > 0) {
-        const distanceText = routes[0].legs[0].distance.text;
-        const match = distanceText.match(/^(\d+(\.\d+)?)[ ]?(km|m)$/i);
-        if (!match) {
-          throw new Error('Invalid format');
-        }
+        // const distanceText = routes[0].legs[0].distance.text;
+        return distanceText * 1000;
+        // const match = distanceText.match(/^(\d+(\.\d+)?)[ ]?(km|m)$/i);
+        // if (!match) {
+        //   throw new Error('Invalid format');
+        // }
 
-        const value = parseFloat(match[1]);
-        const unit = match[3].toLowerCase();
+        // const value = parseFloat(match[1]);
+        // const unit = match[3].toLowerCase();
 
-        switch (unit) {
-          case 'km':
-            return value * 1000;
-          case 'm':
-            return value;
-          default:
-            throw new Error('Unsupported unit');
-        }
+        // switch (unit) {
+        //   case 'km':
+        //     return value * 1000;
+        //   case 'm':
+        //     return value;
+        //   default:
+        //     throw new Error('Unsupported unit');
+        // }
       }
     } catch (error) {
       console.error(error);
@@ -691,11 +717,22 @@ const Goong = () => {
 
       const {routes} = response.data;
 
+      const R = 6371; // Bán kính Trái đất theo km
+        const dLat = degreesToRadians(destinationCustomer.lat - currentLocationShipper.current.latitude);
+        const dLon = degreesToRadians(destinationCustomer.lng - currentLocationShipper.current.longitude);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(degreesToRadians(currentLocationShipper.current.latitude)) * Math.cos(degreesToRadians(destinationCustomer.lat)) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c; // Khoảng cách theo km
+
       if (routes && routes.length > 0) {
         const points = routes[0].overview_polyline.points;
         const coordinates = decodePolyline(points);
         setRouteCoordinatesCustomer(coordinates);
-        setDistanceCustomer(routes[0].legs[0].distance.text);
+        setDistanceCustomer(distance.toFixed(1)+' '+'Km');
+        console.log(distance);
+        // setDistanceCustomer(routes[0].legs[0].distance.text);
         setDurationCustomer(routes[0].legs[0].duration.text);
       }
     } catch (error) {

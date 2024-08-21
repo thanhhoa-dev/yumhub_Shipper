@@ -12,11 +12,13 @@ import { useRoute } from '@react-navigation/native'
 import star from '../../../assets/star.png'
 import starvote from '../../../assets/starvote.png'
 import { useNavigation } from '@react-navigation/native';
+import LoadingComponent from './LoadingComponent';
 
 const DetailHistory = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { order } = route.params;
+  const [checkLoading, setCheckLoading] = useState(false);
   const avatar = order.customerID.avatar != undefined ? order.customerID.avatar : "https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png"
   const handleRenderListFoods = ({ item }) => {
     return (
@@ -37,12 +39,15 @@ const DetailHistory = () => {
   const [listReview, setListReview] = useState([])
   useEffect(() => {
     const fetchData = async () => {
+      setCheckLoading(true);
       try {
         const response = await ShowDetail(order._id);
         const responseReview = await getReviewOfOrder(order._id);
         setListFoods(response);
         setListReview(responseReview.listReview);
+        setCheckLoading(false);
       } catch (error) {
+        setCheckLoading(false);
         console.log(error);
       }
     };
@@ -174,6 +179,8 @@ const DetailHistory = () => {
         <Text style={styles.textHeader}>Mô tả đơn hàng</Text>
         <View style={styles.viewICBack}></View>
       </View>
+      {!checkLoading ? (
+      <View>
       <View style={styles.titleListFood}>
         <Text style={styles.textTitleListFood}>
           danh sách món
@@ -189,6 +196,14 @@ const DetailHistory = () => {
         keyExtractor={(item, index) => `food-${item._id}` + index}
         scrollEnabled={false}
       />
+      <View style={styles.rowTotal}>
+        <Text style={styles.total}>Tên người nhận:</Text>
+        <Text style={styles.money}>{order.deliveryFullName}</Text>
+      </View>
+      <View style={styles.rowTotal}>
+        <Text style={styles.total}>SĐT người nhận:</Text>
+        <Text style={styles.money}>{order.deliveryPhonenumber}</Text>
+      </View>
       <View style={styles.rowTotal}>
         <Text style={styles.total}>Tổng tiền món(giá gốc):</Text>
         <Text style={styles.money}>{formatCurrency(order.priceFood)}</Text>
@@ -219,6 +234,10 @@ const DetailHistory = () => {
           <Text style={styles.txtBackHome}>Về Trang Chủ</Text>
         </View>
       </TouchableOpacity>
+      </View>
+      ) : (
+        <LoadingComponent/>
+      )}
 
     </ScrollView>
   )

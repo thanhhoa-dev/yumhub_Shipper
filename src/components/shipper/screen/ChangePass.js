@@ -21,7 +21,8 @@ const ChangePass = ({ navigation }) => {
     const [optionAlert, setoptionAlert] = useState({})
     const idUser = user.checkAccount._id;
     const [isLoading, setisLoading] = useState(false)
-    // console.log(idUser);
+
+
     const handleChange = async () => {
         if (passNew !== passConfirm) {
             setoptionAlert({
@@ -80,7 +81,6 @@ const ChangePass = ({ navigation }) => {
                 <View>
                     <Image style={{ height: 117, width: 117, marginEnd: 30 }} source={require("../../../assets/iconAsset.png")}></Image>
                     <Text style={styles.viewText}>Đổi mật khẩu</Text>
-
                 </View>
             </View>
             <ScrollView style={styles.viewBody}>
