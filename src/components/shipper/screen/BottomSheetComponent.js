@@ -544,7 +544,7 @@ const BottomSheetComponent = ({
                           onChange={() => {}}
                         />
                         <Text style={styles.textRatingBottomSheet}>
-                          {(order.order.customerID.rating).toFixed(1)}
+                          {order.order.customerID.rating ? (order.order.customerID.rating).toFixed(1) : 0}
                         </Text>
                       </View>
                     </View>
