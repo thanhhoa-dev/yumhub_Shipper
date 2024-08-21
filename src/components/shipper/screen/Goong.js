@@ -62,14 +62,7 @@ const Goong = () => {
   const [destination, setDestination] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
   const [routeCoordinatesCustomer, setRouteCoordinatesCustomer] = useState([]);
-<<<<<<< HEAD
-  const [locateCurrent, setLocateCurrent] = useState({
-    longitude:106.624832,
-    latitude:10.8545021
-});
-=======
   const [locateCurrent, setLocateCurrent] = useState(null);
->>>>>>> 4a122b20b805a3b2ebf12dedc2ccf79d2d189f77
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
   const [distanceCustomer, setDistanceCustomer] = useState(null);
@@ -693,7 +686,7 @@ const Goong = () => {
   const checkDistance = async () => {
     const distance = await checkfetchRouteCustomer();
     if (distance !== null) {
-      if (distance < 500) {
+      if (distance > 500) {
         setIndex(2);
         Alert.alert('Bạn chưa đi tới nơi nhỏ hơn 500 m');
       } else {
