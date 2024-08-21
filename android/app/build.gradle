@@ -125,6 +125,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:23.0.0'
     implementation 'com.google.firebase:firebase-analytics'
     implementation fileTree(dir: 'libs', include: ['*.aar'])
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
     // icon
     implementation project(':react-native-vector-icons')
     implementation("com.squareup.okhttp3:okhttp:4.6.0")

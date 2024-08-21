@@ -26,7 +26,7 @@ import {
   BackHandler,
 } from 'react-native';
 import MapView, {Marker, Polyline, PROVIDER_GOOGLE} from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-geolocation-service'
 import {
   GetOrderByID,
   ShowDetail,
@@ -36,14 +36,9 @@ import {
 import axios from 'axios';
 import {UpdateShipperInformation} from '../ShipperHTTP';
 import {UserContext} from '../../user/UserContext';
-import BottomSheet from '@gorhom/bottom-sheet';
 import {GestureHandlerRootView, ScrollView} from 'react-native-gesture-handler';
-import StarRating from 'react-native-star-rating-widget';
-import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {launchCamera} from 'react-native-image-picker';
 import {useNavigation, useNavigationState} from '@react-navigation/native';
 import Loading from './Loading';
@@ -79,7 +74,6 @@ const Goong = () => {
   const [index, setIndex] = useState(0);
   const [showNumberPhone, setShowNumberPhone] = useState(false);
   const translateX = useRef(new Animated.Value(0)).current;
-  const {width} = Dimensions.get('window');
   const bottomSheetRef = useRef(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const snapPoints = useMemo(() => ['20%', '25%', '50%', '70%', '100%'], []);
@@ -186,6 +180,7 @@ const Goong = () => {
   // }, [countdown, id, idUser, order, statusShipper]);
 
   const handleLocateCurrent = async () => {
+    // console.log('ahihi');
     // Geolocation.getCurrentPosition(
     //   position => {
     //     const {latitude, longitude} = position.coords;
