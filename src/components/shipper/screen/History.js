@@ -60,7 +60,7 @@ const History = ({ startDate, endDate }) => {
         setisLoading(true)
         try {
             const response = await getHistoryShipper(user.checkAccount._id);
-            setlistHistory(response.historyShipper);
+            setlistHistory(response.historyShipper.filter(item => item.status._id !== "661760e3fc13ae3574ab8dde"));
         } catch (error) {
             console.log(error);
         }
