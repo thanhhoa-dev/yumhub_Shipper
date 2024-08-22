@@ -524,7 +524,7 @@ const Goong = () => {
   const handleShowDetail = async () => {
     setCheckImage(true);
     try {
-      const result = await ShowDetail(id);
+      const result = await ShowDetail(currentOrder.current.order._id);
       setDetailFoodOrder(result);
       setCheckImage(false);
     } catch (error) {
