@@ -124,7 +124,7 @@ const Login = (props) => {
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={handleLogin} style={styles.viewLogin}>
-                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>Đăng nhập</Text>
+                        <Text style={{ color: '#333', fontSize: 14, fontWeight: '700' }}>Đăng nhập</Text>
                     </TouchableOpacity>
                 </View>
                 <Modal
@@ -172,20 +172,20 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
     },
     viewLogin: {
-        marginStart: 20,
         marginTop: 31,
-        width: "90%",
+        width: 327,
         height: 62,
         borderRadius: 12,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#19D6E5',
         justifyContent: 'center',
+        alignSelf:'center'
     },
     viewForgotPass: {
         marginTop: 25,
         alignSelf: 'flex-end',
-        marginEnd: 20,
+        marginEnd: 50,
     },
     viewTextInputEmail: {
         width: 327,
@@ -201,9 +201,10 @@ const styles = StyleSheet.create({
     viewTextEmail: {
         fontSize: 13,
         fontWeight: '400',
-        color: '#32343E',
-        marginStart: 44,
+        color: '#333',
+        marginStart: 37,
         marginTop: 24,
+        textTransform:'uppercase'
     },
     viewText2: {
         fontSize: 16,
