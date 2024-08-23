@@ -48,8 +48,8 @@ const ChatWithCustomer = () => {
         const isShowImg = async () => {
             if (dataMessage) {
                 for (let i = 0; i < (dataMessage.length - 1); i++) {
-                    if (dataMessage[i].typeUser == "shipper") {
-                        if (dataMessage[i + 1].typeUser == "shipper") {
+                    if (dataMessage[i].typeUser == "customer") {
+                        if (dataMessage[i + 1].typeUser == "customer") {
                             dataMessage[i].continue = true
                         } else {
                             dataMessage[i].continue = false
@@ -219,7 +219,7 @@ const ChatWithCustomer = () => {
                 styles.viewContent]}
             >
                 {
-                    (item.typeUser == 'customer' && !item.continue) ? <Image style={styles.icAvatarCustomer} source={{ uri: 'https://i.pinimg.com/originals/ff/a0/9a/ffa09aec412db3f54deadf1b3781de2a.png' }} /> : <View style={styles.icAvatarCustomer}></View>
+                    (item.typeUser == 'customer' && !item.continue) ? <Image style={styles.icAvatarCustomer} source={{ uri: order.customerID.avatar }} /> : <View style={styles.icAvatarCustomer}></View>
                 }
                 {
                     (item.type_mess == "timeStart") ?
@@ -274,22 +274,12 @@ const ChatWithCustomer = () => {
                             FontWeight={FontWeight.FW700}
                         />
                     </TouchableOpacity>
-                    <Image style={styles.avatarHeader} source={{ uri: "https://inkythuatso.com/uploads/thumbnails/800/2023/03/1-hinh-anh-ngay-moi-hanh-phuc-sieu-cute-inkythuatso-09-13-35-50.jpg" }} />
+                    {order && (<LoadImage style={styles.avatarHeader} uri={ order.customerID.avatar } />) }
                     <View>
-                        <Text style={styles.nameHeader}>Đoàn Thanh Hòa</Text>
+                    {order && order.customerID.fullName ? (<Text style={styles.nameHeader}>{order.customerID.fullName}</Text>) : (<Text style={styles.nameHeader}>Khách chưa đặt tên</Text>) }
                         <Text style={styles.type}>Khách hàng</Text>
                     </View>
                 </View>
-                <TouchableOpacity style={styles.viewICMore}
-                    onPress={() => { navigation.goBack() }}
-                >
-                    <Icon
-                        name="ellipsis-vertical"
-                        size={24}
-                        color="#005987"
-                        FontWeight={FontWeight.FW700}
-                    />
-                </TouchableOpacity>
             </View>
             <FlatList style={styles.containerMessage}
                 data={dataMessage}

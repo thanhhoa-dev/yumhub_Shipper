@@ -110,8 +110,8 @@ const TopUpPaymentMethod = () => {
             let orderCode = Number(generateRandomNumber(15));
             const body = {
                 orderCode: orderCode,
-                amount: amount,
-                description: 'Nộp tiền vào tài khoản',
+                amount: 2000,
+                description: 2+user.checkAccount._id,
                 items: [{
                     idshipper: user.checkAccount._id,
                     name: user.checkAccount.fullName,
