@@ -3,6 +3,7 @@ import { View, TextInput, StyleSheet, Image, Text, TouchableOpacity, Dimensions,
 import { resetpass,  } from '../UserHTTP';
 import AlertCustom from '../../../constants/AlertCustom';
 import { ScreenStack } from 'react-native-screens';
+import Feather from 'react-native-vector-icons/Feather';
 
 const ResetPassword = (props) => {
     const {width, height} = Dimensions.get('window');
@@ -12,6 +13,8 @@ const ResetPassword = (props) => {
     const [passConfirm, setPassWordConfirm] = useState('');
     const [isShowAlert, setisShowAlert] = useState(false);
     const [optionAlert, setoptionAlert] = useState({});
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword2, setShowPassword2] = useState(false);
 
     
     const validate = () => {
@@ -40,6 +43,7 @@ const ResetPassword = (props) => {
         const checkValidate = validate();
         try {
             if (checkValidate) {
+                console.log('dfadsfas');
                 const result = await resetpass(email, password);
                 if (result.result) {
                     setoptionAlert({
@@ -82,8 +86,16 @@ const ResetPassword = (props) => {
                             onChangeText={setPassWord}
                             placeholder=""
                             style={styles.viewTextInputEmail}
-                            paddingStart={20}
+                            secureTextEntry={!showPassword}
                         />
+                        <TouchableOpacity onPress={()=>{setShowPassword(!showPassword)}} style={styles.eyeButton}>
+                            {
+                                showPassword
+                                ? <Feather name='eye' size={20}/>
+                                : <Feather name='eye-off' size={20}/>
+                            }
+                            
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.viewEmail}>
                         <Text style={styles.viewTextEmail}> Nhập lại mật khẩu mới</Text>
@@ -94,11 +106,19 @@ const ResetPassword = (props) => {
                             onChangeText={setPassWordConfirm}
                             placeholder=""
                             style={styles.viewTextInputEmail}
-                            paddingStart={20}
+                            secureTextEntry={!showPassword2}
                         />
+                        <TouchableOpacity onPress={()=>{setShowPassword2(!showPassword2)}} style={styles.eyeButton}>
+                            {
+                                showPassword2
+                                ? <Feather name='eye' size={20}/>
+                                : <Feather name='eye-off' size={20}/>
+                            }
+                            
+                        </TouchableOpacity>
                     </View>
                     <TouchableOpacity onPress={handleNext} style={styles.viewLogin}>
-                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>Xác nhận</Text>
+                        <Text style={{ color: '#333', fontSize: 14, fontWeight: '700' }}>Xác nhận</Text>
                     </TouchableOpacity>
                     <Modal
                         animationType="slide"
@@ -115,23 +135,25 @@ const ResetPassword = (props) => {
 };
 
 const styles = StyleSheet.create({
+    eyeButton:{
+        marginStart:10
+    },
     viewLogin: {
-        marginStart: 20,
-        marginTop: 31,
-        width: "80%",
+        marginTop: 40,
+        width: 327,
         height: 62,
         borderRadius: 12,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#19D6E5',
         justifyContent: 'center',
-        marginStart: 40,
+        alignSelf:'center'
     },
     viewForgotPass: {
         marginTop: 25,
         marginStart: 270,
     },
-    viewTextInputEmail: {
+    viewTextInputPassword:{
         width: 327,
         height: 62,
         backgroundColor: '#F0F5FA',
@@ -140,13 +162,20 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#333',
+        flexDirection:'row',
+        alignItems:'center',
+        paddingHorizontal:20
+    },
+    viewTextInputEmail: {
+        flex:1
     },
     viewTextEmail: {
         fontSize: 13,
         fontWeight: '400',
         color: '#32343E',
-        marginStart: 44,
+        marginStart: 35,
         marginTop: 24,
+        textTransform:'uppercase'
     },
     viewText2: {
         fontSize: 16,

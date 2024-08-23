@@ -17,6 +17,7 @@ const ForgotPassword = (props) => {
     const [isshowAlert, setisshowAlert] = useState(false)
     const [optionAlert, setoptionAlert] = useState({})
     const [isLoading, setisLoading] = useState(false)
+
     const handleForgotPass = async () => {
         if (!email) {
             setoptionAlert({
@@ -38,7 +39,6 @@ const ForgotPassword = (props) => {
             return;
         }
         try {
-            setisLoading(true)
             const result = await forgotPass(email);
             setisLoading(false)
             if (result.result) {
@@ -103,7 +103,7 @@ const ForgotPassword = (props) => {
                         />
                     </View>
                     <TouchableOpacity onPress={handleForgotPass} style={styles.viewLogin}>
-                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '700' }}>GỬI MÃ </Text>
+                        <Text style={{ color: '#333', fontSize: 14, fontWeight: '700' }}>GỬI MÃ </Text>
                     </TouchableOpacity>
                     <Modal
                         animationType="fade"
@@ -124,16 +124,15 @@ export default ForgotPassword;
 
 const styles = StyleSheet.create({
     viewLogin: {
-        marginStart: 20,
         marginTop: 31,
-        width: "80%",
+        width: 327,
         height: 62,
         borderRadius: 12,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#19D6E5',
         justifyContent: 'center',
-        marginStart: 40,
+        alignSelf:'center'
     },
     viewForgotPass: {
         marginTop: 25,
@@ -154,7 +153,7 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: '400',
         color: '#32343E',
-        marginStart: 44,
+        marginStart: 37,
         marginTop: 24,
     },
     viewText2: {

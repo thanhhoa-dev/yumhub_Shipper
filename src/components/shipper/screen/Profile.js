@@ -20,6 +20,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import LoadImage from './LoadImage';
 import FastImage from 'react-native-fast-image';
+import StarRating from 'react-native-star-rating-widget';
 
 const data = [
   { label: 'Nam', value: 'Male' },
@@ -133,7 +134,7 @@ const Profile = ({ navigation }) => {
     <View style={{ flex: 1, backgroundColor: 'white' }}>
       <View style={styles.viewHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image style={{}} source={require('../../../assets/IconBack.png')} />
+          <Image source={require('../../../assets/IconBack.png')} />
         </TouchableOpacity>
         <Text
           style={{
@@ -148,8 +149,8 @@ const Profile = ({ navigation }) => {
       </View>
       <ScrollView>
         <View>
-          <View style={{ alignSelf: 'center', marginTop: 31 }}>
-            <View style={{ alignSelf: 'center', marginTop: 31 }}>
+          <View style={{ alignSelf: 'center', marginTop: 20 }}>
+            <View style={{ alignSelf: 'center'}}>
               <LoadImage
                 uri={avatar}
                 style={styles.viewImage}
@@ -170,7 +171,7 @@ const Profile = ({ navigation }) => {
                 />
               </TouchableOpacity>
             </View>
-            <Text
+            {/* <Text
               style={{
                 fontSize: 16,
                 fontWeight: '700',
@@ -179,11 +180,25 @@ const Profile = ({ navigation }) => {
                 marginTop: 17,
               }}>
               Quản lý
-            </Text>
+            </Text> */}
+            <View style={{flexDirection:'row', alignItems:'center', justifyContent:'center', marginTop:15}}>
+              <StarRating
+              rating={0}
+              maxStars={1}
+              emptyColor={'#FC6E2A'}
+              starSize={25}
+              />
+              <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '700',
+                color: '#005987',
+              }}>{user.checkAccount.rating != null ? user.checkAccount.rating : 0}</Text>
+            </View>
           </View>
           <View style={styles.viewBody}>
             <View>
-              <Text style={styles.textContent}>Họ tên</Text>
+              <Text style={styles.textContent}>Họ Và tên</Text>
               <TextInput
                 style={styles.viewInput}
                 value={fullName}
@@ -220,10 +235,8 @@ const Profile = ({ navigation }) => {
               {renderLabel()}
               <Dropdown
                 style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
+                placeholderStyle={{color:'#333'}}
+                iconStyle={{width:30}}
                 data={data}
                 maxHeight={300}
                 labelField="label"
@@ -372,22 +385,21 @@ const styles = StyleSheet.create({
     height: 56,
     backgroundColor: '#F0F5FA',
     borderRadius: 10,
-    paddingHorizontal: 8,
+    paddingHorizontal: 20,
   },
   icon: {
     marginRight: 5,
   },
   viewLogin: {
-    marginStart: 20,
     marginTop: 31,
-    width: '80%',
+    width: 328,
     height: 62,
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#19D6E5',
     justifyContent: 'center',
-    marginStart: 40,
+    alignSelf:'center'
   },
   textButton: {
     color: 'white',
@@ -419,13 +431,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     justifyContent: 'space-between',
     flexDirection: 'row',
+    color:'#333'
   },
   textContent: {
     fontSize: 14,
     fontWeight: '400',
     color: '#32343E',
-    marginStart: 44,
+    marginStart: 37,
     marginTop: 22,
+    textTransform:'uppercase'
   },
   viewImage: {
     width: 128,
@@ -433,8 +447,8 @@ const styles = StyleSheet.create({
     borderRadius: 100
   },
   viewHeader: {
-    marginTop: 20,
-    marginBottom: 15,
+    marginTop: 15,
+    marginBottom: 8,
     marginStart: 24,
     flexDirection: 'row',
   },
