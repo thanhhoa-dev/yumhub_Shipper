@@ -129,7 +129,7 @@ const QRCodePayOs = () => {
         }
     }
     const paymentSuccess = async () => {
-        const topUp = await topUpShipper(user, "QRCode", Number(data.amount));
+        const topUp = await topUpShipper(user, "QRCode", Number(data.items[0].price));
         if (topUp) {
             setisShowAlert(true)
             setoptionAlert({
