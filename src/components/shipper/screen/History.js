@@ -135,8 +135,8 @@ const History = ({ startDate, endDate }) => {
                 <Text style={styles.itemID}>{item._id.slice(-9)}</Text>
             </View>
             <View style={styles.itemName}>
-                <Text style={[styles.itemTxTName, { width: '60%' }]} numberOfLines={1} ellipsizeMode="tail">{capitalizeWords(item.shipperID.fullName)}</Text>
-                <Text style={styles.itemTxTName}>{capitalizeWords(item.customerID.fullName)}</Text>
+                <Text style={[styles.itemTxTName, { width: '100%' }]} numberOfLines={1} ellipsizeMode="tail">Nhà hàng: {capitalizeWords(item.merchantID.name)}</Text>
+                <Text style={[styles.itemTxTName, { width: '100%' }]} numberOfLines={1} ellipsizeMode="tail">Khách hàng: {capitalizeWords(item.customerID.fullName)}</Text>
             </View>
             <View style={styles.itemRowDetail}>
                 <Text style={styles.itemTxTLeft}>Loại thanh toán:</Text>
