@@ -123,7 +123,8 @@ content: {
 containerMessage: {
     alignSelf: 'center',
     paddingHorizontal: 16,
-    marginBottom: 74
+    marginBottom: 74,
+    width: '100%'
 },
 txtTimeStart: {
     fontSize: 14,

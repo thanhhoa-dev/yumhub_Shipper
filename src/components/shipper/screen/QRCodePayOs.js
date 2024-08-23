@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect, useContext } from 'react';
-import { View, TouchableOpacity, Text, Alert, PermissionsAndroid,
-    BackHandler, Image, ScrollView, Modal } from 'react-native';
+import {
+    View, TouchableOpacity, Text, Alert, PermissionsAndroid,
+    BackHandler, Image, ScrollView, Modal
+} from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useRoute } from '@react-navigation/native';
 import ViewShot from 'react-native-view-shot';
@@ -27,7 +29,7 @@ const QRCodePayOs = () => {
     const { paymentLinkRes, data } = route.params;
     const viewShotRef = useRef(null);
     const [isChecking, setIsChecking] = useState(false);
-    const { user } = useContext(UserContext);
+    const { user, receiveMessage } = useContext(UserContext);
     const [isShowAlert, setisShowAlert] = useState(false)
     const [optionAlert, setoptionAlert] = useState({})
 
@@ -35,8 +37,15 @@ const QRCodePayOs = () => {
         const payOS = new PayOS("d595ed43-ecf6-4f2a-9c9b-c3a0a00aeb5d", "8e8f0123-db64-468d-92cc-68d990a9bd11", "58dbb967ca269e3b2b9f51c3e85a79a1251027b8004910b05ad2b460a7a12bd1");
         const cancelledPaymentLink = await payOS.cancelPaymentLink(paymentLinkRes.orderCode);
         if (cancelledPaymentLink.status === "CANCELLED") {
-            Alert.alert('đã hủy giao dịch')
-            navigation.goBack()
+            setisShowAlert(true)
+            setoptionAlert({
+                title: "Thất bại",
+                message: "Thanh toán đã hủy",
+                type: 3,
+                otherFunction: () => {
+                    navigation.goBack()
+                }
+            })
         }
     }
 
@@ -153,13 +162,26 @@ const QRCodePayOs = () => {
         const paymentLink = await payOS.getPaymentLinkInformation(paymentLinkRes.orderCode);
         switch (paymentLink.status) {
             case "PENDING":
+                setisShowAlert(true)
+                setoptionAlert({
+                    title: "Vui lòng chờ chút",
+                    message: "Chưa nhận được tiền",
+                    type: 2,
+                })
                 break;
             case "PAID":
                 await paymentSuccess()
                 break;
             case "CANCELLED":
-                Alert.alert("giao dịch này đã bị hủy");
-                navigation.goBack()
+                setisShowAlert(true)
+                setoptionAlert({
+                    title: "Thất bại",
+                    message: "Thanh toán đã hủy",
+                    type: 1,
+                    otherFunction: () => {
+                        navigation.goBack()
+                    }
+                })
                 break;
 
             default:
@@ -202,39 +224,45 @@ const QRCodePayOs = () => {
     }, []);
 
     useEffect(() => {
-        let intervalId;
-        let initialTimeoutId;
-
-        const startSetTimeOut = () => {
-            initialTimeoutId = setTimeout(() => {
-                setIsChecking(true);
-            }, 10000);
+        if (receiveMessage) {
+          receiveMessage(message => {
+            switch (message.command) {
+              case 'paymentQRCode':
+                if(message.order == "success"){
+                    paymentSuccess()
+                }
+                break;
+              default:
+                console.log('Unknown command:', message.command);
+                break;
+            }
+          });
+        } else {
+          console.log('User is not set or receiveMessage is not defined');
         }
-
-        const startChecking = () => {
-            intervalId = setInterval(async () => {
-                await checkPayment();
-            }, 3000);
-        };
-
-        if (isChecking) {
-            startChecking();
-        }
-        if (!isChecking)
-            startSetTimeOut();
-
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-            if (initialTimeoutId) clearTimeout(initialTimeoutId);
-        };
-    }, [isChecking]);
+      }, [receiveMessage]);
 
     return (
         <ScrollView style={styles.container}>
             <View style={styles.viewBack}>
                 <TouchableOpacity style={styles.viewICBack}
                     onPress={() => {
-                        navigation.goBack()
+                        Alert.alert(
+                            'Xác nhận',
+                            'Bạn có chắc chắn muốn hủy giao dịch?',
+                            [
+                                {
+                                    text: 'Hủy',
+                                    onPress: () => null,
+                                    style: 'cancel',
+                                },
+                                {
+                                    text: 'Đồng ý',
+                                    onPress: () => cancelPayment(),
+                                },
+                            ],
+                            { cancelable: false }
+                        );
                     }}
                 >
                     <Icon
@@ -284,14 +312,9 @@ const QRCodePayOs = () => {
                 />
             </ViewShot>
             <TouchableOpacity style={[styles.bntConfirm, { marginTop: 28, marginBottom: 80 }]}
-                onPress={captureQRCode}
+                onPress={checkPayment}
             >
-                <Text style={styles.txtConfirm}>Lưu QR Code</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.bntConfirm, { marginTop: 28, marginBottom: 80 }]}
-                onPress={() => paymentSuccess()}
-            >
-                <Text style={styles.txtConfirm}>test success</Text>
+                <Text style={styles.txtConfirm}>Tôi đã chuyển khoản</Text>
             </TouchableOpacity>
             <Modal
                 animationType="fade"
