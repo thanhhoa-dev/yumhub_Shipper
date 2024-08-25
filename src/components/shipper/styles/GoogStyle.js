@@ -108,6 +108,10 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  viewItemInformationFoodBottomSheet:{
+    flex:1,
+    marginEnd:15
+  },
   viewContainerItemInformationFoodBottomSheet: {
     flexDirection: 'row',
     justifyContent: 'space-between',

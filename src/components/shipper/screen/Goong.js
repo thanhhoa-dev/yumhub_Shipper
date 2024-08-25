@@ -80,15 +80,13 @@ const Goong = () => {
   const [statusShipper, setStatusShipper] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [countdownTimePaymentMethod, setCountdownTimePaymentMethod] =
-    useState(20);
+    useState(600);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [valueCancelOrder, setValueCancelOrder] = useState(1);
   const navigationState = useNavigationState(state => state);
   const {user, sendMessage, receiveMessage} = useContext(UserContext);
-
   const [order, setOrder] = useState(null);
   const [checkImage, setCheckImage] = useState(false);
-  // var id = '66c07f475e61f3aa7119f1f4';
   var id;
   const idUser = user.checkAccount._id;
   const currentOrder = useRef(null);
@@ -100,10 +98,11 @@ const Goong = () => {
   useEffect(() => {
     if (user && receiveMessage) {
       receiveMessage(async message => {
-        console.log(message);
         switch (message.command) {
           case 'placeOrder':
             if (message.command === 'placeOrder' && statusShipper) {
+              setIndex(0);
+              setCountdownTimePaymentMethod(600);
               setOrder(message);
               id = message.order._id;
               await UpdateShipperInformation(idUser, 8);
@@ -548,12 +547,14 @@ const Goong = () => {
         </View>
         <View style={styles.viewItemImageFoodBottomSheet}>
           <LoadImage
-            style={{height: 47, width: 47, borderRadius: 50, marginEnd: 35}}
+            style={{height: 47, width: 47, borderRadius: 50, marginEnd: 15}}
             uri={item.image}
           />
-          <Text style={styles.textInformationFoodBottomSheet}>
-            x {item.food.quantity}
-          </Text>
+          <View style={{width:50}}>
+            <Text style={styles.textInformationFoodBottomSheet}>
+              x {item.food.quantity}
+            </Text>
+          </View>
         </View>
       </View>
     );

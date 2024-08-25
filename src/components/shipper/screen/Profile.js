@@ -193,7 +193,7 @@ const Profile = ({ navigation }) => {
                 fontSize: 16,
                 fontWeight: '700',
                 color: '#005987',
-              }}>{user.checkAccount.rating != null ? user.checkAccount.rating : 0}</Text>
+              }}>{user.checkAccount.rating != null ? (user.checkAccount.rating).toFixed(1) : 0}</Text>
             </View>
           </View>
           <View style={styles.viewBody}>
