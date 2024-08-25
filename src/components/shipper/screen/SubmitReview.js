@@ -21,6 +21,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {UserContext} from '../../user/UserContext';
 import Feather from 'react-native-vector-icons/Feather';
 import LoadingComponent from './LoadingComponent';
+import Loading from './Loading';
 
 const SubmitReview = () => {
   const navigation = useNavigation();
@@ -33,8 +34,10 @@ const SubmitReview = () => {
   const {order} = route.params;
   const idUser = user.checkAccount._id;
   const [checkLoading, setCheckLoading] = useState(false);
+  const [checkLoadingSubmit, setCheckLoadingSubmit] = useState(false);
 
   const handleCreateReview = async (idCustomer) => {
+    setCheckLoadingSubmit(true);
     const customerReviewData = {
       orderID: order.order._id,
       reviewID: idUser,
@@ -48,14 +51,17 @@ const SubmitReview = () => {
         await CreateReivew(customerReviewData);
         const listReviewCustomer = await getListReviewCustomer(idCustomer);
         setReviewsCustomer(listReviewCustomer.history);
+        setCheckLoadingSubmit(false);
         setTimeout(() => {
           ToastAndroid.show('Gửi đánh giá thành công', ToastAndroid.SHORT);
           navigation.goBack();
         }, 2000);
       } else {
+        setCheckLoadingSubmit(false);
         Alert.alert('Bạn chưa đánh giá sao nào!!');
       }
     } catch (error) {
+      setCheckLoadingSubmit(false);
       console.log('Error creating review:', error);
     }
   };
@@ -89,12 +95,12 @@ const SubmitReview = () => {
       return;
     }
     if (response.errorCode) {
-      console.error('ImagePicker Error: ', response.errorCode);
+      console.log('ImagePicker Error: ', response.errorCode);
       setCheckLoading(false)
       return;
     }
     if (response.errorMessage) {
-      console.error('ImagePicker Error: ', response.errorMessage);
+      console.log('ImagePicker Error: ', response.errorMessage);
       setCheckLoading(false)
       return;
     }
@@ -112,7 +118,7 @@ const SubmitReview = () => {
         setCheckLoading(false);
       } catch (error) {
         setCheckLoading(false);
-        console.error('Error uploading image:', error);
+        console.log('Error uploading image:', error);
       }
     }
   }, []);
@@ -149,6 +155,7 @@ const SubmitReview = () => {
           <Feather name={'home'} size={30} color={'#19D6E5'} />
         </TouchableOpacity>
       </View>
+      {!checkLoadingSubmit ? (
       <ScrollView showsVerticalScrollIndicator={false}>
         <View>
           <View style={{flex: 1}}>
@@ -226,6 +233,9 @@ const SubmitReview = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      ) : (
+        <Loading/>
+      ) }
     </View>
   );
 };

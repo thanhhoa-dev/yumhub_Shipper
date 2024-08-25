@@ -388,24 +388,23 @@ const BottomSheetComponent = ({
                   </Text>
                 </View>
                 <View style={styles.viewContainerSummaryBottomSheet}>
-                  <Text style={styles.textItemSummaryBottmSheet}>Thu hộ</Text>
-                  <Text style={styles.textItemSummaryBottmSheet}>
+                  <Text style={[styles.textItemSummaryBottmSheet, styles.textIncomeBottomSheet]}>Thu hộ</Text>
+                  <Text style={[styles.textItemSummaryBottmSheet,
+                      styles.textIncomeBottomSheet,]}>
                     {order.order.paymentMethod === 3 ? formatCurrency(order.order.priceFood) : formatCurrency(0)}
                   </Text>
                 </View>
                 <View style={styles.viewContainerSummaryBottomSheet}>
                   <Text
-                    style={[
-                      styles.textItemSummaryBottmSheet,
-                      styles.textIncomeBottomSheet,
-                    ]}>
+                    style={
+                      styles.textItemSummaryBottmSheet
+                    }>
                     Thu nhập
                   </Text>
                   <Text
-                    style={[
-                      styles.textItemSummaryBottmSheet,
-                      styles.textIncomeBottomSheet,
-                    ]}>
+                    style={
+                      styles.textItemSummaryBottmSheet
+                    }>
                     {formatCurrency(order.order.revenueDelivery)}
                   </Text>
                 </View>
@@ -448,7 +447,7 @@ const BottomSheetComponent = ({
               </View>
               {index >= 3 && (
                 <View style={[styles.viewContainerIconBottomSheet]}>
-                  {order.paymentMethod !== 3 ? (
+                  {order.order.paymentMethod === 3 ? (
                     <TouchableOpacity
                       onPress={() => {
                         setModalVisibleCancelOrder(true);
@@ -474,7 +473,7 @@ const BottomSheetComponent = ({
                       ]}>
                       {countdownTimePaymentMethod <= 0 ? (
                         <Text style={styles.textTakePhotoBottomSheet}>
-                          Huỷ đơn
+                          Hủy đơn
                         </Text>
                       ) : (
                         <Text style={styles.textTakePhotoBottomSheet}>
