@@ -115,8 +115,6 @@ export const styles = StyleSheet.create({
     color : '#646982'
   },
   itemName : {
-    flexDirection : 'row',
-    justifyContent : 'space-between',
     marginTop : 12,
     marginBottom : 9
   },
