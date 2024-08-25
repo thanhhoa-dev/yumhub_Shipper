@@ -357,14 +357,19 @@ const WithdrawPaymentMethod = () => {
                                 <Text style={styles.label}>
                                     Tên chủ tài khoản
                                 </Text>
-                                <View
+                                <TextInput
+                                    keyboardType='default'
+                                    style={styles.viewInput}
+                                    onChangeText={(text) => setname(text)}
+                                ></TextInput>
+                                {/* <View
 
                                     style={styles.viewInput}
                                 >
                                     {name && (
                                         <Text style={styles.input}>{name}</Text>
                                     )}
-                                </View>
+                                </View> */}
                             </View>
                             {name && (
                                 <TouchableOpacity style={styles.btnContinue}
