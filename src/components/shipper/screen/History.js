@@ -137,13 +137,13 @@ const History = ({ startDate, endDate }) => {
                 <Text style={styles.itemID}>{item._id.slice(-9)}</Text>
             </View>
             <View style={styles.itemName}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[styles.itemTxTName, { width: '30%' }]} numberOfLines={1} ellipsizeMode="tail">Khách hàng:</Text>
-                    <Text style={[styles.itemTxTName, { width: '70%' }]} numberOfLines={1} ellipsizeMode="tail">{capitalizeWords(item.customerID.fullName)}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                    <Text style={[styles.itemTxTName, { width: '40%' }]} numberOfLines={1} ellipsizeMode="tail">Khách hàng:</Text>
+                    <Text style={[styles.itemTxTName, { width: '60%', textAlign: 'right' }]} numberOfLines={1} ellipsizeMode="tail">{capitalizeWords(item.customerID.fullName)}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[styles.itemTxTName, { width: '30%' }]} numberOfLines={1} ellipsizeMode="tail">Nhà hàng:</Text>
-                    <Text style={[styles.itemTxTName, { width: '70%' }]} numberOfLines={1} ellipsizeMode="tail">{capitalizeWords(item.merchantID.name)}</Text>
+                    <Text style={[styles.itemTxTName, { width: '40%' }]} numberOfLines={1} ellipsizeMode="tail">Nhà hàng:</Text>
+                    <Text style={[styles.itemTxTName, { width: '60%', textAlign: 'right' }]} numberOfLines={1} ellipsizeMode="tail">{capitalizeWords(item.merchantID.name)}</Text>
                 </View>
             </View>
             <View style={styles.itemRowDetail}>

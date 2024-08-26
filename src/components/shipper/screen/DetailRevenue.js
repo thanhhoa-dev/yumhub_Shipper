@@ -139,8 +139,8 @@ const DetailRevenue = ({
             revenue.payByZalo !== undefined ? (
               <Text style={styles.textNumberStatistical}>
                 {formatCurrency(
-                  parseFloat(revenue.payByBanking) +
-                    parseFloat(revenue.payByZalo),
+                  parseFloat(revenue.revenue) -
+                    parseFloat(revenue.payByCash),
                 )}
               </Text>
             ) : (
