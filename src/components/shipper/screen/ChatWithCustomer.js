@@ -18,13 +18,8 @@ import LoadImage from './LoadImage';
 
 const { width, height } = Dimensions.get('window');
 function convertToHHMM(isoString) {
-
-    const date = new Date(isoString);
-
-    const hours = date.getUTCHours().toString().padStart(2, '0');
-    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-
-    return `${hours}:${minutes}`;
+    const date = moment.tz(new Date(isoString), 'Asia/Ho_Chi_Minh').format('HH:mm')
+    return `${date}`;
 }
 
 const ChatWithCustomer = () => {
