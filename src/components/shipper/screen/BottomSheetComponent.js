@@ -378,8 +378,8 @@ const BottomSheetComponent = ({
                   <Text style={styles.textItemSummaryBottmSheet}>
                     {order.order.paymentMethod === 3 ?
                     (order.order.voucherID != null && order.order.voucherID.typeOfVoucherID !== "6656cfad8913d56206f64e05" ?
-                    formatCurrency(order.order.totalPaid - order.order.voucherID.discountAmount) : 
-                    formatCurrency(order.order.totalPaid))
+                    formatCurrency(order.order.priceFood - order.order.voucherID.discountAmount) : 
+                    formatCurrency(order.order.priceFood))
                     :
                     (formatCurrency(0))
                     }
