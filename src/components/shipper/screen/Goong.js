@@ -98,6 +98,7 @@ const Goong = () => {
   useEffect(() => {
     if (user && receiveMessage) {
       receiveMessage(async message => {
+        console.log(message);
         switch (message.command) {
           case 'placeOrder':
             if (message.command === 'placeOrder' && statusShipper) {

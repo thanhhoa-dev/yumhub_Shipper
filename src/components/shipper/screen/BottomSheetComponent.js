@@ -374,9 +374,15 @@ const BottomSheetComponent = ({
               <View style={styles.viewSummaryBottomSheet}>
                 <Text style={styles.textSummaryBottomSheet}>Tóm tắt</Text>
                 <View style={styles.viewContainerSummaryBottomSheet}>
-                  <Text style={styles.textItemSummaryBottmSheet}>Giá tiền</Text>
+                  <Text style={styles.textItemSummaryBottmSheet}>Giá tiền lấy đồ</Text>
                   <Text style={styles.textItemSummaryBottmSheet}>
-                    {formatCurrency(order.order.totalPaid)}
+                    {order.order.paymentMethod === 3 ?
+                    (order.order.voucherID != null && order.order.voucherID.typeOfVoucherID !== "6656cfad8913d56206f64e05" ?
+                    formatCurrency(order.order.totalPaid - order.order.voucherID.discountAmount) : 
+                    formatCurrency(order.order.totalPaid))
+                    :
+                    (formatCurrency(0))
+                    }
                   </Text>
                 </View>
                 <View style={styles.viewContainerSummaryBottomSheet}>
@@ -388,10 +394,11 @@ const BottomSheetComponent = ({
                   </Text>
                 </View>
                 <View style={styles.viewContainerSummaryBottomSheet}>
-                  <Text style={[styles.textItemSummaryBottmSheet, styles.textIncomeBottomSheet]}>Thu hộ</Text>
+                  <Text style={[styles.textItemSummaryBottmSheet, styles.textIncomeBottomSheet]}>Thu tiền khách hàng</Text>
                   <Text style={[styles.textItemSummaryBottmSheet,
                       styles.textIncomeBottomSheet,]}>
-                    {order.order.paymentMethod === 3 ? formatCurrency(order.order.priceFood) : formatCurrency(0)}
+                    {/* {order.order.paymentMethod === 3 ? formatCurrency(order.order.priceFood) : formatCurrency(0)} */}
+                    {order.order.paymentMethod === 3 ? formatCurrency(order.order.totalPaid) : formatCurrency(0)}
                   </Text>
                 </View>
                 <View style={styles.viewContainerSummaryBottomSheet}>
